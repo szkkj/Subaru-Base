@@ -5,7 +5,7 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baron-baileys-v2");
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baron-baileys-v2");
 const fs = require('fs')
 const pino = require("pino");
 const chalk = require('chalk')
@@ -25,6 +25,8 @@ const groupMetadataCache = new NodeCache({
 stdTTL: 300,
 checkperiod: 120 
 });
+
+const messageCache = new NodeCache({ stdTTL: 60 * 60 });
 
 async function getGroupMetadataSafe(groupId, subaru) {
 if (groupMetadataCache.has(groupId)) { return groupMetadataCache.get(groupId)}
@@ -47,13 +49,10 @@ return config;
 }
 
 const well = fs.readFileSync("./database/imgs/well.png");
-const store = makeInMemoryStore({
-  logger: pino().child({ level: "silent", stream: "store" }),
-});
 
 const startConnection = async () => {
   const { state, saveCreds } = await useMultiFileAuthState("./dono/configs/session");
-  const { version } = await fetchLatestBaileysVersion();
+//  const { version } = await fetchLatestBaileysVersion();
   const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 
   const subaru = makeWASocket({
@@ -68,12 +67,11 @@ const startConnection = async () => {
     shouldIgnoreJid: (jid) =>
       isJidBroadcast(jid) || isJidStatusBroadcast(jid) || isJidNewsletter(jid),
     getMessage: async (key) => {
-      const msg = await store.loadMessage(key.remoteJid, key.id);
-      return msg?.message || undefined;
-    },
+     const msg = messageCache.get(key.id);
+     return msg?.message;
+     },
   });
-    
-  store.bind(subaru.ev);
+     
   if (process.argv.includes("--code") && !subaru.authState.creds.registered) {
     const rl = readline.createInterface({
       input: process.stdin,
@@ -102,7 +100,7 @@ const startConnection = async () => {
     } else if (connection === "open") {
      if (!isRestart) {
      await esperar(500)
-     await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
+    // await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
      await esperar(500)
      const saudacao = getRandomSaudacao(donoName, prefix);
      await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: saudacao });
@@ -113,6 +111,8 @@ const startConnection = async () => {
   });
 
   subaru.ev.on("creds.update", saveCreds);
+  subaru.ev.on('chats.set', () => console.log('✔️ Conversas carregadas.'));
+  subaru.ev.on('contacts.set', () => console.log('✔️ Contatos carregados.'));
 
   subaru.ev.on("messages.upsert", async ({ messages, type }) => {
     const msg = messages[0];    

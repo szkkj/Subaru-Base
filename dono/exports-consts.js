@@ -12,7 +12,6 @@ const axios = require('axios');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const FormData = require("form-data");
-const cheerio = require('cheerio');
 //const cfonts = require('cfonts')
 const util = require('util');
 const NodeCache  = require('node-cache');
@@ -94,7 +93,6 @@ module.exports = {
   axios,
   fetch,
   FormData,
-  cheerio,
   moment,
   agora,
   mss,

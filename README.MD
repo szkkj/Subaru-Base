@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://files.catbox.moe/k24o03.png" alt="Subaru-Base" width="400"/>
+  <img src="https://i.postimg.cc/QCfq3crG/506b866c53e721009ee6fccb27aadf04-high.webp" alt="Subaru-Base - Natal" width="400"/>
 </p>
 
-<h1 align="center">🤖 Subaru-Base</h1>
+<h1 align="center">🤖 Subaru-Base - Edição de natal</h1>
 
 <p align="center">
   Um bot para WhatsApp baseado em <strong>Baileys</strong>, com foco em automação de grupos, brincadeiras, sistemas anti-mídia, jogos, figurinhas, inteligência artificial e muito mais!
@@ -16,13 +16,12 @@
 
 
 ## ✨ Funcionalidades
-
-### 🎵 Música & Mídia
+`🎵 Música & Mídia`
 - Play de áudio/vídeo  
 - Downloads de *YouTube*, *TikTok*, *Instagram*, *Facebook*, *Twitter*
 - Conversão para áudio ou documento
 
-### 🛡️ Sistema Anti
+`🛡️ Sistema Anti`
 - Antilink  
 - Anti-imagem  
 - Anti-vídeo  
@@ -32,29 +31,28 @@
 - Anti-localização  
 - BanChat automático  
 
-### 🎮 Jogos
+`🎮 Jogos`
 - Jogo da velha  
 - Pedra, papel e tesoura  
 - Sistema **NoFap** (patentes motivacionais)
 
-### 🎭 Brincadeiras
+`🎭 Brincadeiras`
 - `chance`, `comer`, `capinarlote`, `pgpeito`, `pgbunda`, `sentar`, etc  
 - Respostas interativas e vídeos engraçados  
 - Rankings de “gado”, “gay”, “corno”, etc  
 
-### 📝 Utilidades
+`📝 Utilidades`
 - Conversão de mídia em *figurinhas*
 - Sistema de *contagem de mensagens* (`!minhaatividade`)
 - *Boas-vindas automáticas*
 - *IA estilo SimSimi* (via [Raikken API](https://raikken-api.speedhosting.cloud))
 - *Menu interativo com botões*
 
-### 🚀 Instalação
-
-### Baixe o bot
+## 🚀 Instalação
+`Baixe o bot`
 📦 [Download direto V1 (MEGA)](https://mega.nz/file/3DxTWBqA#sAYDC5Xvy-oYMuXYAAdIUi1iBiArTSScpG-vuJ0dOvc)
 
-### Comandos para o termux 
+`Comandos para o termux`
 ```bash
 termux-setup-storage
 ````
@@ -63,7 +61,7 @@ termux-setup-storage
 pkg update && pkg upgrade && pkg install -y git nodejs ffmpeg imagemagick yarn
 ```
 
-### 🧩 Instalação via Git
+## 🧩 Instalação via Git
 1️⃣ Clone o repositório
 ```bash
 git clone https://github.com/szkkj/Subaru-Base
@@ -96,24 +94,27 @@ Edite o arquivo `./dono/configs/settings.json:`
 }
 ```
 > [!WARNING] 
-> ⚠️ A chave "raikken" ainda está ativa e gratuita, mas pode expirar a qualquer momento.
-Para obter uma nova, entre em contato: WhatsApp
+> ⚠️ Os comandos por API não funcionam por precisar de uma key, para obter uma nova, entre em contato: WhatsApp
 
 5️⃣ Inicie o bot
 `sh start.sh`
 
-💡 Dica:
+> [!WARNING] 
+> ⚠️ O bot só responde o `lid` do dono, por isso você deve atualiza. Esse número aparece no console, quando qualquer mensagem é recebida. Após atualizar o lid, use o comando: `!banchat 0`, pois o bot estará inativo em grupos por padrão. 
+
+`💡 Dica:`
 Se quiser atualizar o bot no futuro, entre na pasta e use:
 `git pull` ou use o comando: `!checarversao`
 
 ### ▶️ Uso
 Inicie o bot com uma das opções:
-npm start                # Login via Pairing Code
-node conection.js        # Login via QR Code
-node conection.js --code # Pairing Code (manual)
-sh start.sh              # Ambos (recomendado)
+`npm start`                # Login via Pairing Code
+`node conection.js`        # Login via QR Code
+`node conection.js --code`  # Pairing Code (manual)
+`sh start.sh`              # Ambos (recomendado)
 
 Depois, use os comandos no WhatsApp conforme o prefixo definido.
+
 > [!WARNING] 
 > ⚠️Por padrão, o bot está com o banchat (ignorar comandos) ativos, use o comando: !banchat 0 para ativar no grupo!
 Exemplos:
@@ -125,7 +126,7 @@ Exemplos:
 !tinder            → Funções de Tinder
 !ban            → bane o mencionado
 
-⚡ Deploy
+## ⚡ Deploy
 O bot pode ser hospedado em:
 Ambiente	Suporte  
 🧩 Termux	✅  
@@ -134,16 +135,16 @@ Ambiente	Suporte
 ☁️ Heroku	⚠️ (requer ajustes)  
 
 
-👤 Créditos
+## 👤 Créditos
 Base: Baileys
 Criação: Sz
 Integração IA: Raikken-API
 
-📜 Licença
+## 📜 Licença
 Distribuído sob a Licença MIT.
 Sinta-se livre para modificar, melhorar e usar.
 
-💀 Considerações — By Sz
+## 💀 Considerações — By Sz
 Pra ser bem sincero, nem tava nos meus planos escrever esse texto aqui, mas acho que seria injusto não registrar umas coisas importantes.
 Então bora lá 👇
 

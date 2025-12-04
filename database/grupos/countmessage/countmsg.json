@@ -1,1 +1,41 @@
-[]
+[
+  {
+    "groupId": "120363214063579100@g.us",
+    "numbers": [
+      {
+        "id": "78624208212191@lid",
+        "messages": 1,
+        "figus": 0,
+        "cmd_messages": 4,
+        "aparelho": "Android",
+        "joinedAt": "16/11/2025 22:51:51"
+      }
+    ]
+  },
+  {
+    "groupId": "120363401501015488@g.us",
+    "numbers": [
+      {
+        "id": "78624208212191@lid",
+        "messages": 5,
+        "figus": 0,
+        "cmd_messages": 1,
+        "aparelho": "Android",
+        "joinedAt": "16/11/2025 22:52:20"
+      }
+    ]
+  },
+  {
+    "groupId": "120363400073438304@g.us",
+    "numbers": [
+      {
+        "id": "78624208212191@lid",
+        "messages": 12,
+        "figus": 0,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "joinedAt": "23/11/2025 18:12:39"
+      }
+    ]
+  }
+]

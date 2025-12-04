@@ -10,7 +10,7 @@
 /* ===========================//CONSTS\\================================//*/
 const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys, cacheService } = require("baron-baileys-v2");
 
-const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, cheerio, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, getAdmins, util, rgtake, botSemKey } = require('./dono/exports-consts.js')
+const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, getAdmins, util, rgtake, botSemKey } = require('./dono/exports-consts.js')
 
 const { getPlugin, loadPlugins } = require("./dono/functions.js");
 
@@ -1095,7 +1095,6 @@ reply2(`❌ Erro, tenta mais tarde`);
 
 
 if (body.trim().startsWith("$")) {
-if(info.key.fromMe) return;
 if(!isDono) return;
 console.log("$")
 const isFreeCommand = body.startsWith('$free -h');
@@ -1127,7 +1126,6 @@ reply(util.inspect(e.message, {depth: null}));
 return;}
 
 if (body.trim().startsWith("=>")) {
-if (info.key.fromMe) return;
 if (!isDono) return;
 console.log("=>")
 new Promise((resolve, reject) => {
@@ -1550,7 +1548,7 @@ reply("Oi, vip")
 break
 
 case 'minhaatividade':
-case 'meuativo':
+case 'meuativo': {
 if (!isGroup) return reply(mss.grupo);
 var iGroup = countMessage.map(i => i.groupId).indexOf(from);
 if (iGroup < 0) return reply('Ainda não tenho dados desse grupo.');
@@ -1570,6 +1568,7 @@ joinDate = userData.joinedAt || moment().tz("America/Sao_Paulo").format("DD/MM/Y
 var text = `*Sua atividade no grupo:* ${groupName}\n–\n• Entrou no grupo em: *${userData.joinedAt || 'Desconhecido'}*\n Mensagens enviadas: *${userData.messages}*\n• Comandos usados: *${userData.cmd_messages}*\n• Figurinhas enviadas: *${userData.figus}*\n• Dispositivo atual: *${userData.aparelho}*`;
 await reply(text);
 break;
+}
 
 case 'menu': {
 await react("♥️");
@@ -4345,6 +4344,23 @@ reply(`Deu erro, se liga:\n *_${e.message}_*`);
 break
 
 //=====( ABAIXO OS COMANDOS DA API )=====\\
+case 'conversas-simi': {
+try { 
+const url = `https://raikken-api.speedhosting.cloud/api/ia/conversas-simi?apikey=${RaikkenKey}`;
+let response = await fetch(url);
+if (!response.ok) {
+return reply(`❌ Erro ao acessar API: ${response.status}`);
+}
+
+let data = await response.text();
+reply(data);
+} catch (err) {
+console.error(err);
+reply('❌ Erro ao buscar dados.');
+}
+}
+break;
+
 case 'namorar': {
 
 if (!alvo) return reply("💔 Você precisa marcar alguém para pedir em namoro.");
