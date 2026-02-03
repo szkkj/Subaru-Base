@@ -4,11 +4,14 @@
 * Achou o bot legal ou tá pensando em kibar algo? Pelo menos segue o meu canal, kk
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 * Para os comandos da API funcionar, precisa de uma Key, acesse o site oficial!
-* https://raikken-api.speedhosting.cloud/
+* 
 */
 
 /* ===========================//CONSTS\\================================//*/
-const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys, cacheService } = require("baron-baileys-v2");
+const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys } = require("@whiskeysockets/baileys");
+
+const { cacheService } = require('./database/dev/cacheService.js');
+const { sendInteractiveMessage, InteractiveValidationError, sendButtons } = require('./database/dev/botoes.js');
 
 const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, getAdmins, util, rgtake, botSemKey } = require('./dono/exports-consts.js')
 
@@ -134,7 +137,7 @@ return `${id}@s.whatsapp.net`;
 };
 
 function getSenderLid(msg) {
-const { jidDecode, jidEncode } = require('baron-baileys-v2');
+const { jidDecode, jidEncode } = require('@whiskeysockets/baileys');
 try {
 const sender = msg?.key?.participant || msg?.key?.remoteJid || msg?.key?.remoteLid || msg?.key?.participantLid || msg?.key?.participantAlt || '';
 const user = jidDecode(sender)?.user || sender.split('@')[0] || '';
@@ -958,13 +961,19 @@ if (!checkPrefix(body, prefix)) {
  break;}
  
  case 'prefixo': {
- await subaru.sendMessage(from, {text: `> ┏╾ׁ╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┓֪࣪
+ await sendButtons(subaru, from, {
+ text: `> ┏╾ׁ╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┓֪࣪
 > │ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
 > ┃࣪ ┃֪ׅ࣪ׄ᨞⁞❄️✿𖥔࣪ Olá, eu sou o ${botName} ❄️
-> ┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Esse é o meu prefixo: ${prefix}
+> ┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ Esse é o meu prefixo: ${prefix}
 > ┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ Leia o 『 ${prefix}menu 』
 > ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-> ┗╾ׁ┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`}, {quoted: info})
+> ┗╾ׁ┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`,
+ footer: `_By ${donoName}_`,
+ buttons: [{
+ id: `${prefix}menu`,
+ text: '📜 Menu'
+ }]}, { quoted: info })
  break
  }
  
@@ -1086,7 +1095,7 @@ react("😎")
 renameContextSticker3(
 permuteFigPackName(null),
 permuteFigAuthorName(pushname),
-`Figurinha kibada 😎`,
+`It's from: ${pushname} ⚖️`,
 info
 ).catch((err) => {
 reply2(`❌ Erro, tenta mais tarde`);
@@ -1435,7 +1444,7 @@ loadPlugins()
 const plugin = getPlugin(cmd);
 if (plugin) {
 try {
-await plugin.run({ subaru, msg, args, from, sender, isGroup, pushname, reply, seloSz, react, isAdm, isDono, isGroupAdmins, isBotGroupAdmins, });
+await plugin.run({ subaru, msg, args, from, sender, isGroup, pushname, reply, seloSz, react, isAdm, isDono, isGroupAdmins, isBotGroupAdmins, isQuotedAudio });
 } catch (e) {
 console.error(`❌ Erro no plugin ${cmd}:`, e);
 }
@@ -1445,7 +1454,6 @@ try {
 switch (command) {
 
 //=====( ABAIXO OS COMANDOS DE MEMBRO \ MEMBROS )=====\\
-
 
 case 'take': {
 if (!isQuotedSticker) {return reply('Você usou de forma errada... Marque uma figurinha.')};
@@ -1575,32 +1583,39 @@ await react("♥️");
 const moment = require('moment-timezone');
 const data = moment().tz('America/Sao_Paulo').format('DD/MM/YYYY');
 const hora = moment().tz('America/Sao_Paulo').format('HH:mm:ss');
-const userToCheck = menc_jid2?.length ? menc_jid2[0] : alvo || userJid;
 const formatarTempo = (segundos) => {
 const h = Math.floor(segundos / 3600).toString().padStart(2, '0');
 const m = Math.floor((segundos % 3600) / 60).toString().padStart(2, '0');
 const s = Math.floor(segundos % 60).toString().padStart(2, '0');
 return `${h}:${m}:${s}`;
 };
-const { escolherPersonalidadeSubaru } = require('./dono/functions.js')
+
+const { escolherPersonalidadeSubaru } = require('./dono/functions.js');
 const tempoAtivo = formatarTempo(process.uptime());
-const persona = escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo)
+const persona = escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo);
 const videoAleaSz = escolherVideoPorRota(persona.nome);
 
-await subaru.relayMessage(from, {
-interactiveMessage: {
-header: proto.Message.InteractiveMessage.Header.create({
-...(await prepareWAMessageMedia(
-{ video: fs.readFileSync(videoAleaSz), gifPlayback: true },
+try {
+
+let videoHeader = null;
+if (videoAleaSz && fs.existsSync(videoAleaSz)) {
+const videoBuffer = fs.readFileSync(videoAleaSz);
+videoHeader = await prepareWAMessageMedia(
+{ video: videoBuffer, gifPlayback: true },
 { upload: subaru.waUploadToServer }
-)),
-hasMediaAttachment: false,
-title: ``,
-}), 
+);
+}
+
+const interactiveMessage = {
+header: videoHeader ? {
+...videoHeader,
+hasMediaAttachment: true,
+title: ""
+} : undefined,
 body: { 
-text: `${persona.menuStyle}`
+text: persona.menuStyle
 },
-footer: { text: `${botName}` },
+footer: { text: botName },
 nativeFlowMessage: {
 buttons: [
 {
@@ -1640,8 +1655,18 @@ rows: [
 ],
 messageParamsJson: "",
 },
-},
-}, {});
+};
+
+const content = { interactiveMessage };
+await sendInteractiveMessage(subaru, from, content, {
+additionalAttributes: {},
+useCachedGroupMetadata: true
+});
+
+} catch (error) {
+console.error('Erro ao enviar menu:', error);
+await reply(`❌ Erro inesperado ao criar menu: ${error.message}`);
+}
 break;
 }
 
@@ -1784,10 +1809,10 @@ await sleep(1000)
 reply(`Ah, menos um para eu me preocupar. 😪`)
 break
 
-case 'channel':
+case 'channel': {
 reply(`Olá ${pushname}, esse é o link do canal do dono: 
 https://whatsapp.com/channel/0029Vb7qLZZEgGfDZIxCWI3s`).
-break
+break;}
 
 case 'gerarlink': {
 try {//By Duarte. 

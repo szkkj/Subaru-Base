@@ -5,14 +5,15 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baron-baileys-v2");
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast,getContentType, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys");
+const { cacheService } = require('./database/dev/cacheService.js');
 const fs = require('fs')
 const pino = require("pino");
 const chalk = require('chalk')
 const path= require('path')
 const readline = require("readline");
 const NodeCache  = require('node-cache');
-const LoggerB = require('baron-baileys-v2/src/Utils/logger').default;
+const LoggerB = require('@whiskeysockets/baileys/lib/Utils/logger').default;
 const logger = LoggerB.child({});  
 logger.level = 'silent';  
 const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar, groupConfigCache, delay, getRandomSaudacao } = require('./dono/functions.js')
@@ -56,7 +57,7 @@ const startConnection = async () => {
   const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 
   const subaru = makeWASocket({
-    version: [2, 3000, 1025190524],
+    version: [2, 3000, 1030370089],
     logger: pino({ level: "silent" }),
     printQRInTerminal: !process.argv.includes("--code"),
     auth: state,
@@ -100,7 +101,7 @@ const startConnection = async () => {
     } else if (connection === "open") {
      if (!isRestart) {
      await esperar(500)
-    // await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
+     await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
      await esperar(500)
      const saudacao = getRandomSaudacao(donoName, prefix);
      await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: saudacao });

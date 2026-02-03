@@ -5,7 +5,7 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage } = require("baron-baileys-v2")
+const { default: makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage } = require("@whiskeysockets/baileys")
 
 const { prefix, donoName, donoNmr, donoLid, botNumber, baseVersion, baseRaikken, RaikkenKey } = require('./configs/settings.json')
 const fs = require('fs');
@@ -19,7 +19,7 @@ const plugins = new Map();
 const NodeCache = require('node-cache');
 moment.locale("pt");
 const sendHours = (formato) => moment.tz('America/Sao_Paulo').format(formato);
-const scget = require("scget");
+const scget = require(path.join("../database/dev/scget"));
 
 
 

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://i.postimg.cc/QCfq3crG/506b866c53e721009ee6fccb27aadf04-high.webp" alt="Subaru-Base - Natal" width="400"/>
+  <img src="https://files.catbox.moe/k24o03.png" alt="Subaru-Base" width="400"/>
 </p>
 
-<h1 align="center">🤖 Subaru-Base - Edição de natal</h1>
+<h1 align="center">🤖 Subaru-Base</h1>
 
 <p align="center">
   Um bot para WhatsApp baseado em <strong>Baileys</strong>, com foco em automação de grupos, brincadeiras, sistemas anti-mídia, jogos, figurinhas, inteligência artificial e muito mais!
@@ -100,7 +100,7 @@ Edite o arquivo `./dono/configs/settings.json:`
 `sh start.sh`
 
 > [!WARNING] 
-> ⚠️ O bot só responde o `lid` do dono, por isso você deve atualiza. Esse número aparece no console, quando qualquer mensagem é recebida. Após atualizar o lid, use o comando: `!banchat 0`, pois o bot estará inativo em grupos por padrão. 
+> ⚠️ O bot só responde o `lid` do dono, por isso você deve atualizar. Esse número aparece no console, quando qualquer mensagem é recebida. Após atualizar o lid, use o comando: `!banchat 0`, pois o bot estará inativo em grupos por padrão. 
 
 `💡 Dica:`
 Se quiser atualizar o bot no futuro, entre na pasta e use:
