@@ -4,7 +4,7 @@
 * Achou o bot legal ou tá pensando em kibar algo? Pelo menos segue o meu canal, kk
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
-
+console.info = (...a) => String(a[0]).includes("session") || console._info?.(...a) //parte que faz sumir o session entry no console. 
 const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast,getContentType, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys");
 const { cacheService } = require('./database/dev/cacheService.js');
 const fs = require('fs')
@@ -15,18 +15,19 @@ const readline = require("readline");
 const NodeCache  = require('node-cache');
 const LoggerB = require('@whiskeysockets/baileys/lib/Utils/logger').default;
 const logger = LoggerB.child({});  
-logger.level = 'silent';  
+logger.level = 'fatal';  
 const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar, groupConfigCache, delay, getRandomSaudacao } = require('./dono/functions.js')
 
 const { handleCmds } = require("./index.js");
 let fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
-const { prefix, botName, donoName, donoNmr, idCanal } = require('./dono/configs/settings.json');
-
+const { prefix, botName, donoName, donoNmr, idCanal, pairKey } = require('./dono/configs/settings.json');
+const pk = pairKey.toUpperCase()
 const groupMetadataCache = new NodeCache({
 stdTTL: 300,
 checkperiod: 120 
 });
-
+const messageQueue = [];
+let processingQueue = false;
 const messageCache = new NodeCache({ stdTTL: 60 * 60 });
 
 async function getGroupMetadataSafe(groupId, subaru) {
@@ -57,19 +58,22 @@ const startConnection = async () => {
   const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 
   const subaru = makeWASocket({
-    version: [2, 3000, 1030370089],
-    logger: pino({ level: "silent" }),
+    version: [2, 3000, 1034740716],
+    logger,
     printQRInTerminal: !process.argv.includes("--code"),
     auth: state,
-    markOnlineOnConnect: false,
+    markOnlineOnConnect: true,
     syncFullHistory: false,
+    keepAliveIntervalMs: 15_000,
+    connectTimeoutMs: 20_000,
     keys: makeCacheableSignalKeyStore(state.keys, logger),  
     groupMetadataCache,
     shouldIgnoreJid: (jid) =>
       isJidBroadcast(jid) || isJidStatusBroadcast(jid) || isJidNewsletter(jid),
     getMessage: async (key) => {
      const msg = messageCache.get(key.id);
-     return msg?.message;
+     if (msg?.message) return msg?.message;
+     return { conversation: ''}
      },
   });
      
@@ -81,7 +85,7 @@ const startConnection = async () => {
     const question = (text) => new Promise((resolve) => rl.question(text, resolve));
     let phoneNumber = await question("Insira o número de telefone para conectar: ")
     phoneNumber = phoneNumber.replace(/\D/g, "");
-    const code = await subaru.requestPairingCode(phoneNumber);
+    const code = await subaru.requestPairingCode(phoneNumber, pk);
     console.log(`Seu código de pareamento: ${code?.match(/.{1,4}/g)?.join("-") || code}`)
     rl.close();
   }
@@ -94,20 +98,26 @@ const startConnection = async () => {
         lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
       console.log(`Conexão fechada. Motivo: ${lastDisconnect.error?.output?.statusCode}.`),
         console.log(`Reconectando: ${shouldReconnect}`)
+      let reconnectAttempts = 0;
       if (shouldReconnect) {
-        isRestart = true
-        startConnection();
+      isRestart = true;
+      const delay = Math.min(1000 * 2 ** reconnectAttempts, 60000); 
+      reconnectAttempts++;
+      console.log(`Reconectando em ${delay / 1000}s... (tentativa ${reconnectAttempts})`);
+      setTimeout(() => startConnection(), delay);
+      } else {
+      reconnectAttempts = 0; 
       }
     } else if (connection === "open") {
+     reconnectAttempts = 0;
      if (!isRestart) {
-     await esperar(500)
-     await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
-     await esperar(500)
-     const saudacao = getRandomSaudacao(donoName, prefix);
-     await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: saudacao });
-     await sincronizarCases(subaru)
-     }
-     await console.log(chalk.blueBright("\nSubaru-Bot ativo!\n"));
+      await esperar(500)
+      await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
+      await esperar(500)
+      const saudacao = getRandomSaudacao(donoName, prefix);
+      await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: saudacao });
+      sincronizarCases(subaru)}
+      console.log(chalk.blueBright("\nSubaru-Bot ativo!\n"));
     }
   });
 
@@ -116,7 +126,8 @@ const startConnection = async () => {
   subaru.ev.on('contacts.set', () => console.log('✔️ Contatos carregados.'));
 
   subaru.ev.on("messages.upsert", async ({ messages, type }) => {
-    const msg = messages[0];    
+    const msg = messages[0];
+    if (msg?.key?.id) messageCache.set(msg.key.id, msg);
     try {
     if (type !== "notify" || !msg.message || msg.key.remoteJid === "status@broadcast") {return; }
     if (!msg.message) {return; }
@@ -136,7 +147,7 @@ const startConnection = async () => {
     const cmd = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : null;
     const hora = new Date().toLocaleTimeString("pt-BR");
     let comando = cmd         
-// 🔘 Botão tipo Native Flow (paramsJson)
+
     if (msg.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson) {
         try {
             const json = JSON.parse(msg.message.interactiveResponseMessage.nativeFlowResponseMessage.paramsJson);
@@ -144,15 +155,11 @@ const startConnection = async () => {
         } catch (e) {
         console.error("Erro ao parsear paramsJson:", e);
         }}
-// Botão simples
     if (!comando && msg.message?.buttonsResponseMessage?.selectedButtonId) {
   comando = msg.message.buttonsResponseMessage.selectedButtonId; }
-// Lista
     if (!comando && msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId) {
   comando = msg.message.listResponseMessage.singleSelectReply.selectedRowId; }  
-   
-    const messageQueue = [];
-    let processingQueue = false;
+       
     async function processQueue() {
       if (processingQueue) return;
       processingQueue = true;
@@ -165,7 +172,7 @@ const startConnection = async () => {
      processQueue();
     
       cacheService.saveGroupMetadata(from, groupMetadata);
-     if (cmd) {
+     if (isCmd) {
         console.log(
         chalk.blueBright("\n╔══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╗") + "\n" +
         chalk.blueBright("║★ ") + chalk.white.bold("[ COMANDO DETECTADO ]") + "\n" +
@@ -227,8 +234,8 @@ const startConnection = async () => {
          previewType: "PHOTO",
          thumbnailUrl: wel,
          mediaType: 1,
-         mediaUrl: 'https://raikken-api.speedhosting.cloud/',
-         sourceUrl: 'https://raikken-api.speedhosting.cloud/'}}});
+         mediaUrl: 'https://api.raikken.com.br/',
+         sourceUrl: 'https://api.raikken.com.br/'}}});
       }} catch (e) {
       console.error(`Erro no evento 'group-participants.update' para o grupo ${id}:`, e);
       if (e?.data === 403) {

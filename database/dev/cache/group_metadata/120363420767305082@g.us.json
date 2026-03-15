@@ -3,7 +3,7 @@
   "addressingMode": "lid",
   "subject": "Subaru-Beta",
   "subjectTime": 1760129302,
-  "size": 4,
+  "size": 6,
   "creation": 1758759416,
   "descTime": null,
   "restrict": false,
@@ -17,6 +17,16 @@
       "id": "78624208212191@lid",
       "phoneNumber": "559292678251@s.whatsapp.net",
       "admin": "admin"
+    },
+    {
+      "id": "23562727456894@lid",
+      "phoneNumber": "556793374017@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "70412281061465@lid",
+      "phoneNumber": "5518997254513@s.whatsapp.net",
+      "admin": null
     },
     {
       "id": "187944145035273@lid",
@@ -34,5 +44,5 @@
       "admin": "admin"
     }
   ],
-  "lastUpdated": "2026-02-03T22:49:23.653Z"
+  "lastUpdated": "2026-03-14T17:56:46.356Z"
 }

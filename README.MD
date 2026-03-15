@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://files.catbox.moe/k24o03.png" alt="Subaru-Base" width="400"/>
+  <img src="https://i.postimg.cc/fbBCDL1Q/images-11.jpg" alt="Subaru-Base" width="400"/>
 </p>
 
 <h1 align="center">🤖 Subaru-Base</h1>
@@ -14,6 +14,21 @@
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" /></a>
 </p>
 
+## 📋 Sumário
+  - [✨ Funcionalidades](#-funcionalidades)
+  - [🎵 Música & Mídia](#-música--mídia)
+  - [🛡️ Sistema Anti](#️-sistema-anti)
+  - [🎮 Jogos](#-jogos)
+  - [🎭 Brincadeiras](#-brincadeiras)
+  - [📝 Utilidades](#-utilidades)
+  - [🚀 Instalação](#-instalação)
+  - [🧩 Instalação via Git](#-instalação-via-git)
+  - [▶️ Uso](#️-uso)
+  - [⚡ Deploy](#-deploy)
+  - [🌐 Powered by Raikken](#-powered-by-raikken)
+  - [👤 Créditos](#-créditos)
+  - [📜 Licença](#-licença)
+  - [💀 Considerações](#-considerações--by-sz)
 
 ## ✨ Funcionalidades
 `🎵 Música & Mídia`
@@ -45,8 +60,25 @@
 - Conversão de mídia em *figurinhas*
 - Sistema de *contagem de mensagens* (`!minhaatividade`)
 - *Boas-vindas automáticas*
-- *IA estilo SimSimi* (via [Raikken API](https://raikken-api.speedhosting.cloud))
+- *IA estilo SimSimi* (via [Raikken API](https://api.raikken.com.br))
 - *Menu interativo com botões*
+
+## 🚀 Powered by Raikken
+<p align="center">
+  <strong>O Subaru-Base é desenvolvido e mantido com o suporte da infraestrutura Raikken.</strong>
+</p>
+
+<p align="center">
+  <a href="https://raikken.com.br/">
+    <img src="https://i.ibb.co/0jNnzJRP/IMG-20260227-WA0243.jpg" width="200"/>
+  </a>
+</p>
+
+|  Raikken Host | ⚡ Raikken API |
+|:---------------:|:--------------:|
+| Hospede seu bot com estabilidade e suporte dedicado | IA's, downloads, sistemas próprios e muito mais |
+| [🌐 Acessar site](https://raikken.com.br/) | [📄 Ver documentação](https://raikken.com.br/docs) |
+| [💬 Grupo oficial](https://chat.whatsapp.com/BzSDYUHbjHGF6gQmJfh2C7?mode=gi_t) | [💬 Grupo oficial](https://chat.whatsapp.com/BzSDYUHbjHGF6gQmJfh2C7?mode=gi_t) |
 
 ## 🚀 Instalação
 `Baixe o bot`
@@ -90,7 +122,7 @@ Edite o arquivo `./dono/configs/settings.json:`
   "donoLid": "99999999999@lid",
   "botLid": "99999999999@lid",
   "RaikkenKey": "SUA_API_KEY",
-  "baseRaikken": "https://raikken-api.speedhosting.cloud"
+  "baseRaikken": "https://api.raikken.com.br"
 }
 ```
 > [!WARNING] 

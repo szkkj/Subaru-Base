@@ -9,7 +9,7 @@ const path = require('path');
 const { exec, spawn } = require('child_process');
 const crypto = require('crypto');
 const axios = require('axios');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const moment = require('moment-timezone');
 const FormData = require("form-data");
 //const cfonts = require('cfonts')
@@ -33,17 +33,17 @@ const mss = {
     adm: "👑 Este comando é exclusivo para administradores do grupo.",
     dono: "💀Esse comando é exclusivo para o meu dono.",
     apiErro: "😶‍🌫️ Por algum motivo, a Raikken-Api não retornou dados. Tente novamente, ou avise um adm de lá.",
-    api: "⚡ Enquanto esperamos, que tal dar uma olhada na Raikken? Da uma olhadinha: https://raikken-api.speedhosting.cloud/ ",
-    keySemReq: "Eita, vi aqui que sua Key não possui requests, da uma olhadinha nos planos: https://raikken-api.speedhosting.cloud/",
+    api: "⚡ Enquanto esperamos, que tal dar uma olhada na Raikken? Da uma olhadinha: https://api.raikken.com.br/ ",
+    keySemReq: "Eita, vi aqui que sua Key não possui requests, da uma olhadinha nos planos: https://api.raikken.com.br/",
     erro: "Poxa, infelizmente deu erro. Tente novamente mais tarde"
 };
 
 async function botSemKey(subaru, from) {
 try {
-if (RaikkenKey === 'suakey' || RaikkenKey === 'raikken') { await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: `Ei, alguém do grupo: _${from}_ tentou usar um comando que precisa da API, mas sua Apikey não foi configurada! Acesse a API *https://raikken-api.speedhosting.cloud/* e garanta já a sua Key!`}) 
+if (RaikkenKey === 'suakey' || RaikkenKey === 'raikken') { await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: `Ei, alguém do grupo: _${from}_ tentou usar um comando que precisa da API, mas sua Apikey não foi configurada! Acesse a API *https://api.raikken.com.br* e garanta já a sua Key!`}) 
 await subaru.sendMessage(from, { text: `Infelizmente não posso executar comandos com API, pois a Key não foi configurada..`}) 
 return false;}
-const res = await fetch(`https://raikken-api.speedhosting.cloud/api/keyerrada?apikey=${RaikkenKey}`)
+const res = await fetch(`https://api.raikken.com.br/api/keyerrada?apikey=${RaikkenKey}`)
 const data = await res.json()
 if (data.status === "true") { 
 return true;

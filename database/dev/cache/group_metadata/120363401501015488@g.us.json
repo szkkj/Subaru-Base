@@ -3,7 +3,7 @@
   "addressingMode": "lid",
   "subject": "✨『 𝕱𝖎𝖓𝖓 𝐂𝐇𝐀𝐓 』🎅🏻",
   "subjectTime": 1764451957,
-  "size": 87,
+  "size": 83,
   "creation": 1752951492,
   "owner": "78624208212191@lid",
   "ownerPn": "559292678251@s.whatsapp.net",
@@ -106,16 +106,6 @@
       "admin": null
     },
     {
-      "id": "250697476005888@lid",
-      "phoneNumber": "555195485817@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "253274909360210@lid",
-      "phoneNumber": "556294353668@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "95245832310840@lid",
       "phoneNumber": "559484155971@s.whatsapp.net",
       "admin": null
@@ -173,11 +163,6 @@
     {
       "id": "23021679046699@lid",
       "phoneNumber": "5511993212705@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "272778389385405@lid",
-      "phoneNumber": "556294374608@s.whatsapp.net",
       "admin": null
     },
     {
@@ -426,11 +411,6 @@
       "admin": null
     },
     {
-      "id": "202147383763063@lid",
-      "phoneNumber": "558894491377@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "69037421760660@lid",
       "phoneNumber": "244941918328@s.whatsapp.net",
       "admin": null
@@ -457,5 +437,5 @@
     }
   ],
   "ephemeralDuration": 86400,
-  "lastUpdated": "2026-02-03T21:46:42.228Z"
+  "lastUpdated": "2026-02-04T23:55:16.224Z"
 }

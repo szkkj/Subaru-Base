@@ -1,16 +1,16 @@
 <p align="center">
-  <img src="https://i.postimg.cc/QCfq3crG/506b866c53e721009ee6fccb27aadf04-high.webp" alt="Subaru-Base Addons" width="300"/>
+  <img src="https://i.postimg.cc/QCfq3crG/506b866c53e721009ee6fccb27aadf04-high.webp" alt="Subaru-Base plugins" width="300"/>
 </p>
 
-<h1 align="center">🧩 Subaru-Base — Addons</h1>
+<h1 align="center">🧩 Subaru-Base — plugins</h1>
 
 <p align="center">
-  Guia oficial para criação de <strong>plugins (addons)</strong> no <strong>Subaru-Base</strong>.<br/>
+  Guia oficial para criação de <strong>plugins (plugins)</strong> no <strong>Subaru-Base</strong>.<br/>
   Pensado para <strong>humanos</strong> e <strong>inteligências artificiais</strong>.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Addon-System-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/plugin-System-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/IA-Friendly-purple?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Subaru--Base-v2.0.5-red?style=for-the-badge" />
 </p>
@@ -19,8 +19,8 @@
 
 - [🎯 Propósito deste arquivo](#-propósito-deste-arquivo)
 - [🧠 Conceito fundamental (leia antes)](#-conceito-fundamental-leia-antes)
-- [📁 Onde ficam os addons](#-onde-ficam-os-addons)
-- [🧩 Estrutura mínima de um addon](#-estrutura-mínima-de-um-addon)
+- [📁 Onde ficam os plugins](#-onde-ficam-os-plugins)
+- [🧩 Estrutura mínima de um plugin](#-estrutura-mínima-de-um-plugin)
 - [🧱 Plugin Base (modelo oficial)](#-plugin-base-modelo-oficial)
 - [🧠 Parâmetros disponíveis no `run`](#-parâmetros-disponíveis-no-run)
 - [⚠️ Regras obrigatórias](#️-regras-obrigatórias)
@@ -37,20 +37,20 @@ Você pode literalmente enviar este arquivo para uma IA e dizer:
 
 > "Crie um comando de mute usando essa base"
 
-Se a IA seguir este documento, o addon **funciona sem ajustes**.
+Se a IA seguir este documento, o plugin **funciona sem ajustes**.
 
 ### 🧠 Conceito fundamental (leia antes)
 
-Antes de criar qualquer addon, é **obrigatório** entender como o Subaru-Base funciona internamente.  
+Antes de criar qualquer plugin, é **obrigatório** entender como o Subaru-Base funciona internamente.  
 Esse entendimento evita 99% dos erros comuns.
 
-- 📦 **Um plugin/addon = um comando**  
+- 📦 **Um plugin/plugin = um comando**  
   Cada arquivo `.js` representa **exatamente um comando**.  
   Não crie múltiplos comandos no mesmo arquivo e não compartilhe lógica entre comandos sem necessidade.
 
 - 🔌 **A conexão Baileys já existe**  
   O bot já está conectado ao WhatsApp.  
-  Você **NUNCA** deve criar, importar ou inicializar uma nova conexão Baileys dentro de um addon.  
+  Você **NUNCA** deve criar, importar ou inicializar uma nova conexão Baileys dentro de um plugin.  
   Use apenas o objeto `subaru` fornecido no `run`.
 
 - 🧠 **O core do bot injeta tudo no `run`**  
@@ -60,11 +60,11 @@ Esse entendimento evita 99% dos erros comuns.
 
 - 🚫 **Nada deve ser importado do core**  
   Não importe arquivos internos do bot (index, handlers, listeners, socket, etc).  
-  O addon é isolado por design.  
+  O plugin é isolado por design.  
   Isso garante estabilidade, segurança e compatibilidade com atualizações futuras.
 
 - 🎯 **Toda a lógica fica dentro do plugin**  
-  O addon é responsável por:
+  O plugin é responsável por:
   - validar permissões
   - validar argumentos
   - executar ações
@@ -104,7 +104,7 @@ Subaru-Base/
 ```
 
 📌 **Resumo importante:**  
-Se o addon:
+Se o plugin:
 - usa apenas os parâmetros do `run`
 - não cria conexões
 - não acessa o core
@@ -114,9 +114,9 @@ Se o addon:
 Se isso for respeitado, não há erro.
 
 
-### 📁 Onde ficam os addons
+### 📁 Onde ficam os plugins
 
-Todos os comandos do Subaru-Base são carregados a partir do sistema de **addons (plugins)**.  
+Todos os comandos do Subaru-Base são carregados a partir do sistema de **plugins (plugins)**.  
 Esses arquivos ficam organizados em diretórios específicos, de acordo com **nível de permissão**.
 
 📂 Diretório principal de plugins:
@@ -139,8 +139,8 @@ Estrutura real:
 📌 Regras importantes sobre essa estrutura
 Cada arquivo .js representa um único comando
 O nome do arquivo não define o comando, quem define é a propriedade `name`
-O core do bot varre automaticamente essas pastas e carrega os addons
-A pasta onde o addon está define quem pode usá-lo
+O core do bot varre automaticamente essas pastas e carrega os plugins
+A pasta onde o plugin está define quem pode usá-lo
 Não existe fallback de permissão
 Se o comando estiver em owner, apenas o dono executa
 Se estiver em adm, apenas admins
@@ -162,7 +162,7 @@ Nomeie o arquivo igual ao comando (ping.js, mute.js, etc.)
 Não reutilize nomes de comandos já existentes
 Evite arquivos grandes e complexos
 Prefira comandos simples e objetivos
-Um addon deve ser fácil de ler, manter e descartar
+Um plugin deve ser fácil de ler, manter e descartar
 
 📌 Importante para IAs
 Uma IA NUNCA deve:
@@ -176,7 +176,7 @@ controle de permissões
 estabilidade do bot
 
 
-### 🧩 Estrutura mínima de um addon
+### 🧩 Estrutura mínima de um plugin
 
 ```js
 module.exports = {
@@ -194,7 +194,7 @@ Isso já é um comando funcional.
 /**
  * 📌 PLUGIN BASE – Subaru-BOT
  * 
- * Estrutura padrão para criação de addons.
+ * Estrutura padrão para criação de plugins.
  */
 
 module.exports = {
@@ -210,7 +210,7 @@ module.exports = {
           `🔹 Args: ${args.length ? args.join(" ") : "(nenhum)"}`
       })
     } catch (e) {
-      console.error(`❌ Erro no addon ${module.exports.name}:`, e)
+      console.error(`❌ Erro no plugin ${module.exports.name}:`, e)
       await subaru.sendMessage(from, { text: "⚠️ Erro ao executar o comando." })
     }
   }
@@ -235,6 +235,34 @@ run: async ({ ... }) => {}
 - `isDono` → Sender é dono do bot
 - `isGroupAdmins` → Sender é administrador do grupo
 - `isBotGroupAdmins` → O bot é administrador do grupo
+- `baileysIs(msg, type)` → Função utilitária que verifica se a mensagem contém um tipo específico de mensagem Baileys
+- `isImage` → Mensagem é uma imagem?
+- `isVideo` → Mensagem é um vídeo?
+- `isSticker` → Mensagem é um sticker?
+- `isAudio` → Mensagem é um áudio?
+- `isDocument` → Mensagem é um documento?
+- `isVisuU2` → Mensagem é visualização única (View Once V2)?
+- `isContact` → Mensagem é um contato?
+- `isLocation` → Mensagem é uma localização?
+- `isProduct` → Mensagem é um produto (WhatsApp Business)?
+- `isMedia` → Mensagem contém algum tipo de mídia (imagem, vídeo, sticker, áudio ou view once)?
+- `quoted` → Mensagem citada (reply), se existir
+- `quotedType` → Tipo da mensagem citada
+- `isQuotedMsg` → Reply é uma mensagem simples (conversation)?
+- `isQuotedMsg2` → Reply é texto simples (text)?
+- `isQuotedText` → Reply é texto expandido (extendedTextMessage)?
+- isQuotedImage → Reply é uma imagem?
+- `isQuotedVideo` → Reply é um vídeo?
+- `isQuotedAudio` → Reply é um áudio?
+- `isQuotedDocument` → Reply é um documento?
+- `isQuotedSticker` → Reply é um sticker?
+- `isQuotedContact` → Reply é um contato?
+- `isQuotedLocation` → Reply é uma localização?
+- `isQuotedProduct` → Reply é um produto?
+- `isQuotedViewOnce` → Reply é mensagem de visualização única (V1 ou V2)?
+- `isQuotedDocW` → Reply é documento com legenda (documentWithCaptionMessage)?
+- `imgCaption` → Legenda da imagem (prioriza a imagem citada, senão a imagem atual)
+- `vidCaption` → Legenda do vídeo (prioriza o vídeo citado, senão o vídeo atual)
 
 > [!WARNING] 
 > Se qualquer regra abaixo for quebrada, o plugin pode falhar.
@@ -288,7 +316,7 @@ module.exports = {
 
       await subaru.sendMessage(from, { text: texto }, { quoted: seloSz })
     } catch (e) {
-      console.error(`❌ Erro no addon ${module.exports.name}:`, e)
+      console.error(`❌ Erro no plugin ${module.exports.name}:`, e)
       await subaru.sendMessage(from, { text: "⚠️ Erro ao executar." })
     }
   }
@@ -296,7 +324,7 @@ module.exports = {
 ```
 ### 🤖 Prompt pronto para IA
 
-Crie um comando para Subaru-Base usando o sistema de addons.
+Crie um comando para Subaru-Base usando o sistema de plugins.
 Repositório oficial:
 https://github.com/szkkj/Subaru-Base/
 
@@ -307,7 +335,7 @@ Regras obrigatórias:
 - O plugin deve conter apenas `name` e `run`
 - Use try/catch envolvendo toda a lógica do comando
 - Nunca crie ou inicie conexão Baileys manualmente
-- Use somente os parâmetros documentados no addon.md
+- Use somente os parâmetros documentados no plugin.md
 - Um arquivo representa um único comando
 
 Regras de código (muito importante):
@@ -368,9 +396,9 @@ Ao seguir **todas as regras e conceitos deste documento**, o resultado final esp
 
 `🎯 Funcionalidade`
 - O comando funciona **imediatamente**, sem ajustes manuais
-- O addon é carregado automaticamente pelo core do Subaru-Base
+- O plugin é carregado automaticamente pelo core do Subaru-Base
 - O comando responde corretamente no WhatsApp
-- Não causa erros globais, travamentos ou conflitos com outros addons
+- Não causa erros globais, travamentos ou conflitos com outros plugins
 
 ` 🧱 Estrutura`
 - O arquivo contém **apenas um comando**
@@ -378,7 +406,7 @@ Ao seguir **todas as regras e conceitos deste documento**, o resultado final esp
 - Possui somente as propriedades:
   - `name`
   - `run`
-- Toda a lógica está contida no próprio addon
+- Toda a lógica está contida no próprio plugin
 - Não há dependência direta do core do bot
 
 `🧠 Integração com o core`
@@ -390,8 +418,8 @@ Ao seguir **todas as regras e conceitos deste documento**, o resultado final esp
 ` 🛡️ Segurança e estabilidade`
 - O código está totalmente protegido por `try/catch`
 - Erros são tratados de forma silenciosa e segura
-- O addon nunca chama `process.exit`
-- O addon nunca quebra a execução de outros comandos
+- O plugin nunca chama `process.exit`
+- O plugin nunca quebra a execução de outros comandos
 - Em caso de falha, apenas o comando falha — o bot continua funcionando
 
 ` 🧩 Manutenção`
@@ -408,7 +436,7 @@ Ao seguir **todas as regras e conceitos deste documento**, o resultado final esp
 
 ### ✅ Em resumo
 
-Se o addon:
+Se o plugin:
 - foi colocado na pasta correta
 - segue a estrutura documentada
 - respeita todas as regras
@@ -417,4 +445,4 @@ Então o resultado final é:
 
 > **Um comando pronto para produção, seguro, estável e 100% compatível com o Subaru-Base.**
 
-<p align="center">✨ Subaru-Base • Sistema de Addons</p>
+<p align="center">✨ Subaru-Base • Sistema de plugins</p>

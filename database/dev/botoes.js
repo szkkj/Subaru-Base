@@ -503,11 +503,11 @@ async function sendInteractiveMessage(sock, jid, content, options = {}) {
     if (isPrivate) {
       additionalNodes.push({ tag: 'bot', attrs: { biz_bot: '1' } });
     }
-    console.log('Interactive send: ', {
+   /* console.log('Interactive send: ', {
       type: buttonType,
       nodes: additionalNodes.map(n => ({ tag: n.tag, attrs: n.attrs })),
       private: !isJidGroup(jid)
-    });
+    });*/
   }
   await relayMessage(jid, fullMsg.message, {
     messageId: fullMsg.key.id,

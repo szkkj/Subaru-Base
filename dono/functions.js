@@ -5,23 +5,15 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage } = require("@whiskeysockets/baileys")
-
-const { prefix, donoName, donoNmr, donoLid, botNumber, baseVersion, baseRaikken, RaikkenKey } = require('./configs/settings.json')
-const fs = require('fs');
-const path = require('path');
-const moment = require('moment-timezone')
-const fetch = require('node-fetch');
-const FormData = require("form-data");
-const axios = require("axios")
-const { exec } = require("child_process");
-const plugins = new Map();
+const { default: downloadContentFromMessage, relayWAMessage, mentionedJid, MediaType, Mimetype, generateWAMessageFromContent, downloadAndSaveMedia, generateWAMessageContent, downloadMediaMessage } = require("@whiskeysockets/baileys")
+const path = require("path");
+const { prefix, donoName, donoNmr, donoLid, botNumber, baseVersion, baseRaikken, RaikkenKey } = require('./configs/settings.json');
+const { os, fs, exec, spawn, crypto, axios, fetch, FormData, moment} = require(path.join(__dirname, './exports-consts.js'));
 const NodeCache = require('node-cache');
-moment.locale("pt");
+const plugins = new Map();
 const sendHours = (formato) => moment.tz('America/Sao_Paulo').format(formato);
 const scget = require(path.join("../database/dev/scget"));
-
-
+const BodyForm = require('form-data');
 
 //============( PERSONALIDADE RANDOM)===========\\
 function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo ) {
@@ -180,6 +172,44 @@ const link = await response.text();
 if (!link || !link.startsWith('http')) throw new Error('Erro ao enviar para Catbox');
 return link.trim()
 }
+
+async function CatBox(filePath) {
+try {
+const fileStream = fs.createReadStream(filePath);
+const formData = new BodyForm();
+formData.append('fileToUpload', fileStream);
+formData.append('reqtype', 'fileupload');
+formData.append('userhash', '');
+const response = await axios.post('https://catbox.moe/user/api.php', formData, {
+headers: {
+...formData.getHeaders(),
+},
+});
+return response.data;
+} catch (error) {
+console.error("Error at Catbox uploader:", error);
+return "Terjadi kesalahan saat upload ke Catbox.";
+}
+};
+
+async function UploadFileUgu (input) {
+return new Promise (async (resolve, reject) => {
+const form = new BodyForm();
+form.append("files[]", fs.createReadStream(input))
+await axios({
+url: "https://uguu.se/upload.php",
+method: "POST",
+headers: {
+"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+...form.getHeaders()
+},
+data: form
+}).then((data) => {
+resolve(data.data.files[0])
+}).catch((err) => reject(err))
+})
+}
+
 
 //============( GETBUFFER )===========\\
 const getBuffer = async (url) => {
@@ -525,7 +555,7 @@ throw new Error("Erro ao baixar URL: " + e.message)
 
 async function checarVersao(reply2, subaru, from) {
 try {
-const res = await fetch(`https://raikken-api.speedhosting.cloud/api/subaru/versao?versao=${baseVersion}`);
+const res = await fetch(`https://raikken.com.br/api/subaru/versao?versao=${baseVersion}`);
 const data = await res.json();
 
 if (data.status === "desatualizado") {
@@ -554,7 +584,7 @@ reply2(`${e.message}`)
 }}
 
 async function atualizarBot(subaru, seloSz, from) {
-const res = await fetch(`https://raikken-api.speedhosting.cloud/api/subaru/versao?versao=${baseVersion}`);
+const res = await fetch(`https://raikken.com.br/api/subaru/versao?versao=${baseVersion}`);
 const data = await res.json();
 const repo = data.repositorio
 const { execSync, exec } = require("child_process");
@@ -655,7 +685,7 @@ return null;
 }
 };
 
-module.exports = { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON,saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, esperar, loadPlugins, getPlugin, onlyNumbers, toUserLid, toUserOrGroupJid, registrarAluguel, renovarAluguel, removerAluguel, listarAlugueis, verificarAlugueis, carregarAlugueis, gerarlinkUploadCatbox, bytesParaMB, getBufferFromUrl, checarVersao, atualizarBot, groupConfigCache, delay, emCooldown, tempoRestante, getRandomSaudacao, getFamiliaData }
+module.exports = { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON,saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, esperar, loadPlugins, getPlugin, onlyNumbers, toUserLid, toUserOrGroupJid, registrarAluguel, renovarAluguel, removerAluguel, listarAlugueis, verificarAlugueis, carregarAlugueis, gerarlinkUploadCatbox, bytesParaMB, getBufferFromUrl, checarVersao, atualizarBot, groupConfigCache, delay, emCooldown, tempoRestante, getRandomSaudacao, getFamiliaData, UploadFileUgu, CatBox }
 
 fs.watchFile(__filename, () => {
 console.log(`Arquivo '${__filename}' foi modificado. \nReiniciando...`);

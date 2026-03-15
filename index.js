@@ -8,7 +8,7 @@
 */
 
 /* ===========================//CONSTS\\================================//*/
-const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys } = require("@whiskeysockets/baileys");
+const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys } = require("@whiskeysockets/baileys");
 
 const { cacheService } = require('./database/dev/cacheService.js');
 const { sendInteractiveMessage, InteractiveValidationError, sendButtons } = require('./database/dev/botoes.js');
@@ -21,7 +21,7 @@ const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken, idCanal, bo
 
 const { menumembros, menuAdm, menubn, menudono, menugeral } = require('./dono/configs/menus.js')
 
-const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON, saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, onlyNumbers, toUserLid, toUserOrGroupJid, registrarAluguel, renovarAluguel, removerAluguel, listarAlugueis, verificarAlugueis, carregarAlugueis, gerarlinkUploadCatbox, bytesParaMB, getBufferFromUrl, checarVersao, atualizarBot, emCooldown, tempoRestante, delay, getFamiliaData } = require('./dono/functions.js')
+const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON, saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, onlyNumbers, toUserLid, toUserOrGroupJid, registrarAluguel, renovarAluguel, removerAluguel, listarAlugueis, verificarAlugueis, carregarAlugueis, gerarlinkUploadCatbox, bytesParaMB, getBufferFromUrl, checarVersao, atualizarBot, emCooldown, tempoRestante, delay, getFamiliaData, UploadFileUgu, CatBox } = require('./dono/functions.js')
 
 const { selogpt, seloCriador, seloGpt, seloMeta, seloLuzia , seloLaura,seloCopilot, seloNubank, seloBb,seloBradesco, seloSantander, seloItau, selodoc, pay, seloSz, seloface, seloluzia, seloloc, seloSticker, spiral } = require("./dono/fileSz.js")
 
@@ -979,64 +979,90 @@ if (!checkPrefix(body, prefix)) {
  
 }//SWITCH COMANDOS SEM PREFIXO
 
-//Comando Play, optei por usar um humilde regex (por isso aquela postagem de explicação, não viu? Vai lá no canal, kk).
 if (body && /^p\s+/i.test(body.trim())) {
-const q1 = body.trim().slice(1).trim(); 
+const q1 = body.trim().slice(1).trim();
 await react("🎵");
 try {
-let videoInfo;
-const isUrl = /https?:\/\/(www\.)?youtube\.com\/|youtu\.be\//.test(q);
-if (isUrl) {
-reply('⚡ Processando seu link...');
-let res = await fetch(`https://raikken-api.speedhosting.cloud/api/play2?url=${encodeURIComponent(q1)}&apikey=${RaikkenKey}`);
-let json = await res.json();
-if (!json.status) throw new Error('Não foi possível processar o link. Tente novamente.');
-let result = json.resultado;
-videoInfo = {
-titulo: result.Título,
-duracao: result.Duração,
-thumb: result.Thumbnail,
-canal: result.Canal,
-views: result.Views,
-url: q1
-}} else {
-reply('🔎 Buscando sua música...');
-let res = await fetch(`https://raikken-api.speedhosting.cloud/api/play/search?query=${encodeURIComponent(q1)}&apikey=${RaikkenKey}`);
-let json = await res.json();
-if (!json.status || !json.resultado) throw new Error('Não foi possível encontrar a música com esse nome.');
-let result = json.resultado;
-videoInfo = {
-titulo: result.titulo,
-duracao: result.duracao,
-thumb: result.thumb,
-canal: result.canal,
-views: result.views,
-url: result.url
-}}
+let videoUrl, titulo, duracao, thumb, canal, views;
 let data = moment().tz('America/Sao_Paulo').format('DD/MM/YYYY');
 let hora = moment().tz('America/Sao_Paulo').format('HH:mm:ss');
-let textin = `┏╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┓֪࣪
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *🎵 Música Encontrada!*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Título:* ${videoInfo.titulo}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Duração:* ${videoInfo.duracao}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Canal:* ${videoInfo.canal || 'N/A'}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Views:* ${videoInfo.views ? videoInfo.views.toLocaleString('pt-BR') : 'N/A'}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Link:* ${videoInfo.url}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Data:* ${data}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Hora:* ${hora}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`;
-await subaru.sendMessage(from, { image: { url: videoInfo.thumb }, caption: textin, footer: '🎶 Selecione uma opção abaixo',
+if (/https?:\/\/(www\.)?youtube\.com\/|youtu\.be\//.test(q1)) {
+videoUrl = q1;
+let res = await fetch(`${baseRaikken}/api/mp3/url?url=${encodeURIComponent(q1)}&apikey=${RaikkenKey}`);
+let json = await res.json();
+if (!json.success || !json.message) throw new Error('Não foi possível processar o link. Tente novamente.');
+let m = json.message;
+titulo= m.title;
+duracao = m.duration;
+thumb = m.thumbnail;
+canal = m.channel?.name || 'Desconhecido';
+views = null;
+} else {
+reply('🔎 Buscando sua música...');
+let res = await fetch(`${baseRaikken}/api/play/search?query=${encodeURIComponent(q1)}&apikey=${RaikkenKey}`);
+let json = await res.json();
+if (!json.success || !Array.isArray(json.message)) throw new Error('Não foi possível encontrar a música com esse nome.');
+let result = json.message.find(r => r.type === 'video');
+if (!result) throw new Error('Nenhum vídeo encontrado para essa busca.');
+videoUrl = result.url;
+titulo = result.title;
+duracao= result.timestamp;
+thumb= result.image;
+canal= result.author?.name || 'Desconhecido';
+views= result.views ?? null;
+}
+
+const thumbResponse = await fetch(thumb);
+const thumbBuffer = Buffer.from(await thumbResponse.arrayBuffer());
+const imageMedia= await prepareWAMessageMedia(
+{ image: thumbBuffer },
+{ upload: subaru.waUploadToServer }
+);
+
+const textin = `┏╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┓֪࣪
+│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *🎵 Música Encontrada!*
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Título:* ${titulo}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Duração:* ${duracao}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Canal:* ${canal}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Views:* ${views ? views.toLocaleString('pt-BR') : 'N/A'}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Link:* ${videoUrl}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Data:* ${data}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Hora:* ${hora}
+┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
+┗╾ׁ┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`;
+
+const interactiveMessage = {
+header: {
+...imageMedia,
+hasMediaAttachment: true,
+title: ""
+},
+body: {
+text: textin
+},
+footer: {
+text: '🎶 Selecione uma opção abaixo'
+},
+nativeFlowMessage: {
 buttons: [
-{ buttonId: `${prefix}play ${videoInfo.url}`, buttonText: { displayText: '🎧 Áudio' }, type: 1 },
-{ buttonId: `${prefix}playvideo ${videoInfo.url}`, buttonText: { displayText: '▶️ Vídeo' }, type: 1 },
-{ buttonId: `${prefix}playdoc ${videoInfo.url}`, buttonText: { displayText: '📄 Documento' }, type: 1 }], headerType: 4}, { quoted: seloSz });
+{name: "quick_reply",
+buttonParamsJson: JSON.stringify({ display_text: "🎧 Áudio", id: `${prefix}play ${videoUrl}`})},
+{name: "quick_reply",
+buttonParamsJson: JSON.stringify({ display_text: "▶️ Vídeo", id: `${prefix}playvideo ${videoUrl}` })},
+{name: "quick_reply",
+buttonParamsJson: JSON.stringify({ display_text: "📄 Documento", id: `${prefix}playdoc ${videoUrl}` })}],
+messageParamsJson: ""
+}};
+await sendInteractiveMessage(subaru, from, { interactiveMessage }, {
+additionalAttributes: {},
+useCachedGroupMetadata: true
+});
 } catch (e) {
 console.log(e);
 botSemKey(subaru, from);
 }
-return
+return;
 }
 
 async function sendUrlText(
@@ -1169,7 +1195,7 @@ try {
 const persona = escolherPersonalidadeSubaru() 
 const simiPersonality = `${persona.prompt}` ;
 
-const { data } = await axios.post(`https://raikken-api.speedhosting.cloud/api/ia/chat-simi?apikey=${RaikkenKey}`, {
+const { data } = await axios.post(`${baseRaikken}/api/ia/chat-simi?apikey=${RaikkenKey}`, {
 message: budy,
 personality: simiPersonality
 });
@@ -1444,7 +1470,7 @@ loadPlugins()
 const plugin = getPlugin(cmd);
 if (plugin) {
 try {
-await plugin.run({ subaru, msg, args, from, sender, isGroup, pushname, reply, seloSz, react, isAdm, isDono, isGroupAdmins, isBotGroupAdmins, isQuotedAudio });
+await plugin.run({ subaru, msg, args, from, sender, isGroup, pushname, reply, seloSz, react, isAdm, isDono, isGroupAdmins, isBotGroupAdmins, isQuotedAudio, isQuotedImage, isQuotedVideo, quoted, quotedType });
 } catch (e) {
 console.error(`❌ Erro no plugin ${cmd}:`, e);
 }
@@ -3457,7 +3483,7 @@ let textPing = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘�
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
 
-const pingImageUrl = `https://raikken-api.speedhosting.cloud/api/canvas/ping?ping=${String(latency.toFixed(3))}&texto=${botName}&avatar=https://i.postimg.cc/J0jC8w1f/perfil.jpgg&fundo=https://i.postimg.cc/fbBCDL1Q/images-11.jpg`;
+const pingImageUrl = `${baseRaikken}/api/canvas/ping?ping=${String(latency.toFixed(3))}&texto=${botName}&avatar=https://i.postimg.cc/J0jC8w1f/perfil.jpgg&fundo=https://i.postimg.cc/fbBCDL1Q/images-11.jpg`;
 
 
 await subaru.sendMessage(from, { image: { url: pingImageUrl }, caption: `${textPing}`, mentions: [sender] }, { quoted: selogpt });
@@ -3562,7 +3588,9 @@ case 'ativar': {
 if (!isGroup) return reply(mss.grupo);
 if (!isGroupAdmins) return reply(mss.adm);
 if (!isBotGroupAdmins) return reply(mss.botadm);
+
 await react("⚙️");
+
 const funcoes = [
 { nome: "Boas-Vindas", status: isBemVindo, id: `${prefix}bemvindo` },
 { nome: "Anti-Link", status: isAntiLink, id: `${prefix}antilink` },
@@ -3583,20 +3611,13 @@ const funcoes = [
 const rows = funcoes.map(func => ({
 title: `${func.nome}: ${func.status ? '✅ Ativado' : '❌ Desativado'}`,
 description: `Use ${func.id} 1 (ativar) ou 0 (desativar)`,
-id: `${func.id} ${func.status ? '0' : '1'}` 
+id: `${func.id} ${func.status ? '0' : '1'}`
 }));
-await subaru.relayMessage(from, {
-interactiveMessage: {
-header: proto.Message.InteractiveMessage.Header.create({
+const interactiveContent = {
 title: `⚙️ PAINEL DE CONTROLE - ${groupName}`,
-hasMediaAttachment: false
-}),
-body: {
-text: `Olá ${pushname}! 👋\n\nAqui você pode ativar ou desativar as funções do bot para este grupo. Clique em uma opção para alternar o estado dela (ativar/desativar).`
-},
-footer: { text: `© ${botName}` },
-nativeFlowMessage: {
-buttons: [{
+text: `Olá ${pushname}! 👋\n\nAqui você pode ativar ou desativar as funções do bot para este grupo. Clique em uma opção para alternar o estado dela (ativar/desativar).`,
+footer: `© ${botName}`,
+interactiveButtons: [{
 name: "single_select",
 buttonParamsJson: JSON.stringify({
 title: "🔧 FUNÇÕES DO GRUPO",
@@ -3605,11 +3626,28 @@ title: "Clique para ativar ou desativar",
 rows: rows
 }]
 })
-}],
-messageParamsJson: ""
+}]
+};
+
+try {
+await sendInteractiveMessage(subaru, from, interactiveContent, {
+additionalAttributes: {},
+useCachedGroupMetadata: true
+});
+} catch (error) {
+console.error('Erro ao enviar mensagem interativa:', error);
+let textMessage = `⚙️ PAINEL DE CONTROLE - ${groupName}\n\n`;
+textMessage += `Olá ${pushname}! 👋\n\n`;
+textMessage += "Aqui você pode ativar ou desativar as funções do bot para este grupo:\n\n";
+
+funcoes.forEach(func => {
+textMessage += `• ${func.nome}: ${func.status ? '✅ Ativado' : '❌ Desativado'}\n`;
+textMessage += `Use: ${func.id} 1 (ativar) ou 0 (desativar)\n\n`;
+});
+textMessage += `\n© ${botName}`;
+await reply(textMessage);
 }
-}
-}, {});
+
 break;
 }
 
@@ -4185,6 +4223,8 @@ break
 
 case 'promover': 
 if(!isGroup) return reply(mss.grupo)
+if(!isGroupAdmins) return reply(mss.adm)
+if(!isBotGroupAdmins) return reply(mss.botadm)
 if(!alvo) return enviar("Marque a mensagem do usuário ou marque o @ dele.., lembre de só marcar um usuário...")
 let promoveJid = alvo;
 if(!JSON.stringify(groupMembers).includes(alvo)) return enviar("Esse membro não está mais no grupo.")
@@ -4194,7 +4234,9 @@ if(numeroBot.includes(alvo)) return enviar('Ué? Tá pedindo pra eu me promover?
 break
 
 case 'rebaixar': 
-if(!isGroup) return reply(msss.grupo)
+if(!isGroup) return reply(mss.grupo)
+if(!isGroupAdmins) return reply(mss.adm)
+if(!isBotGroupAdmins) return reply(mss.botadm)
 if(!alvo) return enviar("Marque a mensagem do usuário ou marque o @ dele.., lembre de só marcar um usuário...")
 let rebaixarJid = alvo;
 if(!JSON.stringify(groupMembers).includes(alvo)) return enviar("Esse membro não está mais no grupo.")
@@ -4369,9 +4411,140 @@ reply(`Deu erro, se liga:\n *_${e.message}_*`);
 break
 
 //=====( ABAIXO OS COMANDOS DA API )=====\\
+case 'removebg': {
+try {
+const tempDir = './database/temp';
+if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+let imageUrl;
+
+const saveTempAndUpload = async (mediaBuffer) => {
+const tempPath = `${tempDir}/removebg_${Date.now()}.jpg`;
+fs.writeFileSync(tempPath, mediaBuffer);
+let url;
+try {
+url = await CatBox(tempPath);
+} catch {
+const uploaded = await UploadFileUgu(tempPath);
+url = uploaded.url;
+}
+fs.unlinkSync(tempPath);
+return url;
+};
+
+if (isQuotedImage) {
+const mediaBuffer = await downloadMediaMessage(
+{ message: { imageMessage: mediaInfo } },
+'buffer',
+{}
+);
+imageUrl = await saveTempAndUpload(mediaBuffer);
+} else if (isImage) {
+const mediaBuffer = await downloadMediaMessage(info, 'buffer', {});
+imageUrl = await saveTempAndUpload(mediaBuffer);
+} else if (q?.startsWith('http')) {
+imageUrl = q;
+} else {
+return reply(`❌ Envie uma imagem, quote uma imagem, ou passe uma URL. Ex: ${prefix}removebg https://...`);
+}
+
+reply('⏳ Removendo o fundo da imagem, aguarde...');
+
+const res = await fetch(`${baseRaikken}/api/outros/remove-bg?imageUrl=${encodeURIComponent(imageUrl)}&apikey=${RaikkenKey}`);
+if (!res.ok) throw new Error('Erro ao remover o fundo da imagem.');
+const buffer = Buffer.from(await res.arrayBuffer());
+
+const tempOut = `${tempDir}/removebg_out_${Date.now()}.png`;
+fs.writeFileSync(tempOut, buffer);
+const uploadedOut = await UploadFileUgu(tempOut);
+fs.unlinkSync(tempOut);
+
+await subaru.sendMessage(from, {
+image: { url: uploadedOut.url },
+caption: '✅ Fundo removido com sucesso!'
+}, { quoted: info });
+
+} catch (e) {
+console.error(e);
+botSemKey(subaru, from);
+}
+break;
+}
+
+case 'bratmeme': {
+const partes = q?.split('|');
+if (!q || partes.length < 2) return reply(`❌ Use: ${prefix}bratmeme texto1 | texto2`);
+try {
+const text1 = partes[0].trim();
+const text2 = partes[1].trim();
+const res = await fetch(`${baseRaikken}/api/canvas/bratmeme?text1=${encodeURIComponent(text1)}&text2=${encodeURIComponent(text2)}&apikey=${RaikkenKey}`);
+if (!res.ok) throw new Error('Erro ao gerar sticker bratmeme.');
+const buffer = Buffer.from(await res.arrayBuffer());
+await sendImageAsSticker2(subaru, from, buffer, info, {
+packname: botName,
+author: donoName
+});
+} catch (e) {
+console.error(e);
+botSemKey(subaru, from);
+}
+break;
+}
+
+case 'bratmeme2': {
+if (!q) return reply('❌ Digite um texto! Ex: .bratmeme2 seu texto aqui');
+try {
+const res = await fetch(`${baseRaikken}/api/canvas/bratmeme2?text=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+if (!res.ok) throw new Error('Erro ao gerar sticker bratmeme2.');
+const buffer = Buffer.from(await res.arrayBuffer());
+await sendImageAsSticker2(subaru, from, buffer, info, {
+packname: botName,
+author: donoName
+});
+} catch (e) {
+console.error(e);
+botSemKey(subaru, from);
+}
+break;
+}
+
+case 'bratvideo': {
+if (!q) return reply('❌ Digite um texto! Ex: .bratvideo seu texto aqui');
+try {
+const res = await fetch(`${baseRaikken}/api/canvas/bratvideo?text=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+if (!res.ok) throw new Error('Erro ao gerar sticker brat.');
+const buffer = Buffer.from(await res.arrayBuffer());
+await sendVideoAsSticker2(subaru, from, buffer, info, {
+packname: botName,
+author: donoName
+});
+} catch (e) {
+console.error(e);
+botSemKey(subaru, from);
+}
+break;
+}
+
+case 'brat': {
+if (!q) return reply('❌ Digite um texto! Ex: .brat seu texto aqui');
+try {
+const res = await fetch(`${baseRaikken}/api/canvas/brat?text=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+if (!res.ok) throw new Error('Erro ao gerar imagem brat.');
+const buffer = Buffer.from(await res.arrayBuffer());
+await sendImageAsSticker2(subaru, from, buffer, info, {
+packname: botName,
+author: donoName
+});
+} catch (e) {
+console.error(e);
+botSemKey(subaru, from);
+}
+break;
+}
+
 case 'conversas-simi': {
 try { 
-const url = `https://raikken-api.speedhosting.cloud/api/ia/conversas-simi?apikey=${RaikkenKey}`;
+const url = `${baseRaikken}/api/ia/conversas-simi?apikey=${RaikkenKey}`;
 let response = await fetch(url);
 if (!response.ok) {
 return reply(`❌ Erro ao acessar API: ${response.status}`);
@@ -4614,106 +4787,118 @@ botSemKey(subaru, from);
 break;
 
 case 'play': {
-
 if (!q) return reply('Digite o nome da música ou cole o link do YouTube!');
 try {
-let result;
+let videoUrl, titulo, duracao, thumb, canal, views;
 let data = moment().tz('America/Sao_Paulo').format('DD/MM/YYYY');
 let hora = moment().tz('America/Sao_Paulo').format('HH:mm:ss');
-if (/https?:\/\/(www\.)?youtube\.com\/|youtu\.be\//.test(q)) 
-{
-let res = await fetch(`https://raikken-api.speedhosting.cloud/api/play2?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+if (/https?:\/\/(www\.)?youtube\.com\/|youtu\.be\//.test(q)) {
+videoUrl = q;
+let res = await fetch(`${baseRaikken}/api/mp3/url?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
 let json = await res.json();
-if (!json.status) return reply('Não foi possível processar o link.');
-result = json.resultado;
-result.titulo = result.Título;
-result.duracao = result.Duração;
-result.download = result.Download;
-result.thumb = result.Thumbnail;
+if (!json.success || !json.message) return reply('Não foi possível processar o link.');
+let m = json.message;
+titulo= m.title;
+duracao = m.duration;
+thumb = m.thumbnail;
+canal = m.channel?.name || 'Desconhecido';
+views = null;
 } else {
-let res = await fetch(`https://raikken-api.speedhosting.cloud/api/play/search?query=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+let res = await fetch(`${baseRaikken}/api/play/search?query=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
 let json = await res.json();
-if (!json.status) return reply('Não foi possível encontrar a música.');
-result = json.resultado;}
-let caption = `
-┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
+if (!json.success || !Array.isArray(json.message)) return reply('Não foi possível encontrar a música.');
+let result = json.message.find(r => r.type === 'video');
+if (!result) return reply('Nenhum vídeo encontrado para essa busca.');
+videoUrl = result.url;
+titulo = result.title;
+duracao= result.timestamp;
+thumb= result.image;
+canal= result.author?.name || 'Desconhecido';
+views= result.views ?? null;
+}
+let resAudio = await fetch(`${baseRaikken}/api/mp3/url?url=${encodeURIComponent(videoUrl)}&apikey=${RaikkenKey}`);
+let jsonAudio = await resAudio.json();
+if (!jsonAudio.success || !jsonAudio.message?.url) return reply('Não foi possível obter o áudio.');
+let audioUrl = jsonAudio.message.url;
+let c = `
+┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
+│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
 ┃࣪ ┃࣪ ✿𖥔࣪ *ꔛ⃟𝐌𝐔𝐒𝐈𝐂𝐀 𝐄𝐍𝐂𝐎𝐍𝐓𝐑𝐀𝐃𝐀* ✿𖥔࣪
-┃࣪ ┃࣪ 🎵 *Título:* ${result.titulo}
-┃࣪ ┃࣪ ⏱️ *Duração:* ${result.duracao}
-┃࣪ ┃࣪ 👤 *Canal:* ${result.canal || 'Desconhecido'}
-┃࣪ ┃࣪ 👀 *Views:* ${result.views ? result.views.toLocaleString() : 'Desconhecido'}
-┃࣪ ┃࣪ 🔗 *Link:* ${q}
+┃࣪ ┃࣪ 🎵 *Título:* ${titulo}
+┃࣪ ┃࣪ ⏱️ *Duração:* ${duracao}
+┃࣪ ┃࣪ 👤 *Canal:* ${canal}
+┃࣪ ┃࣪ 👀 *Views:* ${views ? views.toLocaleString('pt-BR') : 'N/A'}
+┃࣪ ┃࣪ 🔗 *Link:* ${videoUrl}
 ┃࣪ ┃࣪ 📅 *Data:* ${data}
 ┃࣪ ┃࣪ ⏰ *Hora:* ${hora}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
+┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
 
-await subaru.sendMessage(from, { image: { url: result.thumb }, caption }, { quoted: info });
-await subaru.sendMessage(from, { audio: { url: result.download }, mimetype: 'audio/mpeg', fileName: `${result.titulo}.mp3`, ptt: false }, { quoted: info });
+await subaru.sendMessage(from, { image: { url: thumb }, caption: c }, { quoted: info });
+await subaru.sendMessage(from, { audio: { url: audioUrl }, mimetype: 'audio/mpeg', fileName: `${titulo}.mp3`, ptt: false }, { quoted: info });
 } catch (e) {
 console.log(e);
 botSemKey(subaru, from);
 }
-break;}
+break;
+}
 
 case 'playdoc': {
-
 if (!q || !q.startsWith('http')) {
-return reply('❌ Link do YouTube inválido ou não fornecido. Use o comando .playb para buscar uma música.')}
+return reply('❌ Link do YouTube inválido ou não fornecido. Use o comando .playb para buscar uma música.');
+}
 reply2('📥 Buscando informações do áudio, aguarde...');
 try {
-const apiResponse = await fetch(`https://raikken-api.speedhosting.cloud/api/play2?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
-const apiJson = await apiResponse.json();
-if (!apiJson.status || !apiJson.resultado) {
+const res = await fetch(`${baseRaikken}/api/mp3/url?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+const json = await res.json();
+if (!json.success || !json.message) {
 throw new Error('Não foi possível obter os dados da música. O vídeo pode ser privado ou ter restrição de idade.');
 }
-const result = apiJson.resultado;
-const tituloMusica = result.Título;
-const linkDownloadDireto = result.Download;
-reply(`✅ Música encontrada: "${tituloMusica}"\nEnviando como documento...`);
+const titulo = json.message.title;
+const audioUrl = json.message.url;
+reply(`✅ Música encontrada: "${titulo}"\nEnviando como documento...`);
 await subaru.sendMessage(from, {
-document: { url: linkDownloadDireto },
+document: { url: audioUrl },
 mimetype: 'audio/mpeg',
-fileName: `${tituloMusica}.mp3` 
+fileName: `${titulo}.mp3`
 }, { quoted: info });
-
 } catch (e) {
 console.error('Erro no comando .playdoc:', e);
 botSemKey(subaru, from);
 }
-break;}
+break;
+}
+
 
 case 'playvideo': {
-
+if (!q) return reply(`❌ Use: ${prefix + command} <link do YouTube>`);
 try {
-if (!q) {return reply(`❌ Use: ${prefix + command} <link do YouTube>`)}
-let url = `https://raikken-api.speedhosting.cloud/api/playvideo?url=${encodeURIComponent(q)}&qualidade=480&apikey=${RaikkenKey}`
-let { data } = await axios.get(url)
-if (!data.sucesso || !data.resultado || !data.resultado.url) {
-return reply("❌ Não foi possível obter o vídeo.")
+const res = await fetch(`${baseRaikken}/api/mp4/url?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+const json = await res.json();
+if (!json.success || !json.message) {
+return reply('❌ Não foi possível obter o vídeo.');
 }
-
-let result = data.resultado
-let dataAtual = moment.tz("America/Sao_Paulo").format("DD/MM/YYYY")
-let horaAtual = moment.tz("America/Sao_Paulo").format("HH:mm:ss")
-let msgg = `
-┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *🎬 Vídeo Encontrado!*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Título:* ${result.titulo}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Duração:* ${result.duracao}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Data:* ${dataAtual}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Hora:* ${horaAtual}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`
-
-await subaru.sendMessage(from, { video: { url: result.url }, caption: msgg }, { quoted: seloSz })
+const m = json.message;
+const dataAtual = moment.tz('America/Sao_Paulo').format('DD/MM/YYYY');
+const horaAtual = moment.tz('America/Sao_Paulo').format('HH:mm:ss');
+const msgg = `
+┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
+│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *🎬 Vídeo Encontrado!*
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Título:* ${m.title}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Canal:* ${m.channel?.name || 'Desconhecido'}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Duração:* ${m.duration}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Data:* ${dataAtual}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Hora:* ${horaAtual}
+┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
+await subaru.sendMessage(from, { video: { url: m.url }, caption: msgg }, { quoted: seloSz });
 } catch (e) {
-console.error(e)
+console.error(e);
 botSemKey(subaru, from);
 }
-break}
+break;
+}
 
 case 'down':
 case 'dl':{
@@ -4923,7 +5108,7 @@ case 'gemini': {
 if (!sz) return reply(`💬 Envie uma pergunta para o Gemini responder.\n\nExemplo:\n${prefixo}gemini Quem descobriu o Brasil?`);
 waitReact()
 try {
-const res = await axios.get(`https://raikken-api.speedhosting.cloud/api/ia/gemini?prompt=${encodeURIComponent(sz)}&apikey=${RaikkenKey}`);
+const res = await axios.get(`${baseRaikken}/api/ia/gemini?prompt=${encodeURIComponent(sz)}&apikey=${RaikkenKey}`);
 
 if (!res.data || !res.data.resultado) {
 return reply("❌ Não consegui obter resposta do Gemini.");}
@@ -5007,7 +5192,7 @@ const total = Math.min(Number(qtdStr) || 5, 10);
 let cards = [], i = 1;
 for (let count = 0; count < total; count++) {
 try {
-const url = `https://raikken-api.speedhosting.cloud/api/pinterest?query=${encodeURIComponent(query)}&apikey=${RaikkenKey}`;
+const url = `${baseRaikken}/api/pinterest?query=${encodeURIComponent(query)}&apikey=${RaikkenKey}`;
 const buffer = await getBuffer(url);
 const { imageMessage } = await generateWAMessageContent(
 { image: buffer },
@@ -5140,7 +5325,7 @@ break;
 case 'rgtinder': {
 const rgValue = q; 
 try {
-let endpoint = `https://raikken-api.speedhosting.cloud/api/tinder/login?usu=${sender}`;
+let endpoint = `${baseRaikken}/api/tinder/login?usu=${sender}`;
 
 if (rgValue && !isImage) {
 endpoint += `&rg=${encodeURIComponent(rgValue)}`;
@@ -5162,51 +5347,49 @@ reply(errorMessage);
 }
 break
 
+case 'tinder':
 case 'rolar': {
 await react("🔥");
 if (!isGroup) return reply("Este comando só pode ser usado em grupos.");
-
 try {
-const userProfileResponse = await axios.get(`https://raikken-api.speedhosting.cloud/api/tinder/perfil?usu=${sender}`);
-if (!userProfileResponse.data.dados || userProfileResponse.data.dados.length === 0) {
- return reply("Você não está registrado! Use o comando de registro para começar.");
-}
-const meuPerfil = userProfileResponse.data.dados[0];
-const findResponse = await axios.get(`https://raikken-api.speedhosting.cloud/api/tinder/find?usu=${sender}`);
+const userProfileResponse = await axios.get(`${baseRaikken}/api/tinder/perfil?usu=${sender}`);
+if (!userProfileResponse.data.dados || userProfileResponse.data.dados.length === 0) { return reply2("Você não está registrado! Use o comando de registro para começar.");}
+
+const findResponse = await axios.get(`${baseRaikken}/api/tinder/find?usu=${sender}`);
 if (!findResponse.data.dados || findResponse.data.dados.length === 0) {
-return reply(findResponse.data.message || "Nenhum usuário encontrado no momento. Tente mais tarde!");
-}
+return reply(findResponse.data.message || "Nenhum usuário encontrado no momento. Tente mais tarde!");}
 const dupla = findResponse.data.dados[0];
-let texto = `*Raikken-API's Tinder 👫🌟*\n—\n`;
+let texto = `*${botName} Tinder 👫🌟*\n—\n`;
 texto += `• [💖] Usuário: ${dupla.name}\n`;
 texto += `• WhatsApp: wa.me/${dupla.userId.split('@')[0]}\n`;
 texto += `• [⏳] Idade: ${dupla.age} anos.\n`;
 texto += `• [🏳‍🌈] Sexualidade: ${dupla.sexuality}\n`;
 texto += `• [🚻] Gênero: ${dupla.gender}\n`;
-texto += `• [💌] *Bio:* ${dupla.bio}\n—\n`;
-const buttons = [
+texto += `• [💌] *Bio:* ${dupla.bio}\n—`;
 
-{ buttonId: `${prefix}like ${dupla.userId}`, buttonText: { displayText: '💖 Like' }, type: 1 },
-{ buttonId: `${prefix}dislike ${dupla.userId}`, buttonText: { displayText: '💔 Dislike' }, type: 1 }
-];
-
-const buttonMessage = {
-image: { url: `${dupla.photo}` },
-caption: texto,
-footer: "Escolha uma opção para reagir ao perfil!",
-buttons: buttons,
-headerType: 4
-};
-
-await subaru.sendMessage(from, buttonMessage, { quoted: info });
-
-} catch (error) { 
+const thumbResponse = await fetch(dupla.photo);
+const thumbBuffer = Buffer.from(await thumbResponse.arrayBuffer());
+const imageMedia= await prepareWAMessageMedia({ image: thumbBuffer }, { upload: subaru.waUploadToServer });
+const interactiveMessage = {
+header: {
+...imageMedia,
+hasMediaAttachment: true,
+title: ""},
+body: { text: texto },
+footer: { text: "Escolha uma opção para reagir ao perfil!" },
+nativeFlowMessage: {
+buttons: [{
+name: "quick_reply",
+buttonParamsJson: JSON.stringify({ display_text: "💖 Like",id: `${prefix}like ${dupla.userId}`})},
+{name: "quick_reply",
+buttonParamsJson: JSON.stringify({ display_text: "💔 Dislike", id: `${prefix}dislike ${dupla.userId}` })}], messageParamsJson: "" }};
+await sendInteractiveMessage(subaru, from, { interactiveMessage }, { additionalAttributes: {}, useCachedGroupMetadata: true });
+} catch (error) {
 console.error("Erro no comando rolar:", error);
 const errorMessage = error.response?.data?.message || "Ocorreu um pequeno erro ao buscar um par para você!";
 reply(detectTinder(errorMessage));
 }
-}
-break
+break;}
 
 case 'tindernome': 
 case 'tinderidade': 
@@ -5226,14 +5409,14 @@ try {
 var Fl = info?.message?.extendedTextMessage?.contextInfo?.quotedMessage
 var muk = Fl?.viewOnceMessageV2?.message?.imageMessage || Fl?.viewOnceMessage?.message?.imageMessage || Fl?.imageMessage;
 let base64String = await getFileBuffer(muk, "image");
-var abcd = await uploadX(base64String);//Use o upload de seu bot, no meu caso, estou usando de uma outra API. 
+var abcd = await CatBox(base64String);
 finalQueryValue = abcd;
 } catch (error) {
 console.error("Erro ao processar imagem:", error);
 return reply("Não foi possível processar a imagem. Tente novamente!");
 }
 }
-const endpoint = `https://raikken-api.speedhosting.cloud/api/tinder/config?usu=${sender}&mod=${command}&q=${encodeURIComponent(finalQueryValue)}`;
+const endpoint = `${baseRaikken}/api/tinder/config?usu=${sender}&mod=${command}&q=${encodeURIComponent(finalQueryValue)}`;
 const response = await axios.get(endpoint);
 if (!response.data || !response.data.message) throw new Error("Resposta inválida da API");
 reply(detectTinder(response.data.message));
@@ -5391,7 +5574,7 @@ if (!q) {return reply(`Cadê o usuário?\n\nExemplo de uso:\n${prefix}stalkinsta
 react('🫟')
 try {
 let usuario = q.replace('@', '').trim()
-let url = `https://raikken-api.speedhosting.cloud/api/stalk/insta?user=${usuario}&apikey=${RaikkenKey}`
+let url = `${baseRaikken}/api/stalk/insta?user=${usuario}&apikey=${RaikkenKey}`
 let res = await fetch(url)
 let json = await res.json()
  if (!json.status) {return reply(`Perfil nao encontrado!`)}
@@ -5426,7 +5609,7 @@ if (!q) {return reply(`Qual o usuário?\n\nExemplo de uso:\n${prefix}stalkttk _d
 react('🫟')
 try {
 let usuario = q.replace('@', '').trim()
-let url = `https://raikken-api.speedhosting.cloud/api/stalktiktok?username=${usuario}&apikey=${RaikkenKey}`
+let url = `${baseRaikken}/api/stalktiktok?username=${usuario}&apikey=${RaikkenKey}`
 let res = await fetch(url)
 let json = await res.json()
  if (!json.sucesso && !json.resultado?.status) {returnreply(`> ┃ ❌ *Perfil não encontrado.*`) }
@@ -5457,7 +5640,7 @@ if (!q) {return reply(`Qual o usuário?\n\nExemplo de uso:\n${prefix}stalkyt lil
 react('🫟')
 try {
 let usuario = q.replace('@', '').trim()
-let url = `https://raikken-api.speedhosting.cloud/api/stalk/yt?username=${usuario}&apikey=${RaikkenKey}`
+let url = `${baseRaikken}/api/stalk/yt?username=${usuario}&apikey=${RaikkenKey}`
 let res = await fetch(url)
 let json = await res.json()
 
@@ -5500,7 +5683,7 @@ case 'stalkff': {
 react('🫟')
 if (!q) return reply("❌ Informe o *ID do jogador*!"); 
 try {
-let res = await fetch(`https://raikken-api.speedhosting.cloud/api/stalk/perfil-ff?id=${q}&apikey=${RaikkenKey}`);
+let res = await fetch(`${baseRaikken}/api/stalk/perfil-ff?id=${q}&apikey=${RaikkenKey}`);
 let json = await res.json();
 
 if (!json.status) return reply("❌ Não encontrei nada com esse ID!");
