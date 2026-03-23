@@ -58,4 +58,4 @@ const getSimilarity = (array, txt) => {
   return {nome, porcentagem: porcentagem * 100}
 }
 
-module.exports = getSimilarity
+export { getSimilarity };

@@ -125,6 +125,44 @@ Edite o arquivo `./dono/configs/settings.json:`
   "baseRaikken": "https://api.raikken.com.br"
 }
 ```
+
+5️⃣ Estrutura do Subaru-Base
+```JSON
+📁 Subaru-Base/
+├── 📄 index.js     
+├── 📄 connection.js  
+├── 📄 package.json       
+├── 📄 settings.json     
+├── 📄 README.md   
+│
+├── 📂 configs/    
+│   ├── 📂 session
+│   ├── 📂 novidades/
+│   └── 📄 settings.json
+│   └── 📄 menus.js
+│
+├── 📂 database/         
+│   ├── 📂 grupos/
+│   ├── 📂 users/
+│   ├── 📂 countmessage/    
+│   ├── 📂 audios/
+│   ├── 📂 imgs/
+│   ├── 📂 videos/
+│   ├── 📂 textos/
+│   └── 📂 outros/
+│   └── 📂 dev/
+│   └── 📂 tictactoe/
+│   └── 📂 temp/
+│
+├── 📂 dono/                
+│   ├── 📂 plugins/
+│   ├── 📄 exports-consts.js
+│   └── 📄 functions.js   
+│   └── 📄 fileSz.js  
+│
+└── 📂 node_modules/  
+```
+
 > [!WARNING] 
 > ⚠️ Os comandos por API não funcionam por precisar de uma key, para obter uma nova, entre em contato: WhatsApp
 

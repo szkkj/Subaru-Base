@@ -5,15 +5,23 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: downloadContentFromMessage, relayWAMessage, mentionedJid, MediaType, Mimetype, generateWAMessageFromContent, downloadAndSaveMedia, generateWAMessageContent, downloadMediaMessage } = require("@whiskeysockets/baileys")
-const path = require("path");
-const { prefix, donoName, donoNmr, donoLid, botNumber, baseVersion, baseRaikken, RaikkenKey } = require('./configs/settings.json');
-const { os, fs, exec, spawn, crypto, axios, fetch, FormData, moment} = require(path.join(__dirname, './exports-consts.js'));
-const NodeCache = require('node-cache');
-const plugins = new Map();
-const sendHours = (formato) => moment.tz('America/Sao_Paulo').format(formato);
-const scget = require(path.join("../database/dev/scget"));
-const BodyForm = require('form-data');
+import * as baileysPkg from "@whiskeysockets/baileys";
+const { downloadContentFromMessage, mentionedJid, MediaType } = baileysPkg;
+import path from 'path'
+import { createRequire } from 'module'
+import { fileURLToPath } from 'url'
+import NodeCache from 'node-cache'
+import FormData from 'form-data'
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const { prefix, donoName, donoNmr, donoLid, botNumber, baseVersion, baseRaikken, RaikkenKey } = require('./configs/settings.json', { with: { type: 'json' } })
+import { os, fs, exec, spawn, crypto, axios, fetch, moment } from './exports-consts.js';
+import scget from "../database/dev/scget/scget.js";
+const plugins = new Map()
+const sendHours = (formato) => moment.tz('America/Sao_Paulo').format(formato)
 
 //============( PERSONALIDADE RANDOM)===========\\
 function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo ) {
@@ -388,155 +396,6 @@ const numeros = onlyNumbers(value);
 return `${numeros}@lid`;
 }
 
-// ------------------- [ STEMA DE ALUGUEL - By Sz/Spiral ] -------------------
-const caminhoAluguelDB = path.join(__dirname, '..', 'database', 'grupos', 'aluguel', 'db_aluguel.json');
-const carregarAlugueis = () => {
-try {
-if (fs.existsSync(caminhoAluguelDB)) {
-const dados = fs.readFileSync(caminhoAluguelDB, 'utf8');
-return JSON.parse(dados);
-}
-return [];
-} catch (error) {
-console.error("Erro ao carregar o db_aluguel.json:", error);
-return [];
-}};
-
-const salvarAlugueis = (dados) => {
-try {
-fs.writeFileSync(caminhoAluguelDB, JSON.stringify(dados, null, 2));
-} catch (error) {
-console.error("Erro ao salvar o db_aluguel.json:", error);
-}};
-
-// --- Funções Utilitárias ---
-const parseTempo = (textoTempo) => {
-if (!textoTempo) return null;
-const match = textoTempo.trim().toLowerCase().match(/^\/?(\d+)\s*([dhm])$/);
-if (!match) return null;
-const valor = Number(match[1]);
-if (valor <= 0) return null;
-const multipliers = { d: 86400, h: 3600, m: 60 };
-return multipliers[match[2]] * valor || null;
-};
-
-// Função para formatar o tempo
-const kyun = (segundos) => {
-if (isNaN(segundos) || segundos < 0) return "Tempo inválido";
-const d = Math.floor(segundos / 86400);
-const h = Math.floor(segundos % 86400 / 3600);
-const m = Math.floor(segundos % 3600 / 60);
-const s = Math.floor(segundos % 60);
-return `${d}d ${h}h ${m}m ${s}s`;
-};
-
-// --- Funções Principais do Sistema de Aluguel ---
-const registrarAluguel = (id, nome, textoTempo) => {
-const alugueis = carregarAlugueis();
-const duracao = parseTempo(textoTempo);
-if (!duracao) return { success: false, message: "Formato de tempo inválido. Exemplos: 30d, /7h, 90m" };
-const agora = Math.floor(Date.now() / 1000);
-const existente = alugueis.find(a => a.id_gp === id);
-if (existente) {
-const tempoRestante = kyun(existente.vencimento - agora);
-return { success: false, message: `Este grupo/usuário já está registrado e vencerá em: ${tempoRestante}` };
-}
-alugueis.push({ id_gp: id, nome_: nome, vencimento: agora + duracao });
-salvarAlugueis(alugueis);
-return { success: true, message: `Registrado com sucesso! Vencerá em: ${kyun(duracao)}` };
-};
-
-const renovarAluguel = (id, textoTempo) => {
-const alugueis = carregarAlugueis();
-const duracao = parseTempo(textoTempo);
-if (!duracao) return { success: false, message: "Formato de tempo inválido. Exemplo: /30d ou /24h" };
-const aluguel = alugueis.find(a => a.id_gp === id);
-if (!aluguel) return { success: false, message: "Este grupo/usuário não está na lista de aluguel." };
-aluguel.vencimento += duracao;
-salvarAlugueis(alugueis);
-return { success: true, message: `Aluguel renovado com sucesso! O novo vencimento é em: ${kyun(duracao)}` };
-};
-const removerAluguel = (id) => {
-const alugueis = carregarAlugueis();
-const novos = alugueis.filter(a => a.id_gp !== id);
-if (novos.length === alugueis.length) return { success: false, message: "Este grupo/usuário não foi encontrado na lista de aluguel." };
-salvarAlugueis(novos);
-return { success: true, message: "Grupo/usuário removido da lista de aluguel com sucesso." };
-};
-
-const listarAlugueis = () => {
-const alugueis = carregarAlugueis();
-if (!alugueis.length) return "Não há nenhum usuário/grupo na lista de aluguel.";
-const agora = Math.floor(Date.now() / 1000);
-return "📄 *Lista de Aluguéis Ativos:*\n\n" + alugueis.map(a =>
-`*Nome:* ${a.nome_}
-*ID:* ${a.id_gp}
-*Vence em:* ${kyun(a.vencimento - agora)}
------------------------------------------`).join("\n");
-};
-
-const enviarMensagem = async (subaru, id_gp, msg, admins) => {
-await subaru.relayMessage(id_gp, {
-requestPaymentMessage: {
-currencyCodeIso4217: "BRL",
-amount1000: "666000",
-requestFrom: `${botNumber}@s.whatsapp.net`,
-noteMessage: { extendedTextMessage: { text: msg, contextInfo: { mentionedJid: admins } } },
-expiryTimestamp: "0"
-}}, {});
-};
-
-const verificarAlugueis = async (subaru, numeroDono) => {
-const alugueis = carregarAlugueis();
-const agora = Math.floor(Date.now() / 1000);
-const umDia = 86400, cincoDias = umDia * 5;
-const expirados = [];
-let alterado = false;
-
-for (const a of alugueis) {
-const tempoRestante = a.vencimento - agora;
-
-try {
-const meta = await subaru.groupMetadata(a.id_gp);
-const admins = meta.participants.filter(p => ['admin','superadmin'].includes(p.admin)).map(p => p.id);
-
-if (tempoRestante <= 0) {
-await enviarMensagem(subaru, a.id_gp, "Ei administração, o aluguel do grupo venceu! Irei me retirar do grupo agora, mas por favor, entre em contato com o dono do bot, para eu voltar logo! ♥️♥️", admins);
-await esperar(500);
-await subaru.groupLeave(a.id_gp);
-console.log(`[ALUGUEL] Venceu para ${a.nome_}. Bot saindo do grupo ${a.id_gp}`);
-expirados.push(a);
-alterado = true;
-continue;
-}
-
-const avisos = [
-{ tempo: cincoDias, flag: "aviso5diasEnviado", msg: "📢 Ei administração, o aluguel do grupo irá vencer em menos de 5 dias, não esqueçam de entrar em contato com o dono do bot!" },
-{ tempo: umDia, flag: "aviso1diaEnviado", msg: "📢 Ei administração, o aluguel vai vencer em menos de 1 dia, não esqueçam de entrar em contato com o dono do bot!" }
-];
-
-for (const { tempo, flag, msg } of avisos) {
-if (tempoRestante <= tempo && !a[flag]) {
-await enviarMensagem(subaru, a.id_gp, msg, admins);
-a[flag] = true;
-alterado = true;
-}
-}
-} catch (err) {
-console.error(`[ALUGUEL] Erro ao processar ${a.id_gp}:`, err);
-}
-}
-
-if (expirados.length) {
-const relatorio = "🚨 *Relatório de Aluguéis Expirados:*\n\n" + expirados.map(a =>
-`*Grupo/Usuário:* ${a.nome_}\n*ID:* ${a.id_gp}`).join("\n\n");
-await subaru.sendMessage(`${numeroDono}@s.whatsapp.net`, { text: relatorio.trim() });
-}
-
-if (alterado) salvarAlugueis(alugueis);
-};
-// ------------------- [ FIM DO SISTEMA DE ALUGUEL - By Sz/Spiral ] -------------------
-
 function bytesParaMB(bytes, casasDecimais = 2) {
 if (bytes === 0) return '0 MB';
 const mb = bytes / (1024 * 1024);
@@ -631,32 +490,6 @@ const ms = Math.floor(Math.random() * (max - min + 1)) + min;
 return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const cooldownCache = new NodeCache();
-function emCooldown(sender2, from, isGroupAdmins = false, isDono = false) {
-if (isDono) return false; 
-const cooldownTime = isGroupAdmins ? 2 : 4;
-const key = `${from}_${sender2}`;
-const lastUsed = cooldownCache.get(key);
-const now = Date.now();
-if (lastUsed) {
-const diff = (now - lastUsed) / 1000;
-if (diff < cooldownTime) return true;
-}
-cooldownCache.set(key, now, cooldownTime);
-return false;
-}
-
-function tempoRestante(sender2, from, isGroupAdmins = false, isDono = false) {
-if (isDono) return 0;
-const cooldownTime = isGroupAdmins ? 2 : 4;
-const key = `${from}_${sender2}`;
-const lastUsed = cooldownCache.get(key);
-if (!lastUsed) return 0;
-const diff = (Date.now() - lastUsed) / 1000;
-return Math.max(0, cooldownTime - diff);
-}
-
-
 function getRandomSaudacao(donoName, prefix) {
 try {
 const data = fs.readFileSync("./database/textos/saudacoes.json", "utf8");
@@ -685,7 +518,58 @@ return null;
 }
 };
 
-module.exports = { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON,saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, esperar, loadPlugins, getPlugin, onlyNumbers, toUserLid, toUserOrGroupJid, registrarAluguel, renovarAluguel, removerAluguel, listarAlugueis, verificarAlugueis, carregarAlugueis, gerarlinkUploadCatbox, bytesParaMB, getBufferFromUrl, checarVersao, atualizarBot, groupConfigCache, delay, emCooldown, tempoRestante, getRandomSaudacao, getFamiliaData, UploadFileUgu, CatBox }
+async function dellCase(filePath, caseNameToRemove) {
+fs.readFile(filePath, 'utf8', (err, data) => {
+if (err) {
+console.error('Deu erro.:', err);
+return;
+}
+const regex = new RegExp(`case\\s+'${caseNameToRemove}':[\\s\\S]*?break`, 'g');
+const modifiedData = data.replace(regex, '');
+fs.writeFile(filePath, modifiedData, 'utf8', (err) => {
+if (err) {
+console.error('Erro ao escrever o arquivo. ', err);
+return;
+}
+console.log(`Case '${caseNameToRemove}' removido com sucesso.`);
+});
+});
+}
+    
+
+export {
+    escolherPersonalidadeSubaru,
+    escolherVideoPorRota,
+    getFileBuffer,
+    checkPrefix,
+    fetchJson,
+    getBuffer,
+    data,
+    hora,
+    loadJSON,
+    saveJSON,
+    saveJSON2,
+    sincronizarCases,
+    lerOuCriarJSON,
+    esperar,
+    loadPlugins,
+    getPlugin,
+    onlyNumbers,
+    toUserLid,
+    toUserOrGroupJid,
+    gerarlinkUploadCatbox,
+    bytesParaMB,
+    getBufferFromUrl,
+    checarVersao,
+    atualizarBot,
+    groupConfigCache,
+    delay,
+    getRandomSaudacao,
+    getFamiliaData,
+    UploadFileUgu,
+    CatBox,
+    dellCase
+}
 
 fs.watchFile(__filename, () => {
 console.log(`Arquivo '${__filename}' foi modificado. \nReiniciando...`);

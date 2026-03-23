@@ -1,4 +1,11 @@
-const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken} = require('./configs/settings.json');
+import path from 'path';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
+
+const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken} = require('./configs/settings.json',  { with: { type: 'json' } })
 
 const selogpt = {key: {fromMe: false, participant: '0@s.whatsapp.net'}, message: { "extendedTextMessage": {"text": `Bot: ${botName}\nDono: ${donoName}`,"title": null,'thumbnailUrl': null}}}
 //pedrozz Mods
@@ -139,7 +146,7 @@ remoteJid: "status@broadcast"
 },
 message: {
 stickerPackMessage: {
-stickerPackId: "\000",
+stickerPackId: "\u0000",
 name: ` By ${donoName}.`,
 publisher: "kkkk"
 }
@@ -163,5 +170,4 @@ const spiral = (pushname, senderJid) => ({
 }
 }
 })
-
-module.exports = {  selogpt,  seloCriador, seloGpt,  seloMeta,  seloLuzia,  seloLaura,  seloCopilot,  seloNubank,  seloBb,  seloBradesco, seloSantander,  seloItau, selodoc, pay, seloSz,  seloface,  seloluzia, seloloc, seloSticker, spiral };
+export {  selogpt,  seloCriador, seloGpt,  seloMeta,  seloLuzia,  seloLaura,  seloCopilot,  seloNubank,  seloBb,  seloBradesco, seloSantander,  seloItau, selodoc, pay, seloSz,  seloface,  seloluzia, seloloc, seloSticker, spiral };

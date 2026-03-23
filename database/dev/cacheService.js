@@ -1,6 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const moment = require('moment-timezone');
+import fs from 'fs';
+import path from 'path';
+import moment from 'moment-timezone';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const CACHE_DIR = path.join(__dirname, './cache/group_metadata');
 if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -21,7 +25,7 @@ const dataToSave = {
 ...data,
 lastUpdated: moment().toISOString()
 };
-fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2));
+fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2), "utf8");
 this.groupMetaMap.set(groupId, dataToSave);
 } catch (err) {
 console.error(`❌ Erro ao salvar metadata em cache (${groupId}):`, err);
@@ -30,7 +34,7 @@ console.error(`❌ Erro ao salvar metadata em cache (${groupId}):`, err);
 
 getGroupMetadata(groupId) {
 const filePath = this._getPath(groupId);
-if (!groupId.endsWith("@g.us")) return;
+if (!groupId.endsWith("@g.us")) return null;
 
 try {
 if (fs.existsSync(filePath)) {
@@ -167,4 +171,4 @@ this.groupMetaMap.delete(groupId);
 }
 
 const cacheService = new CacheService();
-module.exports = { cacheService };
+export { cacheService };

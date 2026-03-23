@@ -1,3 +1,6 @@
+### `0.6.1` _2026-03-18_
+* Updated data to IANA TZDB `2026a`. [#1140](https://github.com/moment/moment-timezone/pull/1140)
+
 ### `0.6.0` _2025-05-25_
 * Fixed and updated TypeScript definitions. [#1132](https://github.com/moment/moment-timezone/pull/1132)
   * Updated types to more accurately match the code implementation.

@@ -1,26 +1,27 @@
-// =================================================================
-//                    ARQUIVO DE EXPORTAÇÃO                   
-// =================================================================
+// ───────────( MÓDULOS NODE E NPM )───────────
+import os from 'os'
+import fs from 'fs'
+import path from 'path'
+import { exec, spawn } from 'child_process'
+import crypto from 'crypto'
+import axios from 'axios'
+import { default as _fetch } from 'node-fetch'
+import moment from 'moment-timezone'
+import FormData from 'form-data'
+import util from 'util'
+import NodeCache from 'node-cache'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
+import fetch from 'node-fetch';
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-// -------------------( MÓDULOS NODE E NPM )-------------------
-const os = require("os");
-const fs = require('fs');
-const path = require('path');
-const { exec, spawn } = require('child_process');
-const crypto = require('crypto');
-const axios = require('axios');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-const moment = require('moment-timezone');
-const FormData = require("form-data");
-//const cfonts = require('cfonts')
-const util = require('util');
-const NodeCache  = require('node-cache');
-const timeZone = 'America/Sao_Paulo';
+// ───────────( MÓDULOS DO PROJETO )───────────
+import { loadJSON, saveJSON } from './functions.js'
+import { imageToWebp, videoToWebp, writeExifImg, writeExifVid } from '../database/outros/sticker/exif.js';
+import { imageToWebp as imageToWebp2, videoToWebp as videoToWebp2, writeExifImg as writeExifImg2, writeExifVid as writeExifVid2 } from '../database/outros/sticker/exif2.js';
 
-// -------------------( MÓDULOS DO PROJETO )-------------------
-const { loadJSON,  saveJSON } = require('./functions.js')
-const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('../database/outros/sticker/exif');
-const { imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2 } = require('../database/outros/sticker/exif2');
 const { RaikkenKey, baseRaikken, donoNmr } = require('./configs/settings.json')
 
 // -------------------( CONSTS E CONFIGURAÇÕES )-------------------
@@ -62,7 +63,7 @@ return console.log(console.error);
 });}
 
 const getMembros = (participants) => {
-admins = []
+let admins = []
 for (let i of participants) {
 if(i.admin == null) admins.push(i.id)
 }
@@ -83,7 +84,7 @@ try {
 }
 
 // =====================EXPORTS =====================\\
-module.exports = {
+export {
   os,
   fs,
   path,

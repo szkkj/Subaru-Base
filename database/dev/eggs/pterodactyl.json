@@ -1,0 +1,31 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-03-23T00:00:00-03:00",
+    "name": "Subaru-Base",
+    "author": "raikkencore@gmail.com",
+    "description": "Egg para executar o Subaru-Base (WhatsApp Bot) - Bot baseado em Baileys com música, jogos e IA",
+    "features": null,
+    "docker_images": {
+        "Nodejs 22": "ghcr.io/parkervcp/yolks:nodejs_22"
+    },
+    "file_denylist": [],
+    "startup": "git pull && npm install && sh start.sh",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Conectado com sucesso\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# Script de Instalação do Subaru-Base\n\n# Encerra o script imediatamente se um comando falhar.\nset -e\n\n# Cores\nAMARELO='\\033[1;33m'\nVERDE='\\033[0;32m'\nVERMELHO='\\033[0;31m'\nCIANO='\\033[0;36m'\nSEM_COR='\\033[0m'\n\nclear\nprintf \"${CIANO}Iniciando a instalação do Subaru-Base...${SEM_COR}\\n\\n\"\n\n# 1. Dependências do sistema\napt update\napt install -y git curl unzip make gcc g++ ffmpeg imagemagick yarn\n\n# 2. Código-fonte\ncd /mnt/server\nif [ -d .git ]; then\n  git pull\nelse\n  git clone https://github.com/szkkj/Subaru-Base.git .\nfi\n\n# 3. Dependências Node\nnpm install\n\nprintf \"\\n${VERDE}🚀 Instalação concluída! 🚀${SEM_COR}\\n\\n\"\nprintf \"${AMARELO}⚠️ IMPORTANTE: Edite o arquivo ./dono/configs/settings.json com suas configurações:${SEM_COR}\\n\"\nprintf \"  - donoName: Seu nome\\n\"\nprintf \"  - donoNmr: Seu número (ex: 5512999999999)\\n\"\nprintf \"  - donoLid: Seu lid (aparece no console ao receber mensagem)\\n\"\nprintf \"  - RaikkenKey: Sua chave da API Raikken\\n\\n\"\nprintf \"${CIANO}Após configurar, use o comando !banchat 0 para ativar o bot no grupo.${SEM_COR}\\n\\n\"",
+            "container": "ghcr.io/parkervcp/installers:ubuntu",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": []
+}

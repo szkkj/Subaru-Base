@@ -467,7 +467,7 @@ async function sendInteractiveMessage(sock, jid, content, options = {}) {
   for (const pkg of candidatePkgs) {
     if (loaded) break;
     try {
-      const mod = require(pkg);
+      const mod = await import(pkg);
       generateWAMessageFromContent = mod.generateWAMessageFromContent || mod.Utils?.generateWAMessageFromContent;
       normalizeMessageContent = mod.normalizeMessageContent || mod.Utils?.normalizeMessageContent;
       isJidGroup = mod.isJidGroup || mod.WABinary?.isJidGroup;
@@ -561,7 +561,65 @@ async function sendInteractiveButtonsBasic(sock, jid, data = {}, options = {}) {
   return sendInteractiveMessage(sock, jid, payload, options);
 }
 
-module.exports = {
+
+const sendAlbumMessage = async (finn, jid, album, options = {}) => {
+const { randomBytes } = require("crypto");
+const {
+    generateWAMessage,
+    generateWAMessageFromContent,
+    generateMessageIDV2,
+} = require("@whiskeysockets/baileys");
+    const userJid = finn.user.id;
+    if (!Array.isArray(album) || album.length === 0)
+        throw new Error("album deve ser um array com pelo menos 1 item.");
+    const albumMsg = generateWAMessageFromContent(jid, {
+        albumMessage: {
+            expectedImageCount: album.filter(i => "image" in i).length,
+            expectedVideoCount: album.filter(i => "video" in i).length,
+        },
+    }, { userJid, ...options });
+    await finn.relayMessage(jid, albumMsg.message, { messageId: albumMsg.key.id });
+    for (const media of album) {
+        let content;
+        if ("image" in media) {
+            content = {
+                image: media.image,
+                ...(media.caption ? { caption: media.caption } : {}),
+            };
+        } else if ("video" in media) {
+            content = {
+                video: media.video,
+                ...(media.caption    ? { caption: media.caption }          : {}),
+                ...(media.gifPlayback !== undefined ? { gifPlayback: media.gifPlayback } : {}),
+            };
+        } else {
+            continue;
+        }
+
+        const mediaMsg = await generateWAMessage(jid, content, {
+            userJid,
+            upload: async (stream, opts) => {
+                return finn.waUploadToServer(stream, { ...opts });
+            },
+            ...options,
+        });
+
+        mediaMsg.message.messageContextInfo = {
+            messageSecret: randomBytes(32),
+            messageAssociation: {
+                associationType: 1,
+                parentMessageKey: albumMsg.key,
+            },
+        };
+
+        await finn.relayMessage(jid, mediaMsg.message, { messageId: mediaMsg.key.id });
+        await new Promise(r => setTimeout(r, 800));
+    }
+
+    return albumMsg;
+};
+
+export {
   InteractiveValidationError,
   validateSendButtonsPayload,
   validateSendInteractiveMessagePayload,
@@ -570,5 +628,6 @@ module.exports = {
   getButtonType,
   getButtonArgs,
   sendInteractiveMessage,
-  sendButtons: sendInteractiveButtonsBasic
+  sendInteractiveButtonsBasic as sendButtons,
+  sendAlbumMessage
 };
