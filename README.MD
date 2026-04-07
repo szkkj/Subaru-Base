@@ -26,9 +26,11 @@
   - [▶️ Uso](#️-uso)
   - [⚡ Deploy](#-deploy)
   - [🌐 Powered by Raikken](#-powered-by-raikken)
+  - [🤖 Finn - Bot](#-botvip)
   - [👤 Créditos](#-créditos)
   - [📜 Licença](#-licença)
   - [💀 Considerações](#-considerações--by-sz)
+  
 
 ## ✨ Funcionalidades
 `🎵 Música & Mídia`
@@ -163,9 +165,6 @@ Edite o arquivo `./dono/configs/settings.json:`
 └── 📂 node_modules/  
 ```
 
-> [!WARNING] 
-> ⚠️ Os comandos por API não funcionam por precisar de uma key, para obter uma nova, entre em contato: WhatsApp
-
 5️⃣ Inicie o bot
 `sh start.sh`
 
@@ -196,6 +195,10 @@ Exemplos:
 !tinder            → Funções de Tinder
 !ban            → bane o mencionado
 
+> [!WARNING] 
+> ⚠️ Os comandos por API não funcionam por precisar de uma key, para obter uma nova, entre em contato: WhatsApp
+
+
 ## ⚡ Deploy
 O bot pode ser hospedado em:
 Ambiente	Suporte  
@@ -204,7 +207,19 @@ Ambiente	Suporte
 🐧 VPS/Linux	✅  
 ☁️ Heroku	⚠️ (requer ajustes)  
 
+## 🤖 Botvip
+<p align="center">
+  <img src="https://i.postimg.cc/nLSX0VRb/20251021-223500.png" alt="Finn - Bot" width="400"/>
+</p>
 
+Cansado desses bots ruins que não protegem seu grupo, que não tem atualização constante e que não tem suporte? Obtenha agora mesmo o Finn-Bot! 
+`Mais de 40 grupos` adiquiriram e não se arrependeram! Entre em contato já.
+
+<p align="center">
+  <a href="https://wa.me/559292678251">
+    <img src="https://img.shields.io/badge/💬%20Falar%20com%20o%20dono-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
+  </a>
+  
 ## 👤 Créditos
 Base: Baileys
 Criação: Sz

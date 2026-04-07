@@ -1,0 +1,39 @@
+{
+  "id": "120363214063579100@g.us",
+  "addressingMode": "lid",
+  "subject": "A𝘙𝘘𝘜𝘐𝘝𝘌𝘋 𝘉𝘠 𝘚𝘡",
+  "subjectOwner": "78624208212191@lid",
+  "subjectOwnerPn": "559292678251@s.whatsapp.net",
+  "subjectTime": 1761676645,
+  "size": 3,
+  "creation": 1707266311,
+  "desc": " 𝐒𝐙",
+  "descId": "Baron2A9242B81FECFD8C",
+  "descOwner": "2963594596553@lid",
+  "descOwnerPn": "5512988436073@s.whatsapp.net",
+  "descTime": 1762479584,
+  "restrict": true,
+  "announce": true,
+  "isCommunity": false,
+  "isCommunityAnnounce": false,
+  "joinApprovalMode": true,
+  "memberAddMode": true,
+  "participants": [
+    {
+      "id": "78624208212191@lid",
+      "phoneNumber": "559292678251@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "133836096712838@lid",
+      "phoneNumber": "559291754933@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "2963594596553@lid",
+      "phoneNumber": "5512988436073@s.whatsapp.net",
+      "admin": "admin"
+    }
+  ],
+  "lastUpdated": "2026-04-06T23:49:53.048Z"
+}

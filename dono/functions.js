@@ -506,7 +506,7 @@ return `*CONEXÃO DETECTADA DO BOT!* 📢\n> Dono: ${donoName}\n> Prefixo: ${pre
 
 const getFamiliaData = async (usuarioId) => {
 try {
-const res = await fetch(`${baseRaikken}/familia/arvore/${usuarioId}?apikey=${RaikkenKey}`);
+const res = await fetch(`${baseRaikken}/api/familia/arvore/${usuarioId}?apikey=${RaikkenKey}`);
 if (res.status === 404) {
 return null;
 }

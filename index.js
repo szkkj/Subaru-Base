@@ -224,7 +224,7 @@ newsletterName: '『𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞』'
 async function reply2 (texto) {
 await subaru.sendPresenceUpdate('composing', from) 
 await esperar(1000) 
-subaru.sendMessage(from, { text: texto, contextInfo: {forwardingScore: 100000, isForwarded: true }}, {quoted: info})
+subaru.sendMessage(from, { text: texto, }, {quoted: info})
 }
 
 async function DLT_FL(file) {
@@ -234,22 +234,6 @@ fs.unlinkSync(file);
 }
 
 // Envia uma mensagem de texto, mas com um quoted de loc.
-const enviarBan = (texto) => {
-const selob = {
-"key": {
-"fromMe": false,
-"participant":
-"0@s.whatsapp.net",
-"remoteJid": null},
-message: {liveLocationMessage: 
-{degreesLatitude: 173.282, 
-degreesLongitude: -19.378,
-sequenceNumber: "1657237469254001", 
-thumbnail: null, 
-caption: `*🚫𝐃𝐄𝐒𝐂𝐔𝐌𝐏𝐑𝐈𝐌𝐄𝐍𝐓𝐎 𝐃𝐀𝐒 𝐑𝐄𝐆𝐑𝐀𝐒!🚫*`}}}
-
-subaru.sendMessage(from, { text: texto }, { quoted: selob })
-}
 
 //enviar mensagem de texto simples. 
 const enviar = (texto) => {
@@ -330,71 +314,6 @@ members.push(member)}}}}
 await subaru.sendMessage(from, { text: teks.trim(), mentions: members}, { quoted: seloSz }).catch(async () => { await subaru.sendMessage(from, { text: 'Erro ao enviar mensagem.' }, { quoted: seloSz })})
 }
 
-//=====================( ABAIXO O AUSENTE/AFK )====================//
-let afkData = {};
-try {
-const data = fs.readFileSync('./database/users/ausente.json', 'utf8');
-if (data) {
-afkData = JSON.parse(data);
-}
-} catch (error) {
-if (error.code === 'ENOENT') {
-fs.writeFileSync('./database/users/ausente.json', JSON.stringify({}));
-} else {
-console.error('Erro ao carregar afkData do arquivo JSON:', error.message);
-}}
-function verificarAFK(marc_tds) {
-if (afkData[marc_tds] && afkData[marc_tds].motivo) {
-const tempoSaida = afkData[marc_tds].tempoSaida;
-if (isNaN(tempoSaida)) {
-console.error('Erro: tempoSaida não é um número válido');
-return null;
-}
-const tempoOffline = Date.now() - tempoSaida;
-const milissegundosOffline = tempoOffline % 1000;
-const segundosOffline = Math.floor(tempoOffline / 1000) % 60;
-const minutosOffline = Math.floor(tempoOffline / (1000 * 60)) % 60;
-const horasOffline = Math.floor(tempoOffline / (1000 * 60 * 60));
-// by duarte
-return `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕۪࣪
-┃࣪ ┃࣪ *❌ Esse usuário está off!❌*
-┃࣪ ┃࣪ *🔮 Motivo:* ${afkData[marc_tds].motivo}
-┃࣪ ┃࣪ *⏰ Tempo Offline:* ${horasOffline}h ${minutosOffline}m ${segundosOffline}s
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕۪࣪
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
-}
-return null;
-}
-const mencionadosAfk = menc_jid2?.length ? menc_jid2 : (menc_jid ? [menc_jid] : []);
-mencionadosAfk.forEach(jid => {
-const afkMessage = verificarAFK(jid);
-if (afkMessage) {
-subaru.sendMessage(from, { text: afkMessage, mentions: [jid] });
-}
-});
-
-if (afkData[sender]) {
-const motivoDeVolta = afkData[sender].motivo;
-const nomeDoUser = afkData[sender].numero;
-const tempoSaida = afkData[sender].tempoSaida;
-delete afkData[sender];
-fs.writeFileSync('./database/users/ausente.json', JSON.stringify(afkData));
-const tempoOffline = Date.now() - tempoSaida;
-const milissegundosOffline = tempoOffline % 1000;
-const segundosOffline = Math.floor(tempoOffline / 1000) % 60;
-const minutosOffline = Math.floor(tempoOffline / (1000 * 60)) % 60;
-const horasOffline = Math.floor(tempoOffline / (1000 * 60 * 60));
-await subaru.sendMessage(from, { text: `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕۪࣪
-┃࣪ ┃࣪ *Olha quem voltou!*
-┃࣪ ┃࣪ *🔮 Motivo do AFK:* ${motivoDeVolta}
-┃࣪ ┃࣪ *⏰ Tempo Offline:* ${horasOffline}h ${minutosOffline}m ${segundosOffline}s ${milissegundosOffline}ms
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕۪࣪
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`, mentions: [nomeDoUser] }, { quoted: info });
-}
-//====================( FUNÇÕES DO AUSENTE/AFK )====================//
-
 //====================( FUNÇÕES DO RENAME )====================//
 const { Sticker } = require("./database/outros/sticker/rename/sticker.cjs");
 const figname = JSON.parse(fs.readFileSync("./database/outros/sticker/figname.json"))
@@ -434,6 +353,9 @@ await fs.unlinkSync(resultadoSt[0].value)
 }
 
 async function renameContextSticker3(pack, autor, txt = ``, hehe) {
+let AB;
+let BC;
+let getFile;
 const isJsonIncludes = (json, value) => {
 if(JSON.stringify(json).includes(value)) return true
 return false}
@@ -810,12 +732,6 @@ const isVip = await verificarVip(senderLid || senderJid);
 //if (!isVip) { return enviar("❌ Este comando é exclusivo para usuários VIP.");}
 // ------------------- [ FIM - SISTEMA DE VIPS - By Spiral ] -------------------//
 
-
-// ------------------- [ SISTEMA DE ANTI ARQUIVAMENTO - By Spiral ] -------------------//
-const autorizadosCMD = isGroup ? ArquivosDosGrupos?.[0].antiarquivamento.autorizados || [] : []
-function isAutorizado(senderJid, senderLid) {
-return ( autorizadosCMD.some(i => i.id === senderJid) || autorizadosCMD.some(i => i.id === senderLid) || isDono);
-}
 
 //=====( ABAIXO O COUNTMESSAGE )=====\\
 const countMessage = JSON.parse(fs.readFileSync('./database/grupos/countmessage/countmsg.json'));
@@ -1499,31 +1415,11 @@ await subaru.sendMessage(from, { text: `🔎 Debug do seu LID:\n
 > - remoteLid: ${msg.key.remoteLid || 'não veio'}
 > - participant: ${msg.key.participant || 'não veio'}
 > - participantLid: ${msg.key.participantLid || 'não veio'}
+> - lid do mencionado: ${alvo || "não veio" }
+> - senderJid ${senderJid || "não veio"}
 > - senderLid: ${senderLid || "não veio"}`});
 }
 break;
-
-case 'afk':
-let motivoFK = q ? q.trim() : 'Sem Motivo Especificado'
-if (q && q.trim().toLowerCase() === 'fk') {
-motivoFK = 'Motivo Padrão Gerado Automaticamente'
-}
-afkData[sender] = { numero: pushname, motivo: motivoFK, tempoSaida: Date.now()}
-fs.writeFileSync('./database/users/ausente.json', JSON.stringify(afkData))
-reply(`*Você está agora AFK. Motivo: ${motivoFK}*`);
-break
-
-case 'listaafk':
-let listaAFK = '*Pessoas AFK:*\n\n'
-if (Object.keys(afkData).length === 0) {
-return reply('Não há ninguém AFK no momento.')
-}
-for (const key in afkData) {
-if (afkData.hasOwnProperty(key)) {
-listaAFK += `*Número: ${afkData[key].numero.split("@")[0]}*\n*Motivo: ${afkData[key].motivo}*\n\n`
-}}
-reply(listaAFK)
-break
 
 case 'testevip': {
 if (!isPremium) { return enviar("❌ Este comando é exclusivo para usuários VIP.");}
@@ -1914,44 +1810,6 @@ case 'nao-atualizar': {
 if (!isDono) {return reply2(mss.dono)}
 await reply("Poxa, que pena que não quer atualizar, mas tudo bem! Qualquer coisa, só usar o comando de novo ou simplesmente ir no diretório: https://github.com/andy-botkkj/Subaru-Base")
 break}
-
-case 'listatz': {
-if (!isGroup) return enviar("Este comando só funciona em grupos.");
-if (autorizadosCMD.length === 0) return enviar(`Nenhum usuário autorizado no momento.`);
-let tex = `[Total: *${autorizadosCMD.length}*] - Lista de autorizados para comandos:\n–\n`;
-tex += autorizadosCMD.map((v, index) =>
-`*[${index + 1}]* - @${v.id.split('@')[0]}`
-).join('\n––\n');
-subaru.sendMessage(from, { text: tex, mentions: autorizadosCMD.map(v => v.id)});
-}
-break;
-
-case 'delatz': {
-if (!isDono) return enviar(mss.dono);
-if (!isGroup) return enviar("Este comando só funciona em grupos.");
-let alvo = info?.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
-|| info?.message?.extendedTextMessage?.contextInfo?.participant;
-if (!alvo) return enviar(`Marque ou responda a mensagem do usuário que deseja remover da autorização.`);
-if (!autorizadosCMD.some(user => user.id === alvo)) return enviar("Este número não está na lista de autorizados.");
-ArquivosDosGrupos[0].antiarquivamento.autorizados = autorizadosCMD.filter(user => user.id !== alvo);
-fs.writeFileSync(PastaDeGrupos, JSON.stringify(ArquivosDosGrupos, null, 2));
-subaru.sendMessage(from, { text: `@${alvo.split("@")[0]} foi removido da lista de autorizados.`, mentions: [alvo] }, { quoted: info });
-}
-break
-
-case 'atzcmd': {
-if (!isDono) return enviar(mss.dono);
-if (!isGroup) return enviar("Este comando só funciona em grupos.");
-let citado = info?.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
-|| info?.message?.extendedTextMessage?.contextInfo?.participant;
-if (!citado) return enviar(`Marque ou responda a mensagem do usuário que deseja autorizar.`);
-if (autorizadosCMD.some(user => user.id === citado)) return enviar(`Este usuário já está autorizado.`);
-autorizadosCMD.push({ id: citado, infinito: true });
-ArquivosDosGrupos[0].antiarquivamento.autorizados = autorizadosCMD;
-fs.writeFileSync(PastaDeGrupos, JSON.stringify(ArquivosDosGrupos, null, 2));
-subaru.sendMessage(from, { text: `@${citado.split("@")[0]} foi autorizado a usar comandos especiais!`, mentions: [citado] }, { quoted: info });
-}
-break
 
 case 'viplist':
 let vipList = JSON.parse(fs.readFileSync("./database/users/usuariovip.json"));
@@ -3244,28 +3102,6 @@ break
 }
 break
 
-case 'banfakes':
-case 'banmrfake': { 
-if(!isGroup) return reply(mss.grupo)
-if(!isGroupAdmins) return reply(mss.adm)
-if(!isBotGroupAdmins) return reply(mss.botadm)
-const groupMetadata = await getGroupMetadataSafe(from);
-const participants = groupMetadata.participants;
-const participantsToBan = participants
-.filter(participant => !participant.id.startsWith('55'))
-.map(participant => participant.id);
-
-if (participantsToBan.length === 0) {
-return reply('⚠️ Todos os participantes têm números começando com 55. Nenhum participante foi banido.');}
-try {
-await subaru.groupParticipantsUpdate(from, participantsToBan, 'remove');
-reply(`✅ Todos os participantes com números internacionais foram removidos com sucesso.`);
-} catch (e) {
-console.error("Erro ao remover participantes:", error);
-reply(`Deu erro, se liga:\n *_${e.message}_*`);
-}
-break;}
-
 case 'infgp':
 case 'linkgp':
 if(!isGroup) return reply(mss.grupo)
@@ -3294,29 +3130,6 @@ if(!isBotGroupAdmins) return reply(mss.botadm)
  subaru.sendMessage(from, {text: clear}, {quoted: selogpt, contextInfo : { forwardingScore: 500, isForwarded:true}})
  setTimeout(async () => {
  await subaru.groupSettingUpdate(from, 'not_announcement');}, 10000)
-break
-
-case 'grupo':
-case 'gp':
-if(!isGroup) return reply(mss.grupo)
-if(!isGroupAdmins && isDono) return reply(mss.adm)
-if(!isBotGroupAdmins) return reply(mss.botadm)
-if(!q) {return enviar(`Para poder usar o comando use:\n\'${prefixo}gp f\' para fechar ou \'${prefixo}gp a para abrir\'.`)}
-try {
-if (q === "a"){
-await react("🔓")
-await subaru.groupSettingUpdate(from, "not_announcement")
-enviar(`𝙾 𝚐𝚛𝚞𝚙𝚘 𝚏𝚘i 𝚊𝚋𝚎𝚛𝚝𝚘 🔓`)
-}
-if (q === "f") {
-await react("🔒")
-await subaru.groupSettingUpdate(from, "announcement")
-enviar(`𝙾 𝚐𝚛𝚞𝚙𝚘 𝚏𝚘𝚒 𝚏e𝚌𝚑𝚊𝚍𝚘 🔒`)
-} 
-} catch(e) {
-errorReact()
-reply(`Deu erro, se liga:\n *_${e.message}_*`);
-}
 break
 
 //=====( ABAIXO OS COMANDOS DA API )=====\\
@@ -3483,7 +3296,7 @@ await subaru.sendMessage(parceiroAtual, { text: `🐂 ALERTA! Seu parceiro @${se
 return;
 }
 try {
-const res = await fetch(`${baseRaikken}/familia/namorar?apikey=${RaikkenKey}`, {
+const res = await fetch(`${baseRaikken}api/familia/namorar?apikey=${RaikkenKey}`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo })
@@ -3521,7 +3334,7 @@ await subaru.sendMessage(parceiroAtual, { text: `🐂 ALERTA! Seu namorado(a) @$
 return;
 }
 try {
-const res = await fetch(`${baseRaikken}/familia/casar?apikey=${RaikkenKey}`, {
+const res = await fetch(`${baseRaikken}/api/familia/casar?apikey=${RaikkenKey}`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo })
@@ -3549,7 +3362,7 @@ return reply("💔 Você não está em um relacionamento para poder terminar.");
 const parceiroId = familia.parceiro.parceiroId;
 const endpoint = familia.parceiro.tipo === 'Casamento' ? 'divorciar' : 'terminar';
 try {
-const res = await fetch(`${baseRaikken}/familia/divorciar?apikey=${RaikkenKey}`, {
+const res = await fetch(`${baseRaikken}/api/familia/divorciar?apikey=${RaikkenKey}`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ usuarioId: sender2, parceiroId: parceiroId })
@@ -3574,7 +3387,7 @@ const parceiroAtual = familia.parceiro.parceiroId;
 await reply("🤫 Cuidado... Brincar com fogo pode te queimar...");
 await subaru.sendMessage(parceiroAtual, { text: `🐂 ALERTA DE CORNO! Seu parceiro @${sender2.split("@")[0]} acabou de adicionar @${alvo.split("@")[0]} como amante!`, mentions: [sender2, alvo] })}
 try {
-const res = await fetch(`${baseRaikken}/familia/amante?apikey=${RaikkenKey}`, {
+const res = await fetch(`${baseRaikken}/api/familia/amante?apikey=${RaikkenKey}`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo })
@@ -3651,7 +3464,7 @@ case 'terfilho': {
 if (!alvo || !q) return reply("👶 Use: *.filho @pessoa NomeDoFilho*");
 const nomeFilho = q.trim();
 try {
-const res = await fetch(`${baseRaikken}/familia/filho?apikey=${RaikkenKey}`, {
+const res = await fetch(`${baseRaikken}/api/familia/filho?apikey=${RaikkenKey}`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo, nomeFilho })
@@ -3668,7 +3481,7 @@ break;
 case 'listaramantes': {
 
 try {
-const res = await fetch(`${baseRaikken}/familia/amantes/${sender2}?apikey=${RaikkenKey}`);
+const res = await fetch(`${baseRaikken}/api/familia/amantes/${sender2}?apikey=${RaikkenKey}`);
 const data = await res.json();
 if (!data.sucesso || !data.dados.length) return reply("😏 Nenhum amante encontrado.");
 const lista = data.dados.map((a, i) => `• ${i + 1}. ${a.amanteId} (desde ${a.desde})`).join("\n");
@@ -3683,7 +3496,7 @@ break;
 case 'filhos': {
 
 try {
-const res = await fetch(`${baseRaikken}/familia/filhos/${sender2}?apikey=${RaikkenKey}`);
+const res = await fetch(`${baseRaikken}/api/familia/filhos/${sender2}?apikey=${RaikkenKey}`);
 const data = await res.json();
 if (!data.sucesso || !data.dados.length) return reply("👶 Nenhum filho encontrado.");
 const lista = data.dados.map((f, i) => `• ${i + 1}. ${f.nome} (${f.idade} anos)`).join("\n");
@@ -4049,27 +3862,6 @@ botSemKey(subaru, from);
 break;
 }
  
- 
-case 'printsite': {
-
-if (!sz) return reply(`🌐 Envie o link de um site para tirar print.\n\nExemplo:\n${prefixo}printsite https://google.com`);
-
-try {
-if (!sz.startsWith("http")) return reply("❌ Link inválido. Certifique-se de começar com http:// ou https://");
-await reply("🖼️ Tirando print, aguarde...");
-
-const url = `${baseRaikken}/printsite?url=${encodeURIComponent(sz)}&apikey=${RaikkenKey}`;
-const res = await axios.get(url, { responseType: 'arraybuffer' });
-
-await subaru.sendMessage(from, { image: res.data, caption: `📸 *Print do site solicitado:*\n${sz}\n> ©Subaru-V1`,
-}, { quoted: info });
-
-} catch (err) {
-console.error("Erro printsite =>", err);
-reply("❌ Erro ao tirar print do site. Verifique o link e tente novamente.");}
-
-break;}
-
  case 'insta': {
  
 if (!sz) return reply(`📷 Envie o link do vídeo do Instagram.\nExemplo:\n${prefixo}insta https://www.instagram.com/reel/xxxxx`);

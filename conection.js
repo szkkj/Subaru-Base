@@ -21,7 +21,7 @@ const LoggerB = LoggerBPkg.default || LoggerBPkg;
 const logger = LoggerB.child({});
 logger.level = 'fatal';
 
-import { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar, groupConfigCache, delay, getRandomSaudacao } from './dono/functions.js';
+import { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar, groupConfigCache, getRandomSaudacao } from './dono/functions.js';
 import { handleCmds } from './index.js';
 
 const { prefix, botName, donoName, donoNmr, idCanal, pairKey } = require('./dono/configs/settings.json');
@@ -61,9 +61,9 @@ return config;
 const startConnection = async () => {
 const { state, saveCreds } = await useMultiFileAuthState("./dono/configs/session");
 const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
-
+const { version } = await fetchLatestBaileysVersion();
 const subaru = makeWASocket({
-version: [2, 3000, 1034740716],
+version,
 logger,
 auth: state,
 markOnlineOnConnect: true,
@@ -169,6 +169,11 @@ comando = msg.message.buttonsResponseMessage.selectedButtonId;
 }
 if (!comando && msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId) {
 comando = msg.message.listResponseMessage.singleSelectReply.selectedRowId;
+}
+
+function delay(min = 50, max = 800) {
+const ms = Math.floor(Math.random() * (max - min + 1)) + min;
+return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function processQueue() {
