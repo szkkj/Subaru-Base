@@ -32,8 +32,10 @@ printf "\n"
 printf "${CYAN}Nenhuma sessão encontrada! Como deseja parear o bot?${RESET}\n"
 printf "${YELLOW}1)${RESET} QR Code\n"
 printf "${YELLOW}2)${RESET} Código numérico\n"
-printf "${YELLOW}3)${RESET} Sair\n\n"
-read -p "Escolha uma opção [1-3]: " opcao
+printf "${YELLOW}3)${RESET} Instalar módulos\n"
+printf "${YELLOW}4)${RESET} Sair\n\n"
+read -p "Escolha uma opção [1-4]: " opcao
+
 
 case $opcao in
 1)
@@ -45,6 +47,11 @@ printf "${CYAN}🔗 Iniciando pareamento via Código numérico...${RESET}\n"
 node conection.js --code
 ;;
 3)
+printf "${CYAN}📦 Instalando módulos...${RESET}\n"
+npm install
+printf "${GREEN}✅ Módulos instalados com sucesso!${RESET}\n"
+;;
+4)
 printf "${YELLOW}❌ Saindo...${RESET}\n"
 exit 0
 ;;
