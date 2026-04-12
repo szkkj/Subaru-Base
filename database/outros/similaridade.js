@@ -37,7 +37,7 @@ const getSimilarity = (array, txt) => {
   let nome = '' 
   let porcentagem = 0
 
-  find = rmLetras(txt)
+  let find = rmLetras(txt)
 
   array.forEach((word) => {
     const distance = getdistance(find, word.toLowerCase())

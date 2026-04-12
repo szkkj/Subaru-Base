@@ -211,64 +211,6 @@ const menugeral = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 ┃──〔 BRINCADEIRAS 〕
 ┃͜⃟${prefix}jogodavelha
 ┃͜⃟${prefix}resetarvelha / rv
-┃͜⃟${prefix}chance
-┃͜⃟${prefix}comer
-┃͜⃟${prefix}capinarlote
-┃͜⃟${prefix}pgpeito
-┃͜⃟${prefix}pgpau
-┃͜⃟${prefix}pgbunda
-┃͜⃟${prefix}morder
-┃͜⃟${prefix}sentar
-┃͜⃟${prefix}tirarft
-┃͜⃟${prefix}estuprar
-┃͜⃟${prefix}boquete
-┃͜⃟${prefix}cagar
-┃͜⃟${prefix}cu
-┃͜⃟${prefix}abraco
-┃͜⃟${prefix}lavarlouca
-┃͜⃟${prefix}carinho
-┃͜⃟${prefix}morte / death
-┃͜⃟${prefix}ppt
-┃͜⃟${prefix}nazista
-┃͜⃟${prefix}gay
-┃͜⃟${prefix}feio
-┃͜⃟${prefix}corno
-┃͜⃟${prefix}vesgo
-┃͜⃟${prefix}bebado
-┃͜⃟${prefix}gado
-┃͜⃟${prefix}fiel
-┃͜⃟${prefix}lindo / linda
-┃͜⃟${prefix}gostoso / gostosa
-┃͜⃟${prefix}chutar
-┃͜⃟${prefix}dogolpe
-┃͜⃟${prefix}casal
-┃͜⃟${prefix}gozar
-┃͜⃟${prefix}vcprefere
-┃͜⃟${prefix}eununca
-┃͜⃟${prefix}rankgay
-┃──〔 RANKS 〕
-┃͜⃟${prefix}rankcasalsin
-┃͜⃟${prefix}rankfalido
-┃͜⃟${prefix}rankcu
-┃͜⃟${prefix}rankbct
-┃͜⃟${prefix}rankgado
-┃͜⃟${prefix}rankcorno
-┃͜⃟${prefix}suruba
-┃͜⃟${prefix}rankgostoso
-┃͜⃟${prefix}rankgostosa
-┃͜⃟${prefix}ranknazista
-┃͜⃟${prefix}rankotaku
-┃͜⃟${prefix}ranksigma
-┃͜⃟${prefix}rankbeta
-┃͜⃟${prefix}rankbaiano
-┃͜⃟${prefix}rankbaiana
-┃͜⃟${prefix}rankcarioca
-┃͜⃟${prefix}ranklouco / ranklouca
-┃͜⃟${prefix}ranksafado / ranksafada
-┃͜⃟${prefix}rankmacaco
-┃͜⃟${prefix}rankmacaca
-┃͜⃟${prefix}rankputa
-┃͜⃟${prefix}rankpau
 ┃──〔 ADMINISTRAÇÃO 〕
 ┃͜⃟${prefix}abrir/ a
 ┃͜⃟${prefix}fechar/ f
