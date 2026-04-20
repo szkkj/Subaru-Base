@@ -155,6 +155,7 @@ Edite o arquivo `./dono/configs/settings.json:`
 │   └── 📂 dev/
 │   └── 📂 tictactoe/
 │   └── 📂 temp/
+│   ├── 📂 docs/
 │
 ├── 📂 dono/                
 │   ├── 📂 plugins/

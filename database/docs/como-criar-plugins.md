@@ -89,6 +89,9 @@ Subaru-Base/
 📁 database/
 ├── 📁 grupos/
 ├── 📁 imgs/
+├── 📁 dev/
+│   ├── 📁 botoes.js/
+│   ├── 📁 cacheService.js/
 ├── 📁 outros/
 ├── 📁 textos/
 ├── 📁 tictactoe/
@@ -548,7 +551,7 @@ Ao seguir **todas as regras e conceitos deste documento**, o resultado final esp
 - O resultado é previsível, estável e reutilizável
 
 ---
-
+    
 ### ✅ Em resumo
 
 Se o plugin:

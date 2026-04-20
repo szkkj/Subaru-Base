@@ -42,7 +42,7 @@ python script.py ----->  executa o script```
 
 *🌐 Clonar repositório do GitHub:*
 ```
-git clone https://github.com/andy-botkkj/Subaru-Base
+git clone https://github.com/szkkj/Subaru-Base
 cd Subaru-Base ```
 
 > ❃•≫────≪•◦ ❃ ◦•≫────≪•❃

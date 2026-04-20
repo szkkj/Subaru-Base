@@ -10,6 +10,7 @@ import moment from 'moment-timezone'
 import FormData from 'form-data'
 import util from 'util'
 import NodeCache from 'node-cache'
+import LRU from 'pixl-cache';
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 import fetch from 'node-fetch';
@@ -39,10 +40,10 @@ const mss = {
     erro: "Poxa, infelizmente deu erro. Tente novamente mais tarde"
 };
 
-async function botSemKey(subaru, from) {
+async function botSemKey(subaru, grupoName, comando) {
 try {
-if (RaikkenKey === 'suakey' || RaikkenKey === 'raikken') { await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: `Ei, alguém do grupo: _${from}_ tentou usar um comando que precisa da API, mas sua Apikey não foi configurada! Acesse a API *https://api.raikken.com.br* e garanta já a sua Key!`}) 
-await subaru.sendMessage(from, { text: `Infelizmente não posso executar comandos com API, pois a Key não foi configurada..`}) 
+if (RaikkenKey === 'suakey' || RaikkenKey === 'raikkenv2') { await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: `Ei, alguém do grupo: _${grupoName}_ tentou usar o comando: ${comando} que precisa da API, mas sua Apikey não foi configurada! Acesse a API *https://api.raikken.com.br* e garanta já a sua Key!`}) 
+await subaru.sendMessage(from, { text: `Infelizmente não posso executar comandos com API, pois a Key não foi configurada..Já notifiquei o dono do bot pra ele resolver.`}) 
 return false;}
 const res = await fetch(`https://api.raikken.com.br/api/keyerrada?apikey=${RaikkenKey}`)
 const data = await res.json()
@@ -112,5 +113,6 @@ export {
   loadJSON,  
   saveJSON,
   rgtake,
-  botSemKey
+  botSemKey,
+  LRU
 };

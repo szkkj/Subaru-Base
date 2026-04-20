@@ -1,0 +1,107 @@
+{
+  "id": "120363405127061474@g.us",
+  "addressingMode": "lid",
+  "subject": "Testes de bots 2026",
+  "subjectOwner": "85736506269825@lid",
+  "subjectOwnerPn": "553898268586@s.whatsapp.net",
+  "subjectTime": 1769438659,
+  "size": 16,
+  "creation": 1761693550,
+  "owner": "30958275272868@lid",
+  "ownerPn": "553199343738@s.whatsapp.net",
+  "owner_country_code": "BR",
+  "desc": "_Scheffer Bot_\n_HYPERION BOT_\n_ZeroTwo Bot_\n_Bluerise Bot_",
+  "descId": "8E9EB48626D79346E2B5243A0FC272E6",
+  "descOwner": "30958275272868@lid",
+  "descOwnerPn": "553199343738@s.whatsapp.net",
+  "descTime": 1773411450,
+  "restrict": false,
+  "announce": false,
+  "isCommunity": false,
+  "isCommunityAnnounce": false,
+  "joinApprovalMode": true,
+  "memberAddMode": true,
+  "participants": [
+    {
+      "id": "148997264162899@lid",
+      "phoneNumber": "66832297725@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "67865466142925@lid",
+      "phoneNumber": "639611857671@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "2654944149557@lid",
+      "phoneNumber": "639050935963@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "78624208212191@lid",
+      "phoneNumber": "559292678251@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "237254630981744@lid",
+      "phoneNumber": "558781706157@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "107319102808297@lid",
+      "phoneNumber": "554197625854@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "85736506269825@lid",
+      "phoneNumber": "553898268586@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "30958275272868@lid",
+      "phoneNumber": "553199343738@s.whatsapp.net",
+      "admin": "superadmin"
+    },
+    {
+      "id": "120478714863810@lid",
+      "phoneNumber": "5527996616969@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "242103615533148@lid",
+      "phoneNumber": "5521971511823@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "106868013854922@lid",
+      "phoneNumber": "5518910000363@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "258373035491362@lid",
+      "phoneNumber": "5516999546666@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "2963594596553@lid",
+      "phoneNumber": "5512988436073@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "169931052216417@lid",
+      "phoneNumber": "5511976737163@s.whatsapp.net",
+      "admin": "admin"
+    },
+    {
+      "id": "170356287496276@lid",
+      "phoneNumber": "4917417111686@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "281007513153569@lid",
+      "phoneNumber": "4915678386214@s.whatsapp.net",
+      "admin": null
+    }
+  ],
+  "lastUpdated": 1776565801608
+}

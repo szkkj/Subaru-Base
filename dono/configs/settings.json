@@ -11,5 +11,6 @@
   "baseRaikken": "https://api.raikken.com.br",
   "baseRaikkenTinder": "https://api.raikken.com.br/api/tinder",
   "RaikkenKey": "raikkenv2",
+  "logsCvs": false,
   "idCanal": "120363423245306332@newsletter"
 }

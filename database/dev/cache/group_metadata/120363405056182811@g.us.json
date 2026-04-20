@@ -5,7 +5,7 @@
   "subjectOwner": "133836096712838@lid",
   "subjectOwnerPn": "559291754933@s.whatsapp.net",
   "subjectTime": 1769546336,
-  "size": 231,
+  "size": 134,
   "creation": 1765912098,
   "owner": "78624208212191@lid",
   "ownerPn": "559292678251@s.whatsapp.net",
@@ -22,11 +22,6 @@
   "joinApprovalMode": true,
   "memberAddMode": true,
   "participants": [
-    {
-      "id": "39406928953393@lid",
-      "phoneNumber": "573244364973@s.whatsapp.net",
-      "admin": null
-    },
     {
       "id": "132530476941466@lid",
       "phoneNumber": "5511966579099@s.whatsapp.net",
@@ -48,28 +43,13 @@
       "admin": null
     },
     {
-      "id": "185873886883891@lid",
-      "phoneNumber": "923440319733@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "60555381473405@lid",
-      "phoneNumber": "967712542686@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "202860012781609@lid",
       "phoneNumber": "5521995502259@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "248043219763433@lid",
-      "phoneNumber": "919313281032@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "172963332681906@lid",
-      "phoneNumber": "554298384145@s.whatsapp.net",
+      "id": "186770964672709@lid",
+      "phoneNumber": "558186334861@s.whatsapp.net",
       "admin": null
     },
     {
@@ -88,33 +68,8 @@
       "admin": null
     },
     {
-      "id": "252114731327702@lid",
-      "phoneNumber": "557591154819@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "212756103954471@lid",
       "phoneNumber": "559784001057@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "29386887663870@lid",
-      "phoneNumber": "559491626841@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "250697962528838@lid",
-      "phoneNumber": "5521979926404@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "97044937052410@lid",
-      "phoneNumber": "558281076544@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "127788833104113@lid",
-      "phoneNumber": "258846487759@s.whatsapp.net",
       "admin": null
     },
     {
@@ -123,23 +78,8 @@
       "admin": null
     },
     {
-      "id": "239952038244433@lid",
-      "phoneNumber": "923064018389@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "45037396168781@lid",
-      "phoneNumber": "5522997173727@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "4703391899684@lid",
-      "phoneNumber": "50379736636@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "206532696375366@lid",
-      "phoneNumber": "554797453983@s.whatsapp.net",
+      "id": "14290060861565@lid",
+      "phoneNumber": "5521967040360@s.whatsapp.net",
       "admin": null
     },
     {
@@ -148,13 +88,13 @@
       "admin": null
     },
     {
-      "id": "168376039145542@lid",
-      "phoneNumber": "5521993352809@s.whatsapp.net",
+      "id": "53833774456943@lid",
+      "phoneNumber": "556692731188@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "41923830124720@lid",
-      "phoneNumber": "559899015980@s.whatsapp.net",
+      "id": "174612532994288@lid",
+      "phoneNumber": "5521975898267@s.whatsapp.net",
       "admin": null
     },
     {
@@ -168,18 +108,8 @@
       "admin": null
     },
     {
-      "id": "54662736674842@lid",
-      "phoneNumber": "5549936181166@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "140845315559553@lid",
       "phoneNumber": "5527988414290@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "222715629817865@lid",
-      "phoneNumber": "258868710688@s.whatsapp.net",
       "admin": null
     },
     {
@@ -188,23 +118,13 @@
       "admin": null
     },
     {
-      "id": "219177096863830@lid",
-      "phoneNumber": "555596920127@s.whatsapp.net",
+      "id": "190022674321489@lid",
+      "phoneNumber": "553291295708@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "280504448360620@lid",
-      "phoneNumber": "558197426268@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "194111684526190@lid",
-      "phoneNumber": "559180255795@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "225803845521621@lid",
-      "phoneNumber": "559581213169@s.whatsapp.net",
+      "id": "89593705689333@lid",
+      "phoneNumber": "558499046138@s.whatsapp.net",
       "admin": null
     },
     {
@@ -213,23 +133,13 @@
       "admin": null
     },
     {
-      "id": "80126943440980@lid",
-      "phoneNumber": "556992652870@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "250036168454225@lid",
-      "phoneNumber": "5522981287545@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "30563440271613@lid",
       "phoneNumber": "559691391634@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "220022769238268@lid",
-      "phoneNumber": "918851229966@s.whatsapp.net",
+      "id": "92844526153977@lid",
+      "phoneNumber": "557188179789@s.whatsapp.net",
       "admin": null
     },
     {
@@ -243,38 +153,18 @@
       "admin": null
     },
     {
-      "id": "2740675735570@lid",
-      "phoneNumber": "556298115032@s.whatsapp.net",
+      "id": "109590955974792@lid",
+      "phoneNumber": "553898853592@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "216428217159767@lid",
-      "phoneNumber": "559591512962@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "156281612554311@lid",
-      "phoneNumber": "558199116823@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "179237810106378@lid",
-      "phoneNumber": "5516994116107@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "91877990744139@lid",
-      "phoneNumber": "555592204243@s.whatsapp.net",
+      "id": "38861350650071@lid",
+      "phoneNumber": "559991351262@s.whatsapp.net",
       "admin": null
     },
     {
       "id": "252256934993983@lid",
       "phoneNumber": "558393809130@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "255856218214521@lid",
-      "phoneNumber": "554184678572@s.whatsapp.net",
       "admin": null
     },
     {
@@ -288,23 +178,23 @@
       "admin": null
     },
     {
-      "id": "190490540519627@lid",
-      "phoneNumber": "919325274737@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "101932458873045@lid",
       "phoneNumber": "5519987340816@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "210131560210600@lid",
-      "phoneNumber": "967712860300@s.whatsapp.net",
+      "id": "57574640640100@lid",
+      "phoneNumber": "557999694428@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "39342085017704@lid",
-      "phoneNumber": "555596050751@s.whatsapp.net",
+      "id": "135030198239314@lid",
+      "phoneNumber": "556299739078@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "80600044150906@lid",
+      "phoneNumber": "5521979945637@s.whatsapp.net",
       "admin": null
     },
     {
@@ -318,16 +208,6 @@
       "admin": null
     },
     {
-      "id": "210698831442158@lid",
-      "phoneNumber": "558487599198@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "226555666153701@lid",
-      "phoneNumber": "242064987011@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "19083261169787@lid",
       "phoneNumber": "556182222744@s.whatsapp.net",
       "admin": null
@@ -335,11 +215,6 @@
     {
       "id": "276549269987364@lid",
       "phoneNumber": "5522988243547@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "63127462875348@lid",
-      "phoneNumber": "557996039038@s.whatsapp.net",
       "admin": null
     },
     {
@@ -358,23 +233,8 @@
       "admin": null
     },
     {
-      "id": "164811484717097@lid",
-      "phoneNumber": "5511925355561@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "155362590195848@lid",
-      "phoneNumber": "258835240071@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "255460410134615@lid",
-      "phoneNumber": "558899674346@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "117591909654682@lid",
-      "phoneNumber": "559492577563@s.whatsapp.net",
+      "id": "60692853948663@lid",
+      "phoneNumber": "559885358688@s.whatsapp.net",
       "admin": null
     },
     {
@@ -418,33 +278,13 @@
       "admin": null
     },
     {
-      "id": "129639376756843@lid",
-      "phoneNumber": "553387094824@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "220379754795246@lid",
-      "phoneNumber": "923415667426@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "155160777068716@lid",
-      "phoneNumber": "5542935051439@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "33303797170182@lid",
-      "phoneNumber": "923390469760@s.whatsapp.net",
+      "id": "181557579001989@lid",
+      "phoneNumber": "558388870434@s.whatsapp.net",
       "admin": null
     },
     {
       "id": "197083432800452@lid",
       "phoneNumber": "558391335150@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "156629521682535@lid",
-      "phoneNumber": "5511912577659@s.whatsapp.net",
       "admin": null
     },
     {
@@ -458,13 +298,8 @@
       "admin": null
     },
     {
-      "id": "125276394672327@lid",
-      "phoneNumber": "557598397813@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "5034406350855@lid",
-      "phoneNumber": "558792026792@s.whatsapp.net",
+      "id": "87360389791754@lid",
+      "phoneNumber": "556781100901@s.whatsapp.net",
       "admin": null
     },
     {
@@ -478,38 +313,23 @@
       "admin": null
     },
     {
-      "id": "212893240934515@lid",
-      "phoneNumber": "971582415796@s.whatsapp.net",
+      "id": "33303864291478@lid",
+      "phoneNumber": "5521976814835@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "115745677689050@lid",
-      "phoneNumber": "9647871221070@s.whatsapp.net",
+      "id": "220461409538236@lid",
+      "phoneNumber": "556381044868@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "48946101641235@lid",
-      "phoneNumber": "558296678091@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "164557377032293@lid",
-      "phoneNumber": "553172351415@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "195155428683947@lid",
-      "phoneNumber": "5585921820308@s.whatsapp.net",
+      "id": "234316923711592@lid",
+      "phoneNumber": "556195248828@s.whatsapp.net",
       "admin": null
     },
     {
       "id": "87368895828053@lid",
       "phoneNumber": "556299448588@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "180522089234648@lid",
-      "phoneNumber": "919324775006@s.whatsapp.net",
       "admin": null
     },
     {
@@ -523,43 +343,28 @@
       "admin": null
     },
     {
+      "id": "2921265651844@lid",
+      "phoneNumber": "5521920077531@s.whatsapp.net",
+      "admin": null
+    },
+    {
       "id": "22587467915330@lid",
       "phoneNumber": "558994504246@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "19237192114347@lid",
-      "phoneNumber": "96896327748@s.whatsapp.net",
+      "id": "80484029751478@lid",
+      "phoneNumber": "559884158180@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "113224548651036@lid",
-      "phoneNumber": "5492995168114@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "64858317938897@lid",
-      "phoneNumber": "351938605112@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "43367006244897@lid",
-      "phoneNumber": "553181064679@s.whatsapp.net",
+      "id": "221371942608967@lid",
+      "phoneNumber": "554792451311@s.whatsapp.net",
       "admin": null
     },
     {
       "id": "110093601341479@lid",
       "phoneNumber": "971561384407@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "195679381135507@lid",
-      "phoneNumber": "5547936182213@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "73418774982768@lid",
-      "phoneNumber": "244946769913@s.whatsapp.net",
       "admin": null
     },
     {
@@ -573,23 +378,8 @@
       "admin": null
     },
     {
-      "id": "20659447038120@lid",
-      "phoneNumber": "557591227123@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "1632137949201@lid",
-      "phoneNumber": "919501093408@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "60533436899512@lid",
-      "phoneNumber": "554498836333@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "10660863807735@lid",
-      "phoneNumber": "919872008140@s.whatsapp.net",
+      "id": "99334725070926@lid",
+      "phoneNumber": "559281277730@s.whatsapp.net",
       "admin": null
     },
     {
@@ -603,23 +393,8 @@
       "admin": null
     },
     {
-      "id": "254756706586873@lid",
-      "phoneNumber": "5521969578984@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "94150364004577@lid",
-      "phoneNumber": "559184963353@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "89687574208569@lid",
       "phoneNumber": "5516981374401@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "74346571759825@lid",
-      "phoneNumber": "5511954231108@s.whatsapp.net",
       "admin": null
     },
     {
@@ -628,43 +403,8 @@
       "admin": null
     },
     {
-      "id": "38711077155023@lid",
-      "phoneNumber": "923055000412@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "182429004390406@lid",
-      "phoneNumber": "559591241505@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "235815296831577@lid",
-      "phoneNumber": "556699243572@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "129274690466032@lid",
-      "phoneNumber": "584266462703@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "21131406909581@lid",
-      "phoneNumber": "556181426540@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "64429408415818@lid",
-      "phoneNumber": "559881251402@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "233419241984199@lid",
       "phoneNumber": "554598368491@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "132186980270266@lid",
-      "phoneNumber": "5212311211613@s.whatsapp.net",
       "admin": null
     },
     {
@@ -678,13 +418,8 @@
       "admin": null
     },
     {
-      "id": "248618644713511@lid",
-      "phoneNumber": "244947687570@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "107233052463113@lid",
-      "phoneNumber": "553284371771@s.whatsapp.net",
+      "id": "166770073727041@lid",
+      "phoneNumber": "5512982983640@s.whatsapp.net",
       "admin": null
     },
     {
@@ -693,18 +428,18 @@
       "admin": null
     },
     {
+      "id": "187767950713076@lid",
+      "phoneNumber": "559481320408@s.whatsapp.net",
+      "admin": null
+    },
+    {
       "id": "62956016549915@lid",
       "phoneNumber": "5524998423633@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "261220514984113@lid",
-      "phoneNumber": "557791085090@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "41141944774841@lid",
-      "phoneNumber": "923474004245@s.whatsapp.net",
+      "id": "239419059601421@lid",
+      "phoneNumber": "556699883109@s.whatsapp.net",
       "admin": null
     },
     {
@@ -715,6 +450,11 @@
     {
       "id": "128320737964284@lid",
       "phoneNumber": "553791521999@s.whatsapp.net",
+      "admin": null
+    },
+    {
+      "id": "11395320000646@lid",
+      "phoneNumber": "5511925393336@s.whatsapp.net",
       "admin": null
     },
     {
@@ -738,33 +478,13 @@
       "admin": null
     },
     {
-      "id": "9028725956695@lid",
-      "phoneNumber": "5519953247799@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "27505658437709@lid",
       "phoneNumber": "553198786222@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "23932228878441@lid",
-      "phoneNumber": "556374009025@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "133797374877724@lid",
-      "phoneNumber": "5522998108391@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "45312374775821@lid",
-      "phoneNumber": "601139687914@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "176849690861610@lid",
-      "phoneNumber": "584148501155@s.whatsapp.net",
+      "id": "190869017747501@lid",
+      "phoneNumber": "923718058201@s.whatsapp.net",
       "admin": null
     },
     {
@@ -778,28 +498,13 @@
       "admin": null
     },
     {
-      "id": "264067927253245@lid",
-      "phoneNumber": "34624507008@s.whatsapp.net",
+      "id": "189047934869554@lid",
+      "phoneNumber": "557587055364@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "195661530198050@lid",
-      "phoneNumber": "923224063326@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "192109810344108@lid",
-      "phoneNumber": "557197047162@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "119211582079086@lid",
-      "phoneNumber": "50378351261@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "178714159665212@lid",
-      "phoneNumber": "79679491401@s.whatsapp.net",
+      "id": "41215177281716@lid",
+      "phoneNumber": "559885161533@s.whatsapp.net",
       "admin": null
     },
     {
@@ -808,13 +513,8 @@
       "admin": null
     },
     {
-      "id": "240115146313743@lid",
-      "phoneNumber": "923193205173@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "162062755991673@lid",
-      "phoneNumber": "967730960868@s.whatsapp.net",
+      "id": "269741881077791@lid",
+      "phoneNumber": "556392218466@s.whatsapp.net",
       "admin": null
     },
     {
@@ -828,38 +528,13 @@
       "admin": null
     },
     {
-      "id": "48817420419244@lid",
-      "phoneNumber": "5521992225139@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "57506038608124@lid",
-      "phoneNumber": "5521979686288@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "61701785419979@lid",
-      "phoneNumber": "5521979495495@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "21844790911215@lid",
       "phoneNumber": "5518996123779@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "169535814557699@lid",
-      "phoneNumber": "5548933802688@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "239878654697685@lid",
       "phoneNumber": "558688289785@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "221925540397277@lid",
-      "phoneNumber": "557998386623@s.whatsapp.net",
       "admin": null
     },
     {
@@ -883,18 +558,13 @@
       "admin": null
     },
     {
-      "id": "1327933485113@lid",
-      "phoneNumber": "557399216129@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "130279947657266@lid",
       "phoneNumber": "558698014208@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "86861938745575@lid",
-      "phoneNumber": "5514999091115@s.whatsapp.net",
+      "id": "118112372404265@lid",
+      "phoneNumber": "5583920028458@s.whatsapp.net",
       "admin": null
     },
     {
@@ -905,11 +575,6 @@
     {
       "id": "21054684684526@lid",
       "phoneNumber": "556492904090@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "271975347961903@lid",
-      "phoneNumber": "258845116549@s.whatsapp.net",
       "admin": null
     },
     {
@@ -928,23 +593,8 @@
       "admin": null
     },
     {
-      "id": "8549266677846@lid",
-      "phoneNumber": "557381362196@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "252368704819368@lid",
-      "phoneNumber": "5547936182254@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "30413368123573@lid",
-      "phoneNumber": "258870994487@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "270222900621473@lid",
-      "phoneNumber": "9647813448793@s.whatsapp.net",
+      "id": "75479839182882@lid",
+      "phoneNumber": "558688918701@s.whatsapp.net",
       "admin": null
     },
     {
@@ -958,33 +608,8 @@
       "admin": null
     },
     {
-      "id": "249327196872795@lid",
-      "phoneNumber": "351938037240@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "63617206632566@lid",
-      "phoneNumber": "556492962198@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "18035305898014@lid",
-      "phoneNumber": "559481076464@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "74294881161408@lid",
-      "phoneNumber": "558899562453@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "166250047090846@lid",
       "phoneNumber": "559185473981@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "51995545223336@lid",
-      "phoneNumber": "923425814484@s.whatsapp.net",
       "admin": null
     },
     {
@@ -993,48 +618,18 @@
       "admin": null
     },
     {
-      "id": "34227114491926@lid",
-      "phoneNumber": "558894647019@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "199815266857073@lid",
       "phoneNumber": "5519998307666@s.whatsapp.net",
       "admin": null
     },
     {
-      "id": "115196022530155@lid",
-      "phoneNumber": "967735974096@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "222157703500016@lid",
-      "phoneNumber": "559492308384@s.whatsapp.net",
+      "id": "174311885246566@lid",
+      "phoneNumber": "555197016537@s.whatsapp.net",
       "admin": null
     },
     {
       "id": "111312684212386@lid",
       "phoneNumber": "557192253972@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "25813474889803@lid",
-      "phoneNumber": "62857045326527@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "193819274399814@lid",
-      "phoneNumber": "559870255998@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "73947072745706@lid",
-      "phoneNumber": "201205611018@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "13572163813539@lid",
-      "phoneNumber": "923055565522@s.whatsapp.net",
       "admin": null
     },
     {
@@ -1048,23 +643,8 @@
       "admin": null
     },
     {
-      "id": "53824848933016@lid",
-      "phoneNumber": "554899068745@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "128935522234529@lid",
       "phoneNumber": "557398370717@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "200670217027827@lid",
-      "phoneNumber": "5521986751089@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "121032815947886@lid",
-      "phoneNumber": "573013485020@s.whatsapp.net",
       "admin": null
     },
     {
@@ -1073,63 +653,13 @@
       "admin": null
     },
     {
-      "id": "78525491089431@lid",
-      "phoneNumber": "5511959751865@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "87081049190402@lid",
-      "phoneNumber": "5519971267205@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "76472547045586@lid",
-      "phoneNumber": "258875627419@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "247201808838703@lid",
-      "phoneNumber": "923101749392@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "51213273923662@lid",
-      "phoneNumber": "5516994367222@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "180410822721760@lid",
-      "phoneNumber": "559791485350@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "277326424211636@lid",
-      "phoneNumber": "559186435711@s.whatsapp.net",
+      "id": "43787376173173@lid",
+      "phoneNumber": "556596181920@s.whatsapp.net",
       "admin": null
     },
     {
       "id": "251574152609800@lid",
       "phoneNumber": "5524992295065@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "167749259129017@lid",
-      "phoneNumber": "5521979275116@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "279057329586340@lid",
-      "phoneNumber": "573175804893@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "218468343402746@lid",
-      "phoneNumber": "94786933969@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "42503097082100@lid",
-      "phoneNumber": "5493741404283@s.whatsapp.net",
       "admin": null
     },
     {
@@ -1153,31 +683,16 @@
       "admin": null
     },
     {
-      "id": "181084461494284@lid",
-      "phoneNumber": "923401975796@s.whatsapp.net",
-      "admin": null
-    },
-    {
       "id": "78138373570714@lid",
       "phoneNumber": "557996534637@s.whatsapp.net",
-      "admin": null
-    },
-    {
-      "id": "242107876901014@lid",
-      "phoneNumber": "559492939273@s.whatsapp.net",
       "admin": null
     },
     {
       "id": "250861070585893@lid",
       "phoneNumber": "558398331995@s.whatsapp.net",
       "admin": null
-    },
-    {
-      "id": "180332858982499@lid",
-      "phoneNumber": "558681360399@s.whatsapp.net",
-      "admin": null
     }
   ],
   "ephemeralDuration": 86400,
-  "lastUpdated": "2026-04-06T23:49:34.352Z"
+  "lastUpdated": 1776565262459
 }

@@ -168,11 +168,9 @@ const menugeral = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 ┃͜⃟${prefix}sticker / s
 ┃͜⃟${prefix}sair
 ┃͜⃟${prefix}channel
-┃͜⃟${prefix}nofap
 ┃͜⃟${prefix}wame
 ┃͜⃟${prefix}vab
 ┃͜⃟${prefix}criador
-┃͜⃟${prefix}meuativo
 ┃──〔 DOWNLOADS & API 〕
 ┃͜⃟${prefix}play
 ┃͜⃟${prefix}spotify

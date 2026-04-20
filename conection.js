@@ -5,7 +5,7 @@ import pino from 'pino';
 import chalk from 'chalk';
 import path from 'path';
 import readline from 'readline';
-import NodeCache from 'node-cache';
+import LRU from 'pixl-cache';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import qrcode from 'qrcode-terminal';
@@ -24,30 +24,33 @@ logger.level = 'fatal';
 import { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar, groupConfigCache, getRandomSaudacao } from './dono/functions.js';
 import { handleCmds } from './index.js';
 
-const { prefix, botName, donoName, donoNmr, idCanal, pairKey } = require('./dono/configs/settings.json');
+const { prefix, botName, donoName, donoNmr, idCanal, pairKey, logsCvs } = require('./dono/configs/settings.json');
 
 console.info = (...a) => String(a[0]).includes("session") || console._info?.(...a);
 
 const pk = pairKey.toUpperCase();
-const groupMetadataCache = new NodeCache({ stdTTL: 300, checkperiod: 120 });
+const groupMetadataCache = new LRU({
+maxItems: 50,
+maxAge: 300 
+});
 const messageQueue = [];
 let processingQueue = false;
-const messageCache = new NodeCache({ stdTTL: 60 * 60 });
-
+const messageCache = new LRU({maxItems: 200, maxAge: 600 });
 let fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
 const well = fs.readFileSync("./database/imgs/well.png");
 
 async function getGroupMetadataSafe(groupId, subaru) {
-if (groupMetadataCache.has(groupId)) return groupMetadataCache.get(groupId);
+if (groupMetadataCache.has(groupId)) { return groupMetadataCache.get(groupId)}
+if (!groupId.endsWith('@g.us')) { return null; }
 try {
 const meta = await subaru.groupMetadata(groupId);
 groupMetadataCache.set(groupId, meta);
+cacheService.saveGroupMetadata(groupId, meta);
 return meta;
 } catch (e) {
 console.error(`Erro ao buscar metadata do grupo ${groupId}:`, e);
 return { subject: "Grupo Desconhecido", participants: [] };
-}
-}
+}}
 
 function getGroupConfig(id) {
 const cached = groupConfigCache.get(id);
@@ -56,6 +59,11 @@ if (!fs.existsSync(`./database/grupos/${id}.json`)) return null;
 const config = JSON.parse(fs.readFileSync(`./database/grupos/${id}.json`));
 groupConfigCache.set(id, config);
 return config;
+}
+
+function delay(min = 50, max = 800) {
+const ms = Math.floor(Math.random() * (max - min + 1)) + min;
+return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 const startConnection = async () => {
@@ -88,7 +96,7 @@ const phoneNumber_raw = await new Promise(resolve => rl.once('line', resolve));
 let phoneNumber = phoneNumber_raw.replace(/\D/g, ""); 
 const code = await subaru.requestPairingCode(phoneNumber, pk);
 process.stdout.write(`Seu código de pareamento: ${code?.match(/.{1,4}/g)?.join("-") || code}\n`);
-  rl.close();
+rl.close();
 }
 
 let isRestart = false;
@@ -171,26 +179,9 @@ if (!comando && msg.message?.listResponseMessage?.singleSelectReply?.selectedRow
 comando = msg.message.listResponseMessage.singleSelectReply.selectedRowId;
 }
 
-function delay(min = 50, max = 800) {
-const ms = Math.floor(Math.random() * (max - min + 1)) + min;
-return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function processQueue() {
-if (processingQueue) return;
-processingQueue = true;
-while (messageQueue.length > 0) {
-const queueMsg = messageQueue.shift();
-await handleCmds(subaru, queueMsg);
-await new Promise(r => setTimeout(r, delay));
-}
-processingQueue = false;
-}
-messageQueue.push(msg);
-processQueue();
+await handleCmds(subaru, msg);
 
 cacheService.saveGroupMetadata(from, groupMetadata);
-
 if (isCmd) {
 console.log(
 chalk.blueBright("\n╔══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╗") + "\n" +
@@ -203,7 +194,7 @@ chalk.blueBright("║★ ") + chalk.cyan("Comando: ") + chalk.greenBright(cmd) +
 chalk.blueBright("║★ ") + chalk.cyan("Horário: ") + chalk.gray(horaAtual) + "\n" +
 chalk.blueBright("╚══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╝\n")
 );
-} else if (body) {
+} else if (body && logsCvs) {
 console.log(
 chalk.blueBright("\n╔══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╗") + "\n" +
 chalk.blueBright("║★ ") + chalk.white.bold("[ MENSAGEM RECEBIDA ]") + "\n" +

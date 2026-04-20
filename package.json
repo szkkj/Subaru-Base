@@ -1,6 +1,6 @@
 {
   "name": "Subaru-base",
-  "version": "4.0.2",
+  "version": "4.1.0",
   "author": "https://github.com/szkkj",
   "main": "conection.js",
   "type": "module",
