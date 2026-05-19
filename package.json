@@ -1,6 +1,6 @@
 {
   "name": "Subaru-base",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "author": "https://github.com/szkkj",
   "main": "conection.js",
   "type": "module",
@@ -9,7 +9,7 @@
     "start": "while true; do node conection.js --code; sleep 1; done"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "@whiskeysockets/baileys": "^7.0.0-rc11",
     "axios": "^1.9.0",
     "chalk": "^4.1.2",
     "file-type": "16.5.3",
@@ -20,6 +20,7 @@
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "node-webpmux": "^3.2.1",
+    "pixl-cache": "^1.1.1",
     "qrcode-terminal": "^0.12.0",
     "ws": "^8.18.2",
     "zod": "^3.25.7"

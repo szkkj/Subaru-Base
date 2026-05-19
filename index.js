@@ -61,7 +61,7 @@ import {
   util,
   rgtake,
   botSemKey,
-} from "./dono/exports-consts.js";
+} from "./dono/exports.js";
 
 import { createRequire } from "module";
 import { fileURLToPath } from "url";
@@ -104,9 +104,6 @@ import {
   hora,
   loadJSON,
   saveJSON,
-  saveJSON2,
-  sincronizarCases,
-  lerOuCriarJSON,
   onlyNumbers,
   toUserLid,
   toUserOrGroupJid,
@@ -120,6 +117,7 @@ import {
   UploadFileUgu,
   CatBox,
   dellCase,
+  groupConfigCache
 } from "./dono/functions.js";
 
 import {
@@ -346,39 +344,17 @@ const handleCmds = async (subaru, msg) => {
   const isQuotedViewOnce =
     quotedType === "viewOnceMessage" || quotedType === "viewOnceMessageV2";
   const isQuotedDocW = quotedType === "documentWithCaptionMessage";
-  const imgCaption =
-    (isQuotedImage
-      ? quoted?.imageMessage?.caption
-      : info.message?.imageMessage?.caption) || "";
-  const vidCaption =
-    (isQuotedVideo
-      ? quoted?.videoMessage?.caption
-      : info.message?.videoMessage?.caption) || "";
-  const convText =
-    (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
-  const extdText =
-    (isQuotedText
-      ? quoted?.extendedTextMessage?.text
-      : info.message?.extendedTextMessage?.text) || "";
-  const docNoCap =
-    (isQuotedDocument
-      ? quoted?.documentMessage?.caption
-      : info.message?.documentMessage?.caption) || "";
+  const imgCaption = (isQuotedImage ? quoted?.imageMessage?.caption : info.message?.imageMessage?.caption) || "";
+  const vidCaption = (isQuotedVideo ? quoted?.videoMessage?.caption : info.message?.videoMessage?.caption) || "";
+  const convText = (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
+  const extdText = (isQuotedText ? quoted?.extendedTextMessage?.text : info.message?.extendedTextMessage?.text) || "";
+  const docNoCap = (isQuotedDocument ? quoted?.documentMessage?.caption : info.message?.documentMessage?.caption) || "";
   const docWCap =
     (isQuotedDocW
       ? quoted?.documentWithCaptionMessage?.message?.documentMessage?.caption
       : info.message?.documentWithCaptionMessage?.message?.documentMessage
           ?.caption) || "";
-  const mediaInfo = isQuotedImage
-    ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message
-        .extendedTextMessage.contextInfo.message.imageMessage
-    : isQuotedVideo
-      ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message
-          .extendedTextMessage.contextInfo.message.videoMessage
-      : isQuotedSticker
-        ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message
-            .extendedTextMessage.contextInfo.message.stickerMessage
-        : info;
+  const mediaInfo = isQuotedImage ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message.extendedTextMessage.contextInfo.message.imageMessage : isQuotedVideo ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message.extendedTextMessage.contextInfo.message.videoMessage : isQuotedSticker ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message.extendedTextMessage.contextInfo.message.stickerMessage : info;
 
   function getGroupAdmins(participants) {
     let admins = [];
@@ -399,13 +375,7 @@ const handleCmds = async (subaru, msg) => {
   function getSenderLid(msg) {
     const { jidDecode, jidEncode } = baileysPkg;
     try {
-      const sender =
-        msg?.key?.participant ||
-        msg?.key?.remoteJid ||
-        msg?.key?.remoteLid ||
-        msg?.key?.participantLid ||
-        msg?.key?.participantAlt ||
-        "";
+      const sender = msg?.key?.participant || msg?.key?.remoteJid || msg?.key?.remoteLid || msg?.key?.participantLid || msg?.key?.participantAlt || "";
       const user = jidDecode(sender)?.user || sender.split("@")[0] || "";
       const lid = jidEncode(user, "lid");
       return { jid: sender, lid };
@@ -414,8 +384,8 @@ const handleCmds = async (subaru, msg) => {
       return { jid: null, lid: null };
     }
   }
-
-  const groupMetadata = isGroup ? await subaru.groupMetadata(from) : "";
+  const emoji = "🌹"
+  const groupMetadata = isGroup ? await getGroupMetadataSafe(from, subaru) : "";
   const participants = isGroup ? await groupMetadata.participants : "";
   const groupName = isGroup ? groupMetadata.subject : "";
   const groupDesc = isGroup ? groupMetadata.desc : "";
@@ -453,15 +423,8 @@ const handleCmds = async (subaru, msg) => {
   const pushname = info.pushName ? info.pushName : "";
   const numeroBot = subaru.user.id.split(":")[0] + "@s.whatsapp.net";
   const isDono = sender.includes(donoNmr) || sender === donoLid;
-  const isBotGroupAdmins =
-    groupAdmins.includes(botLid2) || groupAdmins.includes(numeroBot) || false;
-  const isGroupAdmins =
-    groupAdmins.includes(sender) ||
-    groupAdmins.includes(senderLid) ||
-    groupAdmins.includes(senderJid) ||
-    groupAdmins.includes(sender2) ||
-    isDono ||
-    false;
+  const isBotGroupAdmins = groupAdmins.includes(botLid2) || groupAdmins.includes(numeroBot) || false;
+  const isGroupAdmins = groupAdmins.includes(sender) || groupAdmins.includes(senderLid) || groupAdmins.includes(senderJid) || groupAdmins.includes(sender2) || isDono || false;
   const isAdm = isGroupAdmins;
   const participantes = isGroup
     ? groupMetadata.participants.map((usuario) => usuario.id)
@@ -891,15 +854,15 @@ const handleCmds = async (subaru, msg) => {
     ];
     fs.writeFileSync(PastaDeGrupos, JSON.stringify(datea, null, 2) + "\n");
   }
-  const ArquivosDosGrupos =
-    isGroup && fs.existsSync(PastaDeGrupos)
-      ? JSON.parse(fs.readFileSync(PastaDeGrupos))
-      : undefined;
+  const ArquivosDosGrupos = isGroup ? getGroupConfig(from) : undefined;
+
   function ModificaGrupo(index) {
     fs.writeFileSync(PastaDeGrupos, JSON.stringify(index, null, 2) + "\n");
+    groupConfigCache.set(from, index); 
   }
   function setNes(index) {
     fs.writeFileSync(nescj, JSON.stringify(index, null, 2) + "\n");
+    groupConfigCache.set(from, index); 
   }
   function setGp(index) {
     fs.writeFileSync(PastaDeGrupos, JSON.stringify(index, null, 2) + "\n");
@@ -907,33 +870,21 @@ const handleCmds = async (subaru, msg) => {
 
   //====================( CONSTS DE GRUPOS )====================//
   const isAntiLink = isGroup ? ArquivosDosGrupos?.[0]?.antilink : undefined;
-  const BemVindoAcao = isGroup
-    ? ArquivosDosGrupos?.[0]?.bemVindo?.[0]
-    : undefined;
-  const isBemVindo = isGroup
-    ? ArquivosDosGrupos?.[0]?.bemVindo?.[0]?.ativo
-    : undefined;
-
+  const BemVindoAcao = isGroup ? ArquivosDosGrupos?.[0]?.bemVindo?.[0] : undefined;
+  const isBemVindo = isGroup ? ArquivosDosGrupos?.[0]?.bemVindo?.[0]?.ativo : undefined;
   const isAntiImg = isGroup ? ArquivosDosGrupos?.[0]?.antiimg : undefined;
   const isAntiVid = isGroup ? ArquivosDosGrupos?.[0]?.antivideo : undefined;
   const isAntiAudio = isGroup ? ArquivosDosGrupos?.[0]?.antiaudio : undefined;
-  const isAntiSticker = isGroup
-    ? ArquivosDosGrupos?.[0]?.antisticker
-    : undefined;
+  const isAntiSticker = isGroup ? ArquivosDosGrupos?.[0]?.antisticker : undefined;
   const isAntiDoc = isGroup ? ArquivosDosGrupos?.[0]?.antidoc : undefined;
   const isAntiCtt = isGroup ? ArquivosDosGrupos?.[0]?.antictt : undefined;
   const isAntiLoc = isGroup ? ArquivosDosGrupos[0].antiloc : undefined;
   const isBanchat = isGroup ? ArquivosDosGrupos?.[0].banchat : undefined;
   const isSimih = isGroup ? ArquivosDosGrupos?.[0].simih : undefined;
   const isModobn = isGroup ? ArquivosDosGrupos?.[0].modobn : undefined;
-  const isAntiArq = isGroup
-    ? ArquivosDosGrupos?.[0].antiarquivamento.ativo
-    : undefined;
-  const isAutoSticker = isGroup
-    ? ArquivosDosGrupos?.[0].autosticker
-    : undefined;
+  const isAntiArq = isGroup ? ArquivosDosGrupos?.[0].antiarquivamento.ativo : undefined;
+  const isAutoSticker = isGroup ? ArquivosDosGrupos?.[0].autosticker : undefined;
   const isAutoDown = isGroup ? ArquivosDosGrupos?.[0].autodown : undefined;
-  const isLevelingOn = isGroup ? ArquivosDosGrupos?.[0].leveling : undefined;
   //====================( FIM CONSTS DE GRUPOS )====================//
 
   //====================( AUTO STICKER )====================//
@@ -983,17 +934,13 @@ const handleCmds = async (subaru, msg) => {
   }
 
   //====================( SIMILARITY / SIMILARIDADE )====================//
+  let findindex = fs.readFileSync("index.js").toString().match(/case\s+'(.+?)'/g);
+  
   const getallcases = () => {
-    let findindex = fs
-      .readFileSync("index.js")
-      .toString()
-      .match(/case\s+'(.+?)'/g);
-    let cstt = [];
-    for (let i of findindex) {
-      cstt.push(i.split(`'`)[1]);
-    }
-    return cstt;
-  };
+    const content = fs.readFileSync("index.js", "utf-8");
+    const matches = content.matchAll(/case\s+'(.+?)'/g);
+    return [...matches].map(match => match[1]);
+};
   const rmLetras = (txt) => {
     return txt
       .toLowerCase()
@@ -1486,36 +1433,18 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
     }
 
     if (isSimih && isGroup && budy != undefined) {
-      if (
-        ["imageMessage", "audioMessage", "stickerMessage"].includes(type) ||
-        info.key.fromMe
-      ) {
-        return;
-      } //1
+      if (["imageMessage", "audioMessage", "stickerMessage"].includes(type) ||info.key.fromMe) {return; } //1
       try {
         const persona = escolherPersonalidadeSubaru();
         const simiPersonality = `${persona.prompt}`;
-
-        const { data } = await axios.post(
-          `${baseRaikken}/api/ia/chat-simi?apikey=${RaikkenKey}`,
-          {
-            message: budy,
+        const { data } = await axios.post(`${baseRaikken}/api/ia/chat-simi?apikey=${RaikkenKey}`,
+          {message: budy,
             personality: simiPersonality,
-          },
-        );
-        if (data && data.response) {
-          await subaru.sendMessage(
-            from,
-            { text: data.response },
-            { quoted: info },
-          );
+          },);
+        if (data && data.response) { await subaru.sendMessage( from, { text: data.response }, { quoted: info });
         } else {
           const errorMessage = "Não entendi! Pode me explicar melhor?";
-          await subaru.sendMessage(
-            from,
-            { text: errorMessage },
-            { quoted: info },
-          );
+          await subaru.sendMessage( from, { text: errorMessage }, { quoted: info });
         }
       } catch (err) {
         if (err.response && err.response.data && err.response.data.error) {
@@ -1525,82 +1454,6 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
           //await subaru.sendMessage(from, { text: `Erro ao consultar a IA.` }, { quoted: info });
         }
       }
-    }
-
-    //====================( SISTEMA DO LEVEL )====================//
-    const patentes = JSON.parse(
-      fs.readFileSync("./database/textos/patentes.json"),
-    );
-    const levelUpMilestones = new Set([
-      100, 200, 300, 400, 500, 600, 700, 800, 900, 1200, 1500, 1800, 2100, 2700,
-      3300, 3900, 4500, 5000, 5500, 6500, 7500, 9000, 10500, 12000, 13500,
-      15000, 20000, 25000, 30000, 35000, 40000, 50000, 60000, 70000, 80000,
-      90000, 100000, 150000, 200000, 300000, 400000, 500000, 1000000, 1500000,
-      2000000, 5000000,
-    ]);
-    const level2 = JSON.parse(
-      fs.readFileSync("./database/users/leveling.json"),
-    );
-    let user = level2.find((u) => u.id === sender);
-    if (body && isGroup && isLevelingOn) {
-      if (!user) {
-        user = {
-          id: sender,
-          nick: pushname,
-          contador: 0,
-          level: 1,
-        };
-        level2.push(user);
-        console.log(
-          `Novo usuário [${pushname}] foi registrado no sistema de level.`,
-        );
-      }
-      user.contador += 1;
-      user.nick = pushname;
-      const isVeteranLevelUp =
-        user.contador >= 10000000 && user.contador % 1000000 === 0;
-      const isNormalLevelUp = levelUpMilestones.has(user.contador);
-      if (isNormalLevelUp || isVeteranLevelUp) {
-        const oldLevel = user.level;
-        user.level += 1;
-        const sendLevelUpMessage = async (txe) => {
-          try {
-            const profilePicUrl = await subaru
-              .profilePictureUrl(sender)
-              .catch(() => "https://i.postimg.cc/C1ZRKCkD/images-23.jpg");
-            const buffer = await getBuffer(profilePicUrl);
-            const photoUser = await gerarlinkUploadCatbox(buffer).catch(
-              () => "https://i.postimg.cc/C1ZRKCkD/images-23.jpg",
-            );
-            const imageUrl = `${baseRaikken}/canvas/rank?nome=${encodeURIComponent(pushname)}&avatar=${photoUser}&nivel=${user.level}&rank=${user.level}&xpAtual=${user.contador}&xpNecessario=0&apikey=${RaikkenKey}`;
-
-            await subaru.sendMessage(
-              from,
-              { image: { url: imageUrl }, caption: txe, mentions: [sender] },
-              { quoted: seloSz },
-            );
-          } catch (error) {
-            console.error("Erro ao enviar mensagem de level up:", error);
-          }
-        };
-
-        let messageCaption;
-        if (isVeteranLevelUp) {
-          if (user.contador === 10000000) {
-            messageCaption = `🎉 Parabéns *@${sender.split("@")[0]}*, você completou com sucesso 10M de XP, possuindo assim o título de *Veterano 🎩*\n–\n• Todos os níveis daqui pra frente serão contados a cada 1M de XP... Nossa equipe se orgulha de coroar você, depois de tanto esforço e desempenho, após muito tempo de uso de nosso sistemas. ${tempo}!`;
-          } else {
-            messageCaption = `*🎉 LEGANCY LEVEL UP! 🎖️*\nMeus parabéns querido usuário veterano *@${sender.split("@")[0]}*.\n• Sua experiência acaba de levar a quantidade total de XP à triplicar. Agora você tem *${user.contador} XP*\n–\n*Obs:* Sua patente atual continua sendo a mesma, pois você chegou à maior.`;
-          }
-        } else {
-          const newPatente = patentes.find((p) => user.contador >= p.xp).nome;
-          messageCaption = `🎉 Parabéns *@${sender.split("@")[0]}*, você acaba de subir de level.\n• Novo level foi alcançado por completar *${user.contador} XP.*\nNova patente desbloqueada, você agora é *${newPatente}*`;
-        }
-        sendLevelUpMessage(messageCaption);
-      }
-      fs.writeFileSync(
-        "./database/users/leveling.json",
-        JSON.stringify(level2, null, 2),
-      );
     }
 
     //====================( AUTO DOWNLOAD )====================//
@@ -2373,107 +2226,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
             }
           }
           break;
-
-        case "get":
-          if (!isGroupAdmins && !isDono) return enviar(mss.adm);
-          reply2(
-            JSON.stringify(
-              info.message.extendedTextMessage.contextInfo,
-              null,
-              3,
-            ),
-          );
-          break;
-
-        case "gerarlink": {
-          try {
-            //By Duarte.
-            if (isQuotedImage || isQuotedVideo || isQuotedSticker) {
-              const mediaInfo = isQuotedImage
-                ? JSON.parse(JSON.stringify(info).replace("quotedM", "m"))
-                    .message.extendedTextMessage.contextInfo.message
-                    .imageMessage
-                : isQuotedVideo
-                  ? JSON.parse(JSON.stringify(info).replace("quotedM", "m"))
-                      .message.extendedTextMessage.contextInfo.message
-                      .videoMessage
-                  : isQuotedSticker
-                    ? JSON.parse(JSON.stringify(info).replace("quotedM", "m"))
-                        .message.extendedTextMessage.contextInfo.message
-                        .stickerMessage
-                    : info;
-              const gerarlinkTipo = isQuotedImage
-                ? "image"
-                : isQuotedVideo
-                  ? "video"
-                  : isQuotedSticker
-                    ? "sticker"
-                    : "image";
-              const gerarlinkExt = isQuotedImage
-                ? "png"
-                : isQuotedVideo
-                  ? "mp4"
-                  : isQuotedSticker
-                    ? "webp"
-                    : "png";
-              const gerarlinkBuffer = await getFileBuffer(
-                mediaInfo,
-                gerarlinkTipo,
-              );
-              const filename = `subaru-base_${Date.now()}.${gerarlinkExt}`;
-              const gerarlinkFinal = await gerarlinkUploadCatbox(
-                gerarlinkBuffer,
-                filename,
-              );
-
-              await subaru.relayMessage(
-                from,
-                {
-                  interactiveMessage: {
-                    body: {
-                      text: `*Link gerado com sucesso!*\n\nTamanho do arquivo: ${bytesParaMB(gerarlinkBuffer.length)}`,
-                    },
-                    footer: { text: botName },
-                    nativeFlowMessage: {
-                      buttons: [
-                        {
-                          name: "cta_copy",
-                          buttonParamsJson: `{\"display_text\":\"𝕮𝖔𝖕𝖎𝖆𝖗 𝖑𝖎𝖓𝖐\",\"id\":\"cta_copy\",\"copy_code\":\"${gerarlinkFinal}\"}`,
-                        },
-                      ],
-                      messageParamsJson: "",
-                    },
-                  },
-                },
-                {},
-              );
-            } else {
-              enviar("*Marque uma imagem, vídeo ou figurinha*");
-            }
-          } catch (e) {
-            console.log(e);
-            enviar(`❌ Erro ao tentar gerar o link. Erro:${e.message}`);
-          }
-          break;
-        }
-
-        case "linkimage":
-          {
-            if (!isDono) return reply("Apenas dono pode usar este comando.");
-            if (!q) return reply("Envie um link de imagem válido.");
-            let url = q;
-            try {
-              let buffer = await getBufferFromUrl(url);
-              await subaru.sendMessage(from, {
-                image: buffer,
-                caption: "Aqui está a imagem 👆",
-              });
-            } catch (e) {
-              reply("Erro ao baixar a imagem: " + e.message);
-            }
-          }
-          break;
-
+          
         /* ====( AQUI AINDA SÃO CMDS DE MEMBROS, MAS APENAS BRINCADEIRAS )==== */
         case "jogodavelha": {
           if (!isGroup) return reply("Só grupos!");
@@ -2682,200 +2435,54 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             id: `${prefix}${item.nomeAjuda}`,
           }));
 
-          await subaru.relayMessage(
-            from,
-            {
-              interactiveMessage: {
-                header: proto.Message.InteractiveMessage.Header.create({
-                  ...(await prepareWAMessageMedia(
-                    { image: fs.readFileSync("./database/imgs/perfil.jpeg") },
-                    { upload: subaru.waUploadToServer },
-                  )),
-                  hasMediaAttachment: false,
-                  title: `📖 Central de Ajuda`,
-                }),
-                body: {
-                  text: `👋 Olá ${pushname}!\nEscolha abaixo o que você precisa de ajuda:`,
-                },
-                footer: { text: `${botName}` },
-                nativeFlowMessage: {
-                  buttons: [
-                    {
-                      name: "single_select",
-                      buttonParamsJson: JSON.stringify({
-                        title: "AJUDA DISPONÍVEL",
-                        sections: [
-                          {
-                            title: "Central de Ajuda",
-                            rows: rows,
-                          },
-                        ],
-                      }),
-                    },
-                  ],
-                  messageParamsJson: "",
-                },
-              },
+          const imageBuffer = fs.readFileSync("./database/imgs/perfil.jpeg");
+          const imageMedia = await prepareWAMessageMedia(
+            { image: imageBuffer },
+            { upload: finn.waUploadToServer },
+          );
+
+          const interactiveMessage = {
+            header: {
+              ...imageMedia,
+              hasMediaAttachment: true,
+              title: "📖 Central de Ajuda",
             },
-            {},
+            body: {
+              text: `👋 Olá ${pushname}!\nEscolha abaixo o que você precisa de ajuda:`,
+            },
+            footer: {
+              text: botName,
+            },
+            nativeFlowMessage: {
+              buttons: [
+                {
+                  name: "single_select",
+                  buttonParamsJson: JSON.stringify({
+                    title: "AJUDA DISPONÍVEL",
+                    sections: [
+                      {
+                        title: "Central de Ajuda",
+                        rows: rows,
+                      },
+                    ],
+                  }),
+                },
+              ],
+              messageParamsJson: "",
+            },
+          };
+
+          await sendInteractiveMessage(
+            finn,
+            from,
+            { interactiveMessage },
+            {
+              additionalAttributes: {},
+              useCachedGroupMetadata: true,
+            },
           );
           break;
         }
-
-        case "stickerid":
-          {
-            try {
-              const quoted =
-                info.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-              if (!quoted?.stickerMessage) {
-                return reply("Responda a uma figurinha para obter o ID.");
-              }
-              const stickerId =
-                quoted.stickerMessage.fileSha256.toString("base64");
-              reply(`ID da figurinha:\n${stickerId}`);
-            } catch (e) {
-              console.error(e);
-              reply("Erro ao obter o ID da figurinha.");
-            }
-          }
-          break;
-
-        case "novidades": {
-          if (!isDono) {
-            return;
-          }
-          await react("❄️");
-          const casesSz = "./dono/configs/novidades/cases.json";
-          const newsSz = "./dono/configs/novidades/news.json";
-          try {
-            const novidades = lerOuCriarJSON(newsSz);
-            if (novidades.length === 0) {
-              return reply(
-                "📢 Nenhuma novidade por enquanto! Assim que tiver algo novo, eu aviso.",
-              );
-            }
-            let response = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓࣪
-📢 *Novidades ${botName}* 📢\n\n`;
-            novidades.forEach((item, index) => {
-              response += `┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪${index + 1}. *Comando*: \`${item.Comando}\`\n┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Função*: ${item.Função}\n\n`;
-            });
-
-            const meta = await getGroupMetadataSafe(from);
-            const membros = meta.participants.map((i) => i.id);
-            await sleep(500);
-            await subaru.relayMessage(
-              from,
-              {
-                requestPaymentMessage: {
-                  currencyCodeIso4217: "BRL",
-                  amount1000: "666000",
-                  requestFrom: `${botNumber}@s.whatsapp.net`,
-                  noteMessage: {
-                    extendedTextMessage: {
-                      text: response.trim(),
-                      contextInfo: { mentionedJid: membros },
-                    },
-                  },
-                  expiryTimestamp: "0",
-                },
-              },
-              {},
-            );
-            saveJSON2(newsSz, []);
-          } catch (e) {
-            console.log("Erro ao buscar novidades:", e);
-            reply2("Houve um erro ao buscar as novidades. Tente novamente.");
-          }
-          break;
-        }
-
-        case "listacases": {
-          if (!isDono) {
-            return reply("Comando exclusivo do meu mestre. 👑");
-          }
-          try {
-            const listaDeCases = sincronizarCases(subaru);
-            if (listaDeCases && listaDeCases.length > 0) {
-              const listaFormatada = listaDeCases
-                .map((nomeDaCase, index) => `${index + 1}. ${nomeDaCase}`)
-                .join("\n");
-              reply(
-                `🔎 Mestre, aqui estão todas as cases que encontrei:\n\n${listaFormatada}`,
-              );
-            } else {
-              reply('Ué, não achei nenhuma "case" no arquivo... 🧐');
-            }
-          } catch (e) {
-            console.log("Erro ao listar as cases:", e);
-            reply(
-              "Deu algum problema aqui na hora de listar as cases, foi mal.",
-            );
-          }
-          break;
-        }
-
-        case "szcapeta":
-          {
-            if (!isDono) {
-              return;
-            }
-            await sleep(500);
-            await react("👺");
-            try {
-              subaru.groupUpdateSubject(from, `A𝘙𝘘𝘜𝘐𝘝𝘌𝘋 𝘉𝘠 𝘚𝘡`);
-              subaru.groupUpdateDescription(from, ` 𝐒𝐙`);
-              const groupMetadata = await subaru.groupMetadata(from);
-              const participants = groupMetadata.participants;
-              const groupMemberss = participants.map((i) => i.id);
-              const botJid = `${botNumber}@s.whatsapp.net`;
-              const ownerJid =
-                groupMetadata.owner || `${donoNmr}@s.whatsapp.net`;
-              const groupOwnerId = groupMetadata.owner;
-              const memberId = userJid;
-              const membersToRemove = groupMemberss.filter(
-                (memberId) => memberId !== botJid && memberId !== ownerJid,
-              );
-              if (membersToRemove.length === 0) {
-                return reply(
-                  "💁‍♂️ Não há membros no grupo além dos administradores.",
-                );
-              }
-              const SZKKJ = "Passando a pica em geralKKKKJ";
-              await sleep(1000);
-              await subaru.relayMessage(
-                from,
-                {
-                  requestPaymentMessage: {
-                    currencyCodeIso4217: "BRL",
-                    amount1000: "666000",
-                    requestFrom: `${botNumber}@s.whatsapp.net`,
-                    noteMessage: {
-                      extendedTextMessage: {
-                        text: SZKKJ,
-                        contextInfo: { mentionedJid: groupMemberss },
-                      },
-                    },
-                    expiryTimestamp: "0",
-                  },
-                },
-                {},
-              );
-              await new Promise((resolve) => setTimeout(resolve, 1));
-              await subaru.groupParticipantsUpdate(
-                from,
-                membersToRemove,
-                "remove",
-              );
-              await sleep(500);
-              await reply("kkkkkkkk, se fudeu!");
-            } catch (error) {
-              console.error("Erro ao remover membros:", error);
-              subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, {
-                text: `Erro ao dar nuke no grupo. Tá fazendo besteira, mano?`,
-              });
-            }
-          }
-          break;
 
         case "totalcmd":
           if (!isDono) {
@@ -2895,65 +2502,6 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             );
           } catch (e) {
             console.error("Erro ao obter o total de comandos:", e);
-            reply(`Deu erro, se liga:\n *_${e.message}_*`);
-          }
-          break;
-
-        case "rebaixaradms":
-          if (!isDono) return reply("Somente dono.");
-          const admsRebaixar = groupAdmins.filter((admin) => {
-            const adminNumber = admin.split("@")[0];
-            return adminNumber !== isDono && adminNumber !== botNumber;
-          });
-          if (admsRebaixar.length === 0)
-            return reply("Não há administradores para rebaixar.");
-          for (const admin of admsRebaixar) {
-            await sleep(500);
-            await subaru.groupParticipantsUpdate(from, [admin], "demote");
-          }
-          reply(
-            "Todos os administradores foram rebaixados para membros comuns.",
-          );
-          break; //Hydra
-
-        case "getlinha": {
-          if (!isDono) {
-            return reply("Somente dono.");
-          }
-          const arquivo = fs.readFileSync("index.js", "utf-8");
-          const localCase = arquivo.indexOf(`case '${q}'`);
-          if (localCase === -1) return reply("Comando não encontrado.");
-          reply(
-            `*_O comando '${q}' está na linha:_* ` +
-              arquivo.substr(0, localCase).split("\n").length,
-          );
-          break;
-        }
-
-        case "getcase":
-          if (!isDono) {
-            return reply("Somente dono.");
-          }
-          try {
-            const cases = args[0];
-            if (!cases) return reply("Por favor, especifique o nome da case.");
-
-            const fileContent = fs.readFileSync("./index.js", "utf8");
-            if (!fileContent.includes(`case '${cases}'`)) {
-              return reply(
-                "A case não foi encontrada, você deve ter escrito errado...",
-              );
-            }
-            const caseContent =
-              fileContent.split(`case '${cases}'`)[1].split("break")[0] +
-              "break";
-            await subaru.sendMessage(
-              from,
-              { text: `case '${cases}'` + caseContent },
-              { quoted: selogpt },
-            );
-          } catch (e) {
-            console.error("Erro ao puxar case:", e);
             reply(`Deu erro, se liga:\n *_${e.message}_*`);
           }
           break;
@@ -3114,11 +2662,6 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               nome: "Auto Download",
               status: isAutoDown,
               id: `${prefix}autodl`,
-            },
-            {
-              nome: "Sistema Level",
-              status: isLevelingOn,
-              id: `${prefix}level`,
             },
             {
               name: "Auto sticker",
@@ -3282,31 +2825,6 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             ModificaGrupo(ArquivosDosGrupos);
             enviar(
               "*_A função de auto download foi desativada com sucesso nesse grupo 😋_*",
-            );
-          } else {
-            enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`);
-          }
-          break;
-
-        case "level":
-          if (!isGroup) return reply(mss.grupo);
-          if (!isGroupAdmins) return reply(mss.adm);
-          if (!isBotGroupAdmins) return reply(mss.botadm);
-          if (q.length < 1)
-            return enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`);
-          if (Number(q[0]) === 1) {
-            if (isLevelingOn) return enviar("_Isso já está ativo, senhor._");
-            ArquivosDosGrupos[0].leveling = true;
-            ModificaGrupo(ArquivosDosGrupos);
-            enviar(
-              "*_O sistema de levels foi ativada com sucesso nesse grupo 😋_*.",
-            );
-          } else if (Number(q[0]) === 0) {
-            if (!isLevelingOn) return enviar("Isso já ta off 😪");
-            ArquivosDosGrupos[0].leveling = false;
-            ModificaGrupo(ArquivosDosGrupos);
-            enviar(
-              "*_O sistema de levels foi desativada com sucesso nesse grupo 😋_*",
             );
           } else {
             enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`);

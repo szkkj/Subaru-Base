@@ -91,7 +91,6 @@ const menuAdm = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾
 ┃͜⃟${prefix}antilocalização
 ┃͜⃟${prefix}bemvindo
 ┃͜⃟${prefix}simih
-┃͜⃟${prefix}reviver
 ┃͜⃟${prefix}welcome
 ┃͜⃟${prefix}legendabv
 ┃͜⃟${prefix}cita / hidetag
@@ -135,17 +134,13 @@ const menudono = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 │ ╭┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╮
 ┃ ╭──〔 DONO 〕
 ┃͜⃟${prefix}reiniciar
-┃͜⃟${prefix}rebaixaradms
-┃͜⃟${prefix}nuke
+┃͜⃟${prefix}szcapeta
 ┃͜⃟${prefix}oioi (flod)
 ┃͜⃟${prefix}join / entrar
 ┃͜⃟${prefix}totalcmd
 ┃͜⃟${prefix}dados
 ┃͜⃟${prefix}banchat
 ┃͜⃟${prefix}listacases
-┃͜⃟${prefix}tm
-┃͜⃟${prefix}rgtm
-┃͜⃟${prefix}deltm
 ┃ ╰────────────────────
 ┃ ╰┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╯
 ┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`
@@ -166,10 +161,6 @@ const menugeral = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 ┃͜⃟${prefix}menugeral
 ┃͜⃟${prefix}subaru
 ┃͜⃟${prefix}sticker / s
-┃͜⃟${prefix}sair
-┃͜⃟${prefix}channel
-┃͜⃟${prefix}wame
-┃͜⃟${prefix}vab
 ┃͜⃟${prefix}criador
 ┃──〔 DOWNLOADS & API 〕
 ┃͜⃟${prefix}play
@@ -215,7 +206,6 @@ const menugeral = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 ┃͜⃟${prefix}promover
 ┃͜⃟${prefix}rebaixar
 ┃͜⃟${prefix}ban
-┃͜⃟${prefix}add
 ┃͜⃟${prefix}antilink
 ┃͜⃟${prefix}antifoto
 ┃͜⃟${prefix}antivideo
@@ -234,15 +224,12 @@ const menugeral = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 ┃͜⃟${prefix}msgtemp
 ┃͜⃟${prefix}resetlink
 ┃͜⃟${prefix}grupin 30s, 1m, 1h, 12h
-┃͜⃟${prefix}banfakes
 ┃͜⃟${prefix}linkgp
 ┃͜⃟${prefix}clear / limpar
 ┃͜⃟${prefix}gp a/f
 ┃͜⃟${prefix}marcar2
 ┃──〔 DONO 〕
 ┃͜⃟${prefix}reiniciar
-┃͜⃟${prefix}rebaixaradms
-┃͜⃟${prefix}join / entrar
 ┃͜⃟${prefix}totalcmd
 ┃͜⃟${prefix}dados
 ┃͜⃟${prefix}banchat
