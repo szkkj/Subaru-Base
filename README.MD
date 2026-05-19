@@ -248,4 +248,8 @@ Tamo junto, e se curtir, dá aquela força e segue o canal!
   <a href="https://github.com/szkkj/Subaru-Base/">
     <img src="https://img.shields.io/badge/⭐%20Github%20do%20projeto-181717?style=for-the-badge&logo=github" />
   </a>
+<<<<<<< HEAD
 </p>
+=======
+</p>
+>>>>>>> 55c16617 (correcao do readme na tag)
