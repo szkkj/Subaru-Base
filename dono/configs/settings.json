@@ -7,7 +7,7 @@
   "donoLid": "78624208212191@lid",
   "botLid": "2963594596553@lid",
   "pairKey": "SUBARUV4",
-  "baseVersion": "4.2.0",
+  "baseVersion": "4.2.1",
   "baseRaikken": "https://api.raikken.com.br",
   "baseRaikkenTinder": "https://api.raikken.com.br/api/tinder",
   "RaikkenKey": "raikkenv2",
