@@ -134,6 +134,7 @@ const startConnection = async () => {
     const question = (text) =>
       new Promise((resolve) => rl.question(text, resolve));
     process.stdout.write("Insira o número de telefone para conectar: ");
+    process.stdout.write("\n");
     const phoneNumber_raw = await new Promise((resolve) =>
       rl.once("line", resolve),
     );
