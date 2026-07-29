@@ -9,7 +9,7 @@
     "start": "while true; do node conection.js --code; sleep 1; done"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "axios": "^1.9.0",
     "chalk": "^4.1.2",
     "file-type": "16.5.3",
