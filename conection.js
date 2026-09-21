@@ -108,7 +108,7 @@ const startConnection = async () => {
   const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 //  const { version } = await fetchLatestBaileysVersion();
   const subaru = makeWASocket({
-    version: [2, 3000, 1035194821],
+    version: [2, 3000, 1044006379],
     logger,
     auth: state,
     markOnlineOnConnect: true,

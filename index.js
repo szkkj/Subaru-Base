@@ -1292,7 +1292,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
         );
       } catch (e) {
         console.log(e);
-        botSemKey(subaru, grupoName, comando);
+        botSemKey(subaru, groupName, comando);
       }
       return;
     }
@@ -3615,7 +3615,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             );
           } catch (e) {
             console.error(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -3638,7 +3638,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             });
           } catch (e) {
             console.error(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -3658,7 +3658,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             });
           } catch (e) {
             console.error(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -3678,7 +3678,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             });
           } catch (e) {
             console.error(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -3697,7 +3697,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             });
           } catch (e) {
             console.error(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -3820,7 +3820,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               await mentions(msgFormatada, [sender2, alvo]);
             } catch (e) {
               console.log(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -3860,7 +3860,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               await mentions(data.mensagem, [sender2, alvo]);
             } catch (e) {
               console.log(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -3901,7 +3901,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               await mentions(msgFormatada, [sender2, alvo]);
             } catch (e) {
               console.log(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -3977,7 +3977,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               await mentions(msg, membrosParaMencionar);
             } catch (e) {
               console.log(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -4004,7 +4004,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               await reply(`🍼 ${data.mensagem || "Erro desconhecido."}`);
             } catch (e) {
               console.log(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -4024,7 +4024,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               await reply(`💋 *Lista de Amantes de ${sender2}:*\n\n${lista}`);
             } catch (e) {
               console.log(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -4044,7 +4044,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               await reply(`🍼 *Filhos de ${sender2}:*\n\n${lista}`);
             } catch (e) {
               console.log(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -4105,7 +4105,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             );
           } catch (e) {
             console.log(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -4143,7 +4143,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             );
           } catch (e) {
             console.error("Erro no comando .playdoc:", e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -4181,7 +4181,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             );
           } catch (e) {
             console.error(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -4225,7 +4225,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               );
             } catch (err) {
               console.error(err);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -4259,7 +4259,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               );
             } catch (err) {
               console.error(err);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -4282,7 +4282,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             return reply(`🤖 *Resposta do Gemini:*\n\n${res.data.resultado}`);
           } catch (err) {
             console.error("Erro ao chamar Gemini:", err);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -4303,7 +4303,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             await reply(`💡 *Resposta da IA:*\n\n${res.data.resultado}`);
           } catch (err) {
             console.error("Erro na IA =>", err);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
 
           break;
@@ -4338,7 +4338,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             );
           } catch (err) {
             console.error("Erro Insta =>", err);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -4397,7 +4397,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
                   `[❌] Erro ao buscar imagem ${count + 1}:`,
                   err.message || err,
                 );
-                botSemKey(subaru, grupoName, comando);
+                botSemKey(subaru, groupName, comando);
               }
             }
 
@@ -4485,7 +4485,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
             });
           } catch (e) {
             console.error(e);
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -4516,7 +4516,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               { quoted: info },
             );
           } catch (e) {
-            botSemKey(subaru, grupoName, comando);
+            botSemKey(subaru, groupName, comando);
           }
           break;
         }
@@ -4931,7 +4931,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               );
             } catch (e) {
               console.error(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -4974,7 +4974,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               );
             } catch (e) {
               console.error(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -5035,7 +5035,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               }
             } catch (e) {
               console.error(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -5078,7 +5078,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               );
             } catch (e) {
               console.error(e);
-              botSemKey(subaru, grupoName, comando);
+              botSemKey(subaru, groupName, comando);
             }
           }
           break;
@@ -5104,7 +5104,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
       }
     } catch (error) {
       console.error(`Erro ao processar o comando '${command}':`, error);
-      if (!botSemKey(subaru, grupoName, comando)) return;
+      if (!botSemKey(subaru, groupName, comando)) return;
     }
   } // aqui fecha o else
 }; //CUIDADO, AQUI FECHA A FUNÇÃO !!
