@@ -1,0 +1,65 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.toSerializedPubKey = toSerializedPubKey;
+exports.toRawPubKey = toRawPubKey;
+exports.prependVersion = prependVersion;
+exports.readVersionedContent = readVersionedContent;
+const bytes_1 = require("../../util/bytes");
+const SERIALIZED_PUB_KEY_PREFIX = 5;
+/**
+ * Converts a 32-byte raw public key to 33-byte serialized format (with 0x05 prefix)
+ */
+function toSerializedPubKey(key) {
+    if (key.length === 33) {
+        if (key[0] !== SERIALIZED_PUB_KEY_PREFIX) {
+            throw new Error('invalid serialized signal public key prefix');
+        }
+        return key;
+    }
+    (0, bytes_1.assertByteLength)(key, 32, `invalid signal public key length ${key.length}`);
+    const out = new Uint8Array(33);
+    out[0] = SERIALIZED_PUB_KEY_PREFIX;
+    out.set(key, 1);
+    return out;
+}
+/**
+ * Converts a 33-byte serialized public key to 32-byte raw format
+ */
+function toRawPubKey(key) {
+    if (key.length === 32) {
+        return key;
+    }
+    if (key.length === 33 && key[0] === SERIALIZED_PUB_KEY_PREFIX) {
+        return key.subarray(1);
+    }
+    throw new Error(`invalid signal public key length ${key.length}`);
+}
+/**
+ * Prepends a version byte to content
+ */
+function prependVersion(content, version) {
+    const out = new Uint8Array(1 + content.length);
+    out[0] = ((version << 4) | version) & 0xff;
+    out.set(content, 1);
+    return out;
+}
+/**
+ * Reads versioned content, validating the version and extracting the body
+ */
+function readVersionedContent(versionContent, expectedVersion, suffixLength) {
+    if (versionContent.length < 1) {
+        throw new Error('signal versioned content is empty');
+    }
+    const version = versionContent[0] >>> 4;
+    if (version !== expectedVersion) {
+        if (version < expectedVersion) {
+            throw new Error('legacy signal version');
+        }
+        throw new Error(`unsupported signal version ${version}`);
+    }
+    const bodyEnd = versionContent.length - suffixLength;
+    if (bodyEnd <= 1) {
+        throw new Error('invalid signal content length');
+    }
+    return versionContent.subarray(1, bodyEnd);
+}

@@ -1,0 +1,91 @@
+import { DICTIONARIES, SINGLE_BYTE_TOKENS } from '../binary/tokens.js';
+export const LIST_EMPTY = 0;
+export const STREAM_END = 2;
+export const DICTIONARY_0 = 236;
+export const DICTIONARY_3 = 239;
+export const JID_INTEROP = 245;
+export const JID_FB = 246;
+export const JID_U = 247;
+export const LIST_8 = 248;
+export const LIST_16 = 249;
+export const JID_PAIR = 250;
+export const HEX_8 = 251;
+export const BINARY_8 = 252;
+export const BINARY_20 = 253;
+export const BINARY_32 = 254;
+export const NIBBLE_8 = 255;
+export const JID_U_DOMAIN_TYPE_PN = 0x00;
+export const JID_U_DOMAIN_TYPE_LID = 0x01;
+export const JID_U_DOMAIN_TYPE_HOSTED = 0x80;
+export const JID_U_DOMAIN_TYPE_HOSTED_LID = 0x81;
+export const JID_U_DOMAIN_TYPE_HOSTED_MASK = 0x80;
+export const JID_U_DOMAIN_TYPE_LID_MASK = 0x01;
+export const NIBBLE_ALPHABET = Object.freeze([
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '-',
+    '.',
+    '\uFFFD',
+    '\uFFFD',
+    '\uFFFD',
+    '\uFFFD'
+]);
+export const HEX_ALPHABET = Object.freeze([
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F'
+]);
+export const SINGLE_BYTE_TOKEN_MAP = (() => {
+    const map = new Map();
+    for (let i = 0; i < SINGLE_BYTE_TOKENS.length; i += 1) {
+        map.set(SINGLE_BYTE_TOKENS[i], i + 1);
+    }
+    return map;
+})();
+export const DICTIONARY_TOKEN_MAPS = DICTIONARIES.map((dictionary) => {
+    const map = new Map();
+    for (let i = 0; i < dictionary.length; i += 1) {
+        map.set(dictionary[i], i);
+    }
+    return map;
+});
+export const MERGED_TOKEN_DICTIONARY_FLAG = 65536;
+/**
+ * Single lookup table for the encoder: single-byte tokens map to their code
+ * (< 256), dictionary tokens to `MERGED_TOKEN_DICTIONARY_FLAG | (dict << 8) |
+ * token`. Built dictionary-last-to-first then single-byte so precedence
+ * matches the sequential lookup order (single byte, then dictionary 0..3).
+ */
+export const MERGED_TOKEN_MAP = (() => {
+    const map = new Map();
+    for (let i = DICTIONARY_TOKEN_MAPS.length - 1; i >= 0; i -= 1) {
+        for (const [value, token] of DICTIONARY_TOKEN_MAPS[i]) {
+            map.set(value, MERGED_TOKEN_DICTIONARY_FLAG | (i << 8) | token);
+        }
+    }
+    for (const [value, token] of SINGLE_BYTE_TOKEN_MAP) {
+        map.set(value, token);
+    }
+    return map;
+})();

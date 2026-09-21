@@ -1,0 +1,15 @@
+import type { AppStateCollectionName } from './types';
+export declare const APP_STATE_DERIVED_KEY_LENGTH = 160;
+export declare const APP_STATE_DERIVED_INDEX_KEY_END = 32;
+export declare const APP_STATE_DERIVED_VALUE_ENCRYPTION_KEY_END = 64;
+export declare const APP_STATE_DERIVED_VALUE_MAC_KEY_END = 96;
+export declare const APP_STATE_DERIVED_SNAPSHOT_MAC_KEY_END = 128;
+export declare const APP_STATE_DERIVED_PATCH_MAC_KEY_END = 160;
+export declare const APP_STATE_VALUE_MAC_LENGTH = 32;
+export declare const APP_STATE_MAC_OCTET_LENGTH = 8;
+export declare const APP_STATE_IV_LENGTH = 16;
+export declare const APP_STATE_LT_HASH_SIZE = 128;
+export declare const APP_STATE_POINT_SIZE = 2;
+export declare const APP_STATE_EMPTY_LT_HASH: Readonly<Uint8Array>;
+export declare const APP_STATE_DEFAULT_COLLECTION_VERSION = 0;
+export declare const APP_STATE_DEFAULT_COLLECTIONS: readonly AppStateCollectionName[];

@@ -1,0 +1,73 @@
+import { WA_DEFAULTS, WA_IQ_TYPES, WA_NODE_TAGS, WA_USYNC_CONTEXTS, WA_XMLNS } from '../../../protocol/constants.js';
+import { buildUsyncIq } from '../../node/builders/usync.js';
+import { buildIqNode } from '../../node/query.js';
+export function buildAccountDevicesSyncIq(userJids, sid) {
+    return buildUsyncIq({
+        sid,
+        context: WA_USYNC_CONTEXTS.NOTIFICATION,
+        queryProtocolNodes: [
+            {
+                tag: WA_NODE_TAGS.DEVICES,
+                attrs: {
+                    version: '2'
+                }
+            }
+        ],
+        users: userJids.map((jid) => ({
+            jid
+        }))
+    });
+}
+export function buildAccountPictureSyncIq(meJid) {
+    return buildIqNode(WA_IQ_TYPES.GET, WA_DEFAULTS.HOST_DOMAIN, WA_XMLNS.PROFILE_PICTURE, [
+        {
+            tag: WA_NODE_TAGS.PICTURE,
+            attrs: {
+                type: 'image',
+                query: 'url'
+            }
+        }
+    ], {
+        target: meJid
+    });
+}
+export function buildAccountBlocklistSyncIq() {
+    return buildIqNode(WA_IQ_TYPES.GET, WA_DEFAULTS.HOST_DOMAIN, WA_XMLNS.BLOCKLIST);
+}
+export function buildListParticipatingGroupsIq() {
+    return buildIqNode(WA_IQ_TYPES.GET, WA_DEFAULTS.GROUP_SERVER, WA_XMLNS.GROUPS, [
+        {
+            tag: WA_NODE_TAGS.PARTICIPATING,
+            attrs: {},
+            content: [
+                {
+                    tag: WA_NODE_TAGS.PARTICIPANTS,
+                    attrs: {}
+                },
+                {
+                    tag: WA_NODE_TAGS.DESCRIPTION,
+                    attrs: {}
+                }
+            ]
+        }
+    ]);
+}
+export function buildNewsletterMetadataSyncIq() {
+    return buildIqNode(WA_IQ_TYPES.GET, WA_DEFAULTS.HOST_DOMAIN, WA_XMLNS.NEWSLETTER, [
+        {
+            tag: WA_NODE_TAGS.MY_ADDONS,
+            attrs: {
+                limit: '1'
+            }
+        }
+    ]);
+}
+export function buildClearDirtyBitsIq(dirtyBits) {
+    return buildIqNode(WA_IQ_TYPES.SET, WA_DEFAULTS.HOST_DOMAIN, WA_XMLNS.DIRTY_BITS, dirtyBits.map((dirtyBit) => ({
+        tag: 'clean',
+        attrs: {
+            type: dirtyBit.type,
+            timestamp: `${dirtyBit.timestamp}`
+        }
+    })));
+}

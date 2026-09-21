@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SIGNAL_PREFIX = exports.WHISPER_RATCHET_INFO = exports.WHISPER_TEXT_INFO = exports.WHISPER_MESSAGE_KEYS_INFO = exports.WHISPER_GROUP_INFO = exports.CHAIN_KEY_LABEL = exports.MESSAGE_KEY_LABEL = exports.SENDER_KEY_FUTURE_MESSAGES_MAX = exports.FUTURE_MESSAGES_MAX = exports.MAX_UNUSED_KEYS = exports.MAX_PREV_SESSIONS = exports.SIGNAL_MAC_SIZE = exports.SIGNAL_GROUP_VERSION = exports.SIGNAL_VERSION = void 0;
+const bytes_1 = require("../util/bytes");
+exports.SIGNAL_VERSION = 3;
+exports.SIGNAL_GROUP_VERSION = 3;
+exports.SIGNAL_MAC_SIZE = 8;
+exports.MAX_PREV_SESSIONS = 40;
+exports.MAX_UNUSED_KEYS = 2000;
+exports.FUTURE_MESSAGES_MAX = 2000;
+exports.SENDER_KEY_FUTURE_MESSAGES_MAX = 20000;
+exports.MESSAGE_KEY_LABEL = new Uint8Array([1]);
+exports.CHAIN_KEY_LABEL = new Uint8Array([2]);
+exports.WHISPER_GROUP_INFO = bytes_1.TEXT_ENCODER.encode('WhisperGroup');
+exports.WHISPER_MESSAGE_KEYS_INFO = bytes_1.TEXT_ENCODER.encode('WhisperMessageKeys');
+exports.WHISPER_TEXT_INFO = bytes_1.TEXT_ENCODER.encode('WhisperText');
+exports.WHISPER_RATCHET_INFO = bytes_1.TEXT_ENCODER.encode('WhisperRatchet');
+exports.SIGNAL_PREFIX = new Uint8Array(32).fill(0xff);

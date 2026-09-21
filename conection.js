@@ -1,7 +1,5 @@
-import * as baileysPkg from "@whiskeysockets/baileys";
 import { cacheService } from "./database/dev/cacheService.js";
 import fs from "fs";
-import pino from "pino";
 import chalk from "chalk";
 import path from "path";
 import readline from "readline";
@@ -9,73 +7,41 @@ import LRU from "pixl-cache";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import qrcode from "qrcode-terminal";
+import { createEngine } from "./database/dev/.scripts/engine.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const {
-  default: makeWASocket,
-  DisconnectReason,
-  useMultiFileAuthState,
-  fetchLatestBaileysVersion,
-  isJidBroadcast,
-  isJidStatusBroadcast,
-  getContentType,
-  makeCacheableSignalKeyStore,
-} = baileysPkg;
-
-import LoggerBPkg from "@whiskeysockets/baileys/lib/Utils/logger.js";
-const LoggerB = LoggerBPkg.default || LoggerBPkg;
-const logger = LoggerB.child({});
-logger.level = "fatal";
-
 import {
-  escolherPersonalidadeSubaru,
-  escolherVideoPorRota,
-  getFileBuffer,
-  checkPrefix,
-  fetchJson,
   getBuffer,
-  data,
-  hora,
+  getRandomSaudacao,
   esperar,
   groupConfigCache,
-  getRandomSaudacao,
 } from "./dono/functions.js";
 import { handleCmds } from "./index.js";
 
+const settings = require("./dono/configs/settings.json");
 const {
   prefix,
-  botName,
   donoName,
   donoNmr,
-  idCanal,
   pairKey,
   logsCvs,
-} = require("./dono/configs/settings.json");
+} = settings;
 
 console.info = (...a) =>
   String(a[0]).includes("session") || console._info?.(...a);
 
 const pk = pairKey.toUpperCase();
-const groupMetadataCache = new LRU({
-  maxItems: 50,
-  maxAge: 300,
-});
-const messageQueue = [];
-let processingQueue = false;
+const groupMetadataCache = new LRU({ maxItems: 50, maxAge: 300 });
 const messageCache = new LRU({ maxItems: 200, maxAge: 600 });
-let fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
+const fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
 const well = fs.readFileSync("./database/imgs/well.png");
 
 async function getGroupMetadataSafe(groupId, subaru) {
-  if (groupMetadataCache.has(groupId)) {
-    return groupMetadataCache.get(groupId);
-  }
-  if (!groupId.endsWith("@g.us")) {
-    return null;
-  }
+  if (groupMetadataCache.has(groupId)) return groupMetadataCache.get(groupId);
+  if (!groupId.endsWith("@g.us")) return null;
   try {
     const meta = await subaru.groupMetadata(groupId);
     groupMetadataCache.set(groupId, meta);
@@ -96,49 +62,23 @@ function getGroupConfig(id) {
   return config;
 }
 
-function delay(min = 50, max = 800) {
-  const ms = Math.floor(Math.random() * (max - min + 1)) + min;
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 const startConnection = async () => {
-  const { state, saveCreds } = await useMultiFileAuthState(
-    "./dono/configs/session",
-  );
-  const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
-//  const { version } = await fetchLatestBaileysVersion();
-  const subaru = makeWASocket({
-    version: [2, 3000, 1044006379],
-    logger,
-    auth: state,
-    markOnlineOnConnect: true,
-    syncFullHistory: false,
-    keepAliveIntervalMs: 15_000,
-    connectTimeoutMs: 20_000,
-    keys: makeCacheableSignalKeyStore(state.keys, logger),
-    groupMetadataCache,
-    shouldIgnoreJid: (jid) =>
-      isJidBroadcast(jid) || isJidStatusBroadcast(jid) || isJidNewsletter(jid),
-    getMessage: async (key) => {
-      const msg = messageCache.get(key.id);
-      if (msg?.message) return msg?.message;
-      return { conversation: "" };
-    },
-  });
+  const subaru = await createEngine(settings);
 
-  if (process.argv.includes("--code") && !subaru.authState.creds.registered) {
+  if (
+    subaru.type === "baileys" &&
+    process.argv.includes("--code") &&
+    !subaru.authState.creds.registered
+  ) {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
-    const question = (text) =>
-      new Promise((resolve) => rl.question(text, resolve));
-    process.stdout.write("Insira o número de telefone para conectar: ");
-    process.stdout.write("\n");
+    process.stdout.write("Insira o número de telefone para conectar: \n");
     const phoneNumber_raw = await new Promise((resolve) =>
       rl.once("line", resolve),
     );
-    let phoneNumber = phoneNumber_raw.replace(/\D/g, "");
+    const phoneNumber = phoneNumber_raw.replace(/\D/g, "");
     const code = await subaru.requestPairingCode(phoneNumber, pk);
     process.stdout.write(
       `Seu código de pareamento: ${code?.match(/.{1,4}/g)?.join("-") || code}\n`,
@@ -148,6 +88,7 @@ const startConnection = async () => {
 
   let isRestart = false;
   let reconnectAttempts = 0;
+
   subaru.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
@@ -158,9 +99,9 @@ const startConnection = async () => {
 
     if (connection === "close") {
       const shouldReconnect =
-        lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
+        lastDisconnect?.error?.output?.statusCode !== 401;
       console.log(
-        `Conexão fechada. Motivo: ${lastDisconnect.error?.output?.statusCode}.`,
+        `Conexão fechada. Motivo: ${lastDisconnect?.error?.output?.statusCode}.`,
       );
       console.log(`Reconectando: ${shouldReconnect}`);
       if (shouldReconnect) {
@@ -175,7 +116,7 @@ const startConnection = async () => {
         reconnectAttempts = 0;
       }
     } else if (connection === "open") {
-      if (!isRestart) {
+      if (!isRestart && subaru.type === "baileys") {
         await esperar(500);
         await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
         await esperar(500);
@@ -188,9 +129,11 @@ const startConnection = async () => {
     }
   });
 
-  subaru.ev.on("creds.update", saveCreds);
-  subaru.ev.on("chats.set", () => console.log("✔️ Conversas carregadas."));
-  subaru.ev.on("contacts.set", () => console.log("✔️ Contatos carregados."));
+  if (subaru.type === "baileys") {
+    subaru.ev.on("creds.update", () => subaru.authState?.saveCreds?.());
+    subaru.ev.on("chats.set", () => console.log("✔️ Conversas carregadas."));
+    subaru.ev.on("contacts.set", () => console.log("✔️ Contatos carregados."));
+  }
 
   subaru.ev.on("messages.upsert", async ({ messages, type }) => {
     const msg = messages[0];
@@ -223,6 +166,7 @@ const startConnection = async () => {
         info.message?.templateButtonReplyMessage?.selectedId ||
         info?.text ||
         "";
+
       const from =
         msg.key.remoteJid || msg.key.remoteLid || msg.key.participantAlt;
       const isGroup = from.endsWith("@g.us");
@@ -261,8 +205,7 @@ const startConnection = async () => {
             msg.message.interactiveResponseMessage.nativeFlowResponseMessage
               .paramsJson,
           );
-          let comandoInterativo = json.selectedRowId;
-          if (comandoInterativo) comando = comandoInterativo;
+          if (json.selectedRowId) comando = json.selectedRowId;
         } catch (e) {
           console.error("Erro ao parsear paramsJson:", e);
         }
@@ -281,6 +224,7 @@ const startConnection = async () => {
       await handleCmds(subaru, msg);
 
       cacheService.saveGroupMetadata(from, groupMetadata);
+
       if (isCmd) {
         console.log(
           chalk.blueBright("\n╔══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╗") +
@@ -375,7 +319,7 @@ const startConnection = async () => {
     const groupName = groupMetadata.subject;
     const member = participants[0];
     try {
-      let wel = getBuffer(well);
+      const wel = getBuffer(well);
       let textinh = "";
       if (action === "add" && welcomeConfig.entrou) {
         textinh = welcomeConfig.entrou
@@ -404,14 +348,9 @@ const startConnection = async () => {
         });
       }
     } catch (e) {
-      console.error(
-        `Erro no evento 'group-participants.update' para o grupo ${id}:`,
-        e,
-      );
+      console.error(`Erro no evento 'group-participants.update' para o grupo ${id}:`, e,);
       if (e?.data === 403) {
-        console.log(
-          `Bot foi removido do grupo ${id}. Excluindo arquivo de configuração.`,
-        );
+        console.log(`Bot foi removido do grupo ${id}. Excluindo arquivo de configuração.`,);
         fs.unlinkSync(groupSettingsPath);
       }
     }

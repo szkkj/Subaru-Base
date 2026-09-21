@@ -1,0 +1,23 @@
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
+export declare const LOG_LEVEL_PRIORITY: Readonly<Record<LogLevel, number>>;
+export interface LoggerChildOptions {
+    /** Minimum level the derived logger emits; defaults to the parent's level. */
+    readonly level?: LogLevel;
+}
+export interface Logger {
+    readonly level: LogLevel;
+    trace(message: string, context?: Readonly<Record<string, unknown>>): void;
+    debug(message: string, context?: Readonly<Record<string, unknown>>): void;
+    info(message: string, context?: Readonly<Record<string, unknown>>): void;
+    warn(message: string, context?: Readonly<Record<string, unknown>>): void;
+    error(message: string, context?: Readonly<Record<string, unknown>>): void;
+    /**
+     * Returns a derived logger that pre-binds `bindings` into every log
+     * call's context object. Bindings stack: `parent.child(a).child(b)`
+     * merges `{ ...a, ...b }`. Per-call context wins on key conflicts.
+     * Pass `options.level` to give the child its own minimum level
+     * (independent of the parent), e.g. to quiet a noisy subsystem.
+     */
+    child(bindings: Readonly<Record<string, unknown>>, options?: LoggerChildOptions): Logger;
+}
+export declare function createNoopLogger(level?: LogLevel): Logger;

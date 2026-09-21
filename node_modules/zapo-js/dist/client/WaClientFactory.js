@@ -1,0 +1,1146 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resolveWaClientBase = resolveWaClientBase;
+exports.buildWaClientDependencies = buildWaClientDependencies;
+const WaAppStateSyncClient_1 = require("../appstate/sync/WaAppStateSyncClient");
+const WaAuthClient_1 = require("../auth/WaAuthClient");
+const WaConnectionManager_1 = require("./connection/WaConnectionManager");
+const WaReceiptQueue_1 = require("./connection/WaReceiptQueue");
+const WaAbPropsCoordinator_1 = require("./coordinators/WaAbPropsCoordinator");
+const WaAppStateMutationCoordinator_1 = require("./coordinators/WaAppStateMutationCoordinator");
+const WaBotCoordinator_1 = require("./coordinators/WaBotCoordinator");
+const WaBroadcastListCoordinator_1 = require("./coordinators/WaBroadcastListCoordinator");
+const WaBusinessCoordinator_1 = require("./coordinators/WaBusinessCoordinator");
+const WaEmailCoordinator_1 = require("./coordinators/WaEmailCoordinator");
+const WaGroupCoordinator_1 = require("./coordinators/WaGroupCoordinator");
+const WaIncomingNodeCoordinator_1 = require("./coordinators/WaIncomingNodeCoordinator");
+const WaLowLevelCoordinator_1 = require("./coordinators/WaLowLevelCoordinator");
+const WaMessageCoordinator_1 = require("./coordinators/WaMessageCoordinator");
+const WaMessageDispatchCoordinator_1 = require("./coordinators/WaMessageDispatchCoordinator");
+const WaMobileCoordinator_1 = require("./coordinators/WaMobileCoordinator");
+const WaNewsletterCoordinator_1 = require("./coordinators/WaNewsletterCoordinator");
+const WaOfflineResumeCoordinator_1 = require("./coordinators/WaOfflineResumeCoordinator");
+const WaPassiveTasksCoordinator_1 = require("./coordinators/WaPassiveTasksCoordinator");
+const WaPresenceCoordinator_1 = require("./coordinators/WaPresenceCoordinator");
+const WaPrivacyCoordinator_1 = require("./coordinators/WaPrivacyCoordinator");
+const WaProfileCoordinator_1 = require("./coordinators/WaProfileCoordinator");
+const WaRetryCoordinator_1 = require("./coordinators/WaRetryCoordinator");
+const WaStatusCoordinator_1 = require("./coordinators/WaStatusCoordinator");
+const WaStreamControlCoordinator_1 = require("./coordinators/WaStreamControlCoordinator");
+const WaTrustedContactTokenCoordinator_1 = require("./coordinators/WaTrustedContactTokenCoordinator");
+const devices_1 = require("./events/devices");
+const dirty_1 = require("./events/dirty");
+const identity_1 = require("./events/identity");
+const privacy_token_1 = require("./events/privacy-token");
+const username_1 = require("./events/username");
+const fanout_1 = require("./messaging/fanout");
+const group_metadata_1 = require("./messaging/group-metadata");
+const key_protocol_1 = require("./messaging/key-protocol");
+const link_preview_1 = require("./messaging/link-preview");
+const messages_1 = require("./messaging/messages");
+const WaMediaTransferClient_1 = require("../media/transfer/WaMediaTransferClient");
+const fetcher_1 = require("../message/addons/link-preview/fetcher");
+const newsletter_1 = require("../message/kinds/newsletter");
+const incoming_1 = require("../message/primitives/incoming");
+const media_retry_1 = require("../message/primitives/media-retry");
+const peer_data_operation_1 = require("../message/primitives/peer-data-operation");
+const WaMessageClient_1 = require("../message/WaMessageClient");
+const constants_1 = require("../protocol/constants");
+const jid_1 = require("../protocol/jid");
+const presence_1 = require("../protocol/presence");
+const tracker_1 = require("../retry/tracker");
+const SignalDeviceSyncApi_1 = require("../signal/api/SignalDeviceSyncApi");
+const SignalDigestSyncApi_1 = require("../signal/api/SignalDigestSyncApi");
+const SignalIdentitySyncApi_1 = require("../signal/api/SignalIdentitySyncApi");
+const SignalMissingPreKeysSyncApi_1 = require("../signal/api/SignalMissingPreKeysSyncApi");
+const SignalRotateKeyApi_1 = require("../signal/api/SignalRotateKeyApi");
+const SignalSessionSyncApi_1 = require("../signal/api/SignalSessionSyncApi");
+const SenderKeyManager_1 = require("../signal/group/SenderKeyManager");
+const resolver_1 = require("../signal/session/resolver");
+const SignalProtocol_1 = require("../signal/session/SignalProtocol");
+const WaKeepAlive_1 = require("../transport/keepalive/WaKeepAlive");
+const global_1 = require("../transport/node/builders/global");
+const presence_2 = require("../transport/node/builders/presence");
+const helpers_1 = require("../transport/node/helpers");
+const usync_1 = require("../transport/node/usync");
+const WaNodeOrchestrator_1 = require("../transport/node/WaNodeOrchestrator");
+const WaNodeTransport_1 = require("../transport/node/WaNodeTransport");
+const proxy_1 = require("../transport/proxy");
+const clock_1 = require("../util/clock");
+const primitives_1 = require("../util/primitives");
+function assertProxyTransport(value, path) {
+    if (value === undefined) {
+        return;
+    }
+    if (!(0, proxy_1.isProxyTransport)(value)) {
+        throw new Error(`${path} must be a proxy transport instance (dispatcher with dispatch(...) or agent with addRequest(...))`);
+    }
+}
+function validateProxyOptions(options) {
+    const rawProxy = options.proxy;
+    if (rawProxy === undefined) {
+        return;
+    }
+    if (typeof rawProxy !== 'object' || rawProxy === null || Array.isArray(rawProxy)) {
+        throw new Error('proxy must be an object with optional ws/mediaUpload/mediaDownload');
+    }
+    const proxy = rawProxy;
+    assertProxyTransport(proxy?.ws, 'proxy.ws');
+    assertProxyTransport(proxy?.mediaUpload, 'proxy.mediaUpload');
+    assertProxyTransport(proxy?.mediaDownload, 'proxy.mediaDownload');
+}
+function resolveWaClientBase(options, logger) {
+    validateProxyOptions(options);
+    const device = (0, constants_1.resolveWaDeviceIdentity)(options);
+    const sessionId = options.sessionId.trim();
+    if (sessionId.length === 0) {
+        throw new Error('sessionId must be a non-empty string');
+    }
+    const sessionStore = options.store.session(sessionId);
+    const normalizedOptions = Object.freeze({
+        ...options,
+        sessionId,
+        deviceBrowser: device.browser,
+        deviceOsDisplayName: device.osDisplayName,
+        deviceOsVersion: device.osVersion ?? undefined,
+        devicePlatform: device.platform,
+        urls: options.urls ?? options.chatSocketUrls ?? constants_1.WA_DEFAULTS.CHAT_SOCKET_URLS,
+        iqTimeoutMs: options.iqTimeoutMs ?? constants_1.WA_DEFAULTS.IQ_TIMEOUT_MS,
+        nodeQueryTimeoutMs: options.nodeQueryTimeoutMs ?? constants_1.WA_DEFAULTS.NODE_QUERY_TIMEOUT_MS,
+        keepAliveIntervalMs: options.keepAliveIntervalMs ?? constants_1.WA_DEFAULTS.HEALTH_CHECK_INTERVAL_MS,
+        deadSocketTimeoutMs: options.deadSocketTimeoutMs ?? constants_1.WA_DEFAULTS.DEAD_SOCKET_TIMEOUT_MS,
+        mediaTimeoutMs: options.mediaTimeoutMs ?? constants_1.WA_DEFAULTS.MEDIA_TIMEOUT_MS,
+        appStateSyncTimeoutMs: options.appStateSyncTimeoutMs ?? constants_1.WA_DEFAULTS.APP_STATE_SYNC_TIMEOUT_MS,
+        signalFetchKeyBundlesTimeoutMs: options.signalFetchKeyBundlesTimeoutMs ??
+            constants_1.WA_DEFAULTS.SIGNAL_FETCH_KEY_BUNDLES_TIMEOUT_MS,
+        messageAckTimeoutMs: options.messageAckTimeoutMs ?? constants_1.WA_DEFAULTS.MESSAGE_ACK_TIMEOUT_MS,
+        messageMaxAttempts: options.messageMaxAttempts ?? constants_1.WA_DEFAULTS.MESSAGE_MAX_ATTEMPTS,
+        messageRetryDelayMs: options.messageRetryDelayMs ?? constants_1.WA_DEFAULTS.MESSAGE_RETRY_DELAY_MS
+    });
+    return {
+        options: normalizedOptions,
+        logger,
+        sessionStore
+    };
+}
+function createIncomingNodeRuntime(input) {
+    const { logger, emitEvent, authClient, connectionManager, nodeOrchestrator, streamControl, mediaMessageBuildOptions, retryCoordinator, mediaRetryRequester, messageDispatch, sendNode, syncAppState, disconnect, clearStoredCredentials, getCurrentCredentials, handleClientDirtyBits, incomingMessageAckOptions } = input;
+    return {
+        handleStreamControlResult: streamControl.handleStreamControlResult,
+        persistSuccessAttributes: (attributes) => authClient.persistSuccessAttributes(attributes, { countsAsLogin: true }),
+        emitSuccessNode: (node) => emitEvent('debug_connection_success', { node }),
+        updateClockSkewFromSuccess: (serverUnixSeconds) => connectionManager.updateClockSkewFromSuccess(serverUnixSeconds),
+        shouldWarmupMediaConn: () => !!(getCurrentCredentials()?.meJid && connectionManager.isConnected()),
+        warmupMediaConn: async () => {
+            await (0, messages_1.getMediaConn)(mediaMessageBuildOptions, true);
+        },
+        persistRoutingInfo: (routingInfo) => authClient.persistRoutingInfo(routingInfo),
+        tryResolvePendingNode: (node) => nodeOrchestrator.tryResolvePending(node),
+        handleGenericIncomingNode: (node) => nodeOrchestrator.handleIncomingNode(node),
+        handleIncomingIqSetNode: (node) => authClient.handleIncomingIqSet(node),
+        handleLinkCodeNotificationNode: (node) => authClient.handleLinkCodeNotification(node),
+        handleCompanionRegRefreshNotificationNode: (node) => authClient.handleCompanionRegRefreshNotification(node),
+        handleIncomingMessageNode: (node) => (0, incoming_1.handleIncomingMessageAck)(node, incomingMessageAckOptions),
+        sendNode,
+        handleIncomingRetryReceipt: (node) => retryCoordinator.handleIncomingRetryReceipt(node),
+        handleMediaRetryNotification: (node) => mediaRetryRequester.handleNotification(node),
+        trackOutboundReceipt: (node) => retryCoordinator.trackOutboundReceipt(node),
+        emitIncomingReceipt: (event) => emitEvent('receipt', event),
+        emitIncomingPresence: (event) => emitEvent('presence', event),
+        emitIncomingChatstate: (event) => emitEvent('chatstate', event),
+        emitIncomingCall: (event) => emitEvent('call', event),
+        getCurrentCredentials,
+        emitIncomingFailure: (event) => emitEvent('stream_failure', event),
+        emitIncomingErrorStanza: (event) => emitEvent('stanza_error', event),
+        emitIncomingNotification: (event) => emitEvent('debug_notification', event),
+        emitOfflineThreadMetadata: (event) => emitEvent('offline_thread_metadata', event),
+        emitMexNotification: (event) => emitEvent('mex_notification', event),
+        emitRegistrationCode: (event) => emitEvent('mobile_registration_code', event),
+        emitAccountTakeoverNotice: (event) => emitEvent('mobile_account_takeover_notice', event),
+        emitGroupEvent: (event) => {
+            // Register the cache mutation before emitting so a handler that
+            // sends synchronously sees the fresh participants, not the stale ones.
+            void messageDispatch.mutateGroupMetadataCacheFromGroupEvent(event).catch((error) => {
+                logger.warn('failed to mutate group metadata cache from group event', {
+                    action: event.action,
+                    groupJid: event.groupJid,
+                    contextGroupJid: event.contextGroupJid,
+                    message: (0, primitives_1.toError)(error).message
+                });
+            });
+            emitEvent('group', event);
+        },
+        emitBusinessEvent: (event) => emitEvent('business', event),
+        emitPictureEvent: (event) => emitEvent('picture', event),
+        emitUnhandledIncomingNode: (event) => emitEvent('debug_unhandled_stanza', event),
+        syncAppState,
+        stopComms: () => {
+            void connectionManager.getComms()?.stopComms();
+        },
+        disconnect,
+        clearStoredCredentials,
+        parseDirtyBits: (nodes) => (0, dirty_1.parseDirtyBits)(nodes, logger),
+        handleDirtyBits: (dirtyBits) => handleClientDirtyBits(dirtyBits)
+    };
+}
+function createPassiveTasksRuntime(input) {
+    const { queryWithContext, authClient, nodeOrchestrator, receiptQueue, getCurrentCredentials, abPropsCoordinator, markOnlineOnConnect } = input;
+    return {
+        queryWithContext,
+        getCurrentCredentials,
+        persistServerHasPreKeys: (serverHasPreKeys) => authClient.persistServerHasPreKeys(serverHasPreKeys),
+        sendNodeDirect: (node) => nodeOrchestrator.sendNode(node),
+        takeDanglingReceipts: () => receiptQueue.take(),
+        requeueDanglingReceipt: (node) => receiptQueue.enqueue(node),
+        shouldQueueDanglingReceipt: (node, error) => receiptQueue.shouldQueue(node, error),
+        syncAbProps: () => abPropsCoordinator.sync(),
+        sendInitialPresence: async () => {
+            const credentials = getCurrentCredentials();
+            const name = credentials?.meDisplayName ?? undefined;
+            const node = markOnlineOnConnect
+                ? (0, presence_2.buildPresenceNode)({ name })
+                : (0, presence_2.buildPresenceNode)({ type: presence_1.WA_PRESENCE_TYPES.UNAVAILABLE, name });
+            await nodeOrchestrator.sendNode(node, false);
+        }
+    };
+}
+function buildWaClientDependencies(input) {
+    const { base, runtime } = input;
+    const { options, logger, sessionStore } = base;
+    const receiptQueue = new WaReceiptQueue_1.WaReceiptQueue();
+    let connectionManager = null;
+    let passiveTasks = null;
+    let mediaConnCacheFallback = null;
+    let scheduleReconnectAfterPairing = () => undefined;
+    const serverClock = (0, clock_1.createServerClock)(() => connectionManager?.getClockSkewMs() ?? null);
+    const nodeTransport = new WaNodeTransport_1.WaNodeTransport(logger);
+    const nodeOrchestrator = new WaNodeOrchestrator_1.WaNodeOrchestrator({
+        sendNode: async (node) => nodeTransport.sendNode(node),
+        logger,
+        defaultTimeoutMs: options.nodeQueryTimeoutMs,
+        hostDomain: constants_1.WA_DEFAULTS.HOST_DOMAIN,
+        mobileIqIdFormat: () => isMobilePrimary()
+    });
+    const keepAlive = new WaKeepAlive_1.WaKeepAlive({
+        logger,
+        nodeOrchestrator,
+        getComms: () => connectionManager?.getComms() ?? null,
+        intervalMs: options.keepAliveIntervalMs,
+        getIntervalMs: () => abPropsCoordinator.getConfigValue('heartbeat_interval_s') * 1000,
+        timeoutMs: options.deadSocketTimeoutMs,
+        hostDomain: constants_1.WA_DEFAULTS.HOST_DOMAIN,
+        onClockSkewMs: (clockSkewMs) => connectionManager?.setClockSkewMs(clockSkewMs, 'keepalive')
+    });
+    const mediaTransfer = new WaMediaTransferClient_1.WaMediaTransferClient({
+        logger,
+        defaultTimeoutMs: options.mediaTimeoutMs,
+        defaultUploadAgent: (0, proxy_1.toProxyAgent)(options.proxy?.mediaUpload),
+        defaultDownloadAgent: (0, proxy_1.toProxyAgent)(options.proxy?.mediaDownload),
+        skipMacVerification: options.dangerous?.disableMediaMacVerification
+    });
+    const linkPreviewOptions = options.linkPreview ?? {};
+    const linkPreviewFetcher = linkPreviewOptions.fetcher ??
+        (0, fetcher_1.createDefaultLinkPreviewFetcher)({
+            mediaTransfer,
+            userAgent: linkPreviewOptions.userAgent,
+            fetchTimeoutMs: linkPreviewOptions.fetchTimeoutMs,
+            maxHtmlBytes: linkPreviewOptions.maxHtmlBytes,
+            maxThumbnailBytes: linkPreviewOptions.maxThumbnailBytes,
+            allowPrivateHosts: linkPreviewOptions.allowPrivateHosts,
+            proxy: linkPreviewOptions.proxy ?? options.proxy?.linkPreview
+        });
+    const createLinkPreviewResolver = (surface) => (content) => (0, link_preview_1.resolveLinkPreview)(content.text, content.linkPreview, {
+        logger,
+        mediaTransfer,
+        getMediaConn: () => (0, messages_1.getMediaConn)(mediaMessageBuildOptions),
+        fetcher: linkPreviewFetcher,
+        options: linkPreviewOptions,
+        serverClock,
+        surface
+    });
+    const mediaMessageBuildOptions = {
+        logger,
+        mediaTransfer,
+        iqTimeoutMs: options.iqTimeoutMs,
+        queryWithContext: runtime.queryWithContext,
+        getMediaConnCache: () => {
+            if (connectionManager) {
+                return connectionManager.getMediaConnCache();
+            }
+            return mediaConnCacheFallback;
+        },
+        setMediaConnCache: (mediaConn) => {
+            mediaConnCacheFallback = mediaConn;
+            connectionManager?.setMediaConnCache(mediaConn);
+        },
+        serverClock,
+        media: options.media,
+        linkPreviewResolver: createLinkPreviewResolver()
+    };
+    const messageClient = new WaMessageClient_1.WaMessageClient({
+        logger,
+        sendNode: runtime.sendNode,
+        query: runtime.query,
+        defaultAckTimeoutMs: options.messageAckTimeoutMs,
+        defaultMaxAttempts: options.messageMaxAttempts,
+        defaultRetryDelayMs: options.messageRetryDelayMs
+    });
+    const senderKeyManager = new SenderKeyManager_1.SenderKeyManager(sessionStore.senderKey, {
+        getFutureMessagesMax: () => abPropsCoordinator.getConfigValue('web_signal_future_messages_max'),
+        skipSignatureVerification: options.dangerous?.disableSenderKeySignatureVerification
+    });
+    const signalProtocol = new SignalProtocol_1.SignalProtocol({
+        signal: sessionStore.signal,
+        preKey: sessionStore.preKey,
+        session: sessionStore.session,
+        identity: sessionStore.identity
+    }, logger);
+    const signalSystemQuery = (node, timeoutMs) => runtime.query(node, timeoutMs, { useSystemId: true });
+    const signalDigestSync = new SignalDigestSyncApi_1.SignalDigestSyncApi({
+        logger,
+        query: signalSystemQuery,
+        signalStore: sessionStore.signal,
+        preKeyStore: sessionStore.preKey,
+        defaultTimeoutMs: options.signalFetchKeyBundlesTimeoutMs
+    });
+    const generateUsyncSid = (0, usync_1.createUsyncSidGenerator)();
+    const signalDeviceSync = new SignalDeviceSyncApi_1.SignalDeviceSyncApi({
+        logger,
+        query: runtime.query,
+        deviceListStore: sessionStore.deviceList,
+        defaultTimeoutMs: options.signalFetchKeyBundlesTimeoutMs,
+        generateSid: generateUsyncSid
+    });
+    const signalIdentitySync = new SignalIdentitySyncApi_1.SignalIdentitySyncApi({
+        logger,
+        query: signalSystemQuery,
+        identityStore: sessionStore.identity,
+        defaultTimeoutMs: options.signalFetchKeyBundlesTimeoutMs
+    });
+    const signalMissingPreKeysSync = new SignalMissingPreKeysSyncApi_1.SignalMissingPreKeysSyncApi({
+        logger,
+        query: signalSystemQuery,
+        defaultTimeoutMs: options.signalFetchKeyBundlesTimeoutMs
+    });
+    const signalRotateKey = new SignalRotateKeyApi_1.SignalRotateKeyApi({
+        logger,
+        query: signalSystemQuery,
+        signalStore: sessionStore.signal,
+        defaultTimeoutMs: options.signalFetchKeyBundlesTimeoutMs
+    });
+    const signalSessionSync = new SignalSessionSyncApi_1.SignalSessionSyncApi({
+        logger,
+        query: signalSystemQuery,
+        defaultTimeoutMs: options.signalFetchKeyBundlesTimeoutMs
+    });
+    const authClient = new WaAuthClient_1.WaAuthClient({
+        deviceBrowser: options.deviceBrowser,
+        deviceOsDisplayName: options.deviceOsDisplayName,
+        deviceOsVersion: options.deviceOsVersion,
+        devicePlatform: options.devicePlatform,
+        requireFullSync: options.requireFullSync,
+        version: options.version,
+        dangerous: options.dangerous,
+        mobileTransport: options.mobileTransport
+    }, {
+        logger,
+        authStore: sessionStore.auth,
+        signalStore: sessionStore.signal,
+        preKeyStore: sessionStore.preKey,
+        socket: {
+            sendNode: runtime.sendNode,
+            query: runtime.query
+        },
+        isConnected: () => connectionManager?.isConnected() ?? false,
+        callbacks: {
+            onQr: (qr, ttlMs) => runtime.emitEvent('auth_qr', { qr, ttlMs }),
+            onPairingCode: (code) => runtime.emitEvent('auth_pairing_code', { code }),
+            onPairingRefresh: (forceManual) => runtime.emitEvent('auth_pairing_required', { forceManual }),
+            onPaired: (credentials) => {
+                runtime.emitEvent('auth_paired', { credentials });
+                scheduleReconnectAfterPairing();
+            },
+            onError: (error) => runtime.handleError(error),
+            onPasskeyRequired: (hasSigner) => runtime.emitEvent('auth_passkey_required', { hasSigner }),
+            signPasskeyAssertion: options.signPasskeyAssertion
+        }
+    });
+    const getCurrentCredentials = authClient.getCurrentCredentials.bind(authClient);
+    const isMobilePrimary = () => options.mobileTransport !== undefined || Boolean(getCurrentCredentials()?.deviceInfo);
+    const groupCoordinator = (0, WaGroupCoordinator_1.createGroupCoordinator)({
+        queryWithContext: runtime.queryWithContext,
+        mexSocket: { query: runtime.query }
+    });
+    const newsletterCoordinator = (0, WaNewsletterCoordinator_1.createNewsletterCoordinator)({
+        mexSocket: { query: runtime.query },
+        sendNode: runtime.sendNode,
+        publishMessageNode: (node, opts) => messageDispatch.publishMessageNode(node, opts),
+        queryWithContext: runtime.queryWithContext,
+        generateStanzaId: () => messageDispatch.generateOutgoingMessageId(),
+        mediaTransfer,
+        getMediaConn: () => (0, messages_1.getMediaConn)(mediaMessageBuildOptions),
+        linkPreviewResolver: createLinkPreviewResolver('newsletter'),
+        getAbPropString: (name) => abPropsCoordinator.getConfigValue(name),
+        logger
+    });
+    const privacyCoordinator = (0, WaPrivacyCoordinator_1.createPrivacyCoordinator)({
+        logger,
+        contactStore: sessionStore.contacts,
+        isUsernamePrivacyListIdentifierEnabled: () => abPropsCoordinator.getConfigValue('username_contact_privacy_setting_allow_uncontact_set_enable'),
+        queryWithContext: runtime.queryWithContext,
+        resolveUserJidPair: (userJid) => signalDeviceSync.resolveUserJidPair(userJid),
+        getSelfLid: () => getCurrentCredentials()?.meLid ?? null,
+        emitPrivacy: (event) => runtime.emitEvent('privacy', event)
+    });
+    const businessCoordinator = (0, WaBusinessCoordinator_1.createBusinessCoordinator)({
+        queryWithContext: runtime.queryWithContext,
+        mediaTransfer,
+        getMediaConn: () => (0, messages_1.getMediaConn)(mediaMessageBuildOptions),
+        logger,
+        generateSid: generateUsyncSid
+    });
+    const emailCoordinator = (0, WaEmailCoordinator_1.createEmailCoordinator)({
+        queryWithContext: runtime.queryWithContext
+    });
+    const retryTracker = (0, tracker_1.createOutboundRetryTracker)({
+        retryStore: sessionStore.retry,
+        logger
+    });
+    const sessionResolver = (0, resolver_1.createSignalSessionResolver)({
+        signalProtocol,
+        sessionStore: sessionStore.session,
+        identityStore: sessionStore.identity,
+        signalIdentitySync,
+        signalSessionSync,
+        logger
+    });
+    const fanoutResolver = (0, fanout_1.createDeviceFanoutResolver)({
+        signalDeviceSync,
+        getCurrentCredentials,
+        logger
+    });
+    const groupMetadataCache = (0, group_metadata_1.createGroupMetadataCache)({
+        groupMetadataStore: sessionStore.groupMetadata,
+        queryGroupMetadata: async (groupJid) => {
+            const metadata = await groupCoordinator.queryGroupMetadata(groupJid);
+            const participantJids = new Array(metadata.participants.length);
+            for (let index = 0; index < metadata.participants.length; index += 1) {
+                participantJids[index] = metadata.participants[index].jid;
+            }
+            return {
+                participants: participantJids,
+                ephemeral: metadata.ephemeral,
+                ephemeralTrigger: metadata.ephemeralTrigger
+            };
+        },
+        logger
+    });
+    const trustedContactToken = new WaTrustedContactTokenCoordinator_1.WaTrustedContactTokenCoordinator({
+        logger,
+        store: sessionStore.privacyToken,
+        runtime: {
+            queryWithContext: runtime.queryWithContext,
+            emitEvent: runtime.emitEvent,
+            getCurrentCredentials
+        },
+        serverClock,
+        durationS: options.privacyToken?.tcTokenDurationS,
+        numBuckets: options.privacyToken?.tcTokenNumBuckets,
+        senderDurationS: options.privacyToken?.tcTokenSenderDurationS,
+        senderNumBuckets: options.privacyToken?.tcTokenSenderNumBuckets,
+        maxDurationS: options.privacyToken?.tcTokenMaxDurationS,
+        getConfigOverrides: () => ({
+            durationS: abPropsCoordinator.getConfigValue('tctoken_duration'),
+            numBuckets: abPropsCoordinator.getConfigValue('tctoken_num_buckets'),
+            senderDurationS: abPropsCoordinator.getConfigValue('tctoken_duration_sender'),
+            senderNumBuckets: abPropsCoordinator.getConfigValue('tctoken_num_buckets_sender')
+        })
+    });
+    const abPropsCoordinator = new WaAbPropsCoordinator_1.WaAbPropsCoordinator({
+        logger,
+        runtime: {
+            queryWithContext: runtime.queryWithContext
+        }
+    });
+    let messageDispatch;
+    const appStateSyncKeyProtocol = (0, key_protocol_1.createAppStateSyncKeyProtocol)({
+        publishProtocolMessageToDevice: (deviceJid, protocolMessage, opts) => messageDispatch.publishProtocolMessageToDevice(deviceJid, protocolMessage, opts),
+        fanoutResolver,
+        getCurrentCredentials,
+        logger
+    });
+    messageDispatch = new WaMessageDispatchCoordinator_1.WaMessageDispatchCoordinator({
+        logger,
+        emitMessageSend: (event) => runtime.emitEvent('message_send', event),
+        messageClient,
+        retryTracker,
+        sessionResolver,
+        fanoutResolver,
+        groupMetadataCache,
+        appStateSyncKeyProtocol,
+        buildMessageContent: async (content, ctx) => (0, messages_1.buildMediaMessageContent)(mediaMessageBuildOptions, content, ctx),
+        senderKeyManager,
+        signalProtocol,
+        signalStore: sessionStore.signal,
+        sessionStore: sessionStore.session,
+        identityStore: sessionStore.identity,
+        deviceListStore: sessionStore.deviceList,
+        threadStore: sessionStore.threads,
+        chatMetadataStore: sessionStore.chatMetadata,
+        signalDeviceSync,
+        messageSecretStore: sessionStore.messageSecret,
+        persistAllMessageSecrets: options.addons?.persistAllSecrets === true,
+        getCurrentCredentials,
+        resolvePrivacyTokenNode: (recipientJid) => trustedContactToken.resolveTokenForMessage(recipientJid),
+        onDirectMessageSent: (recipientJid) => {
+            trustedContactToken.maybeIssueSenderToken(recipientJid).catch((err) => logger.warn('sender token issue failed', {
+                to: recipientJid,
+                message: (0, primitives_1.toError)(err).message
+            }));
+        },
+        sendNewsletterMessage: (newsletterJid, content, sendOptions, contextInfo) => newsletterCoordinator.send(newsletterJid, content, {
+            stanzaId: sendOptions.id,
+            contextInfo,
+            additionalAttributes: sendOptions.additionalAttributes
+        }),
+        getIcdcHashLength: () => abPropsCoordinator.getConfigValue('md_icdc_hash_length'),
+        mobileMessageIdFormat: isMobilePrimary,
+        serverClock
+    });
+    const presenceCoordinator = (0, WaPresenceCoordinator_1.createPresenceCoordinator)({
+        sendNode: (node) => nodeOrchestrator.sendNode(node, false),
+        getCurrentCredentials,
+        resolvePrivacyTokenNode: (jid) => trustedContactToken.resolveReceiverTokenNode(jid)
+    });
+    const peerDataOperation = (0, peer_data_operation_1.createPeerDataOperationRequester)({
+        logger,
+        publishProtocolMessageToDevice: (deviceJid, protocolMessage, opts) => messageDispatch.publishProtocolMessageToDevice(deviceJid, protocolMessage, opts),
+        getCurrentCredentials,
+        generateOutgoingMessageId: () => messageDispatch.generateOutgoingMessageId(),
+        subscribeToProtocolMessage: runtime.subscribeProtocolMessage
+    });
+    const mediaRetryRequester = (0, media_retry_1.createMediaRetryRequester)({
+        logger,
+        sendNode: (node) => nodeOrchestrator.sendNode(node, false),
+        getCurrentCredentials
+    });
+    const messageCoordinator = new WaMessageCoordinator_1.WaMessageCoordinator({
+        messageDispatch,
+        mediaTransfer,
+        mediaRetry: mediaRetryRequester,
+        mediaUploadOptions: mediaMessageBuildOptions,
+        logger,
+        messageStore: sessionStore.messages,
+        messageSecretStore: sessionStore.messageSecret,
+        trustedContactToken,
+        emitAddon: (event) => runtime.emitEvent('message_addon', event),
+        mexSocket: { query: runtime.query },
+        peerDataOperation,
+        isGroupHistorySendEnabled: () => abPropsCoordinator.getConfigValue('group_history_send'),
+        getAbPropNumber: (name) => abPropsCoordinator.getConfigValue(name)
+    });
+    const retryCoordinator = new WaRetryCoordinator_1.WaRetryCoordinator({
+        logger,
+        retryStore: sessionStore.retry,
+        signalStore: sessionStore.signal,
+        preKeyStore: sessionStore.preKey,
+        sessionStore: sessionStore.session,
+        senderKeyStore: sessionStore.senderKey,
+        signalProtocol,
+        sessionResolver,
+        signalDeviceSync,
+        signalMissingPreKeysSync,
+        messageClient,
+        sendNode: runtime.sendNode,
+        getCurrentCredentials,
+        resolveUserIcdc: (userJid) => messageDispatch.resolveUserIcdc(userJid),
+        resolvePrivacyTokenNode: (recipientJid) => trustedContactToken.resolveTokenForMessage(recipientJid),
+        // Placeholder resend asks the primary phone (a peer) for the plaintext.
+        peerDataOperation,
+        emitIncomingMessage: (event) => {
+            void runtime
+                .handleIncomingMessageEvent(event)
+                .catch((err) => runtime.handleError((0, primitives_1.toError)(err)));
+        },
+        isMobilePrimary,
+        getAbPropNumber: (name) => abPropsCoordinator.getConfigValue(name)
+    });
+    const botCoordinator = (0, WaBotCoordinator_1.createBotCoordinator)({
+        logger,
+        queryWithContext: runtime.queryWithContext,
+        buildMessageContent: async (content) => (0, messages_1.buildMediaMessageContent)(mediaMessageBuildOptions, content),
+        sendMessage: (to, content, sendOptions) => messageDispatch.sendMessage(to, content, sendOptions ?? {}),
+        messageStore: sessionStore.messages,
+        messageSecretStore: sessionStore.messageSecret,
+        getCurrentCredentials,
+        emitBotChunk: (event) => runtime.emitEvent('message_bot_chunk', event),
+        generateSid: generateUsyncSid
+    });
+    const appStateSync = new WaAppStateSyncClient_1.WaAppStateSyncClient({
+        logger,
+        query: runtime.query,
+        getCurrentMeJid: () => getCurrentCredentials()?.meJid,
+        defaultTimeoutMs: options.appStateSyncTimeoutMs,
+        store: sessionStore.appState,
+        serverClock,
+        onMissingKeys: async ({ keyIds }) => {
+            await messageDispatch.requestAppStateSyncKeys(keyIds);
+        },
+        skipMacVerification: options.dangerous?.disableAppStateMacVerification,
+        mobilePrimary: isMobilePrimary,
+        isOwnAccountDevice: (deviceJid) => {
+            const credentials = getCurrentCredentials();
+            if (!credentials)
+                return false;
+            return (0, jid_1.isOwnAccountJid)(deviceJid, credentials.meJid, credentials.meLid);
+        },
+        sendKeyShare: (toDeviceJid, keys, missingKeyIds) => messageDispatch.sendAppStateSyncKeyShare(toDeviceJid, keys, missingKeyIds),
+        triggerSync: async () => {
+            await runtime.syncAppState();
+        }
+    });
+    // Persists a pushName change and re-broadcasts presence carrying it (how the
+    // name reaches peers on primary connections). No-op when unchanged, which
+    // also collapses the app-state echo of our own SettingPushName write.
+    const applyOwnPushName = async (name) => {
+        if (getCurrentCredentials()?.meDisplayName === name) {
+            return;
+        }
+        await authClient.persistSuccessAttributes({ meDisplayName: name });
+        if (connectionManager?.isConnected()) {
+            await presenceCoordinator.send();
+        }
+    };
+    const appStateMutations = new WaAppStateMutationCoordinator_1.WaAppStateMutationCoordinator({
+        logger,
+        messageStore: sessionStore.messages,
+        appStateSync,
+        mediaTransfer,
+        isConnected: () => connectionManager?.isConnected() ?? false,
+        serverClock,
+        emitSnapshotMutations: options.chatEvents?.emitSnapshotMutations === true,
+        emitMutation: (event) => runtime.emitEvent('mutation', event),
+        emitMutationSend: (event) => runtime.emitEvent('mutation_send', event),
+        nctSaltSink: (salt) => trustedContactToken.handleNctSaltSync(salt),
+        contactSink: runtime.persistContact,
+        pushNameSink: (name) => {
+            void applyOwnPushName(name).catch((error) => logger.debug('apply own pushName from app-state sync failed', {
+                message: (0, primitives_1.toError)(error).message
+            }));
+        }
+    });
+    const profileCoordinator = (0, WaProfileCoordinator_1.createProfileCoordinator)({
+        queryWithContext: runtime.queryWithContext,
+        generateSid: generateUsyncSid,
+        mexSocket: { query: runtime.query },
+        queryLidsByPhoneJids: (phoneJids) => signalDeviceSync.queryLidsByPhoneJids(phoneJids),
+        mutations: appStateMutations,
+        applyOwnPushName,
+        resolvePrivacyTokenNode: (jid) => trustedContactToken.resolveReceiverTokenNode(jid),
+        logger
+    });
+    const statusCoordinator = (0, WaStatusCoordinator_1.createStatusCoordinator)({
+        appStateMutations,
+        buildMessageContent: async (content) => (0, messages_1.buildMediaMessageContent)(mediaMessageBuildOptions, content),
+        publishStatusMessage: (input) => messageDispatch.publishStatusMessage(input)
+    });
+    const broadcastListCoordinator = (0, WaBroadcastListCoordinator_1.createBroadcastListCoordinator)({
+        appStateMutations,
+        buildMessageContent: async (content) => (0, messages_1.buildMediaMessageContent)(mediaMessageBuildOptions, content),
+        publishBroadcastListMessage: (input) => messageDispatch.publishBroadcastListMessage(input)
+    });
+    connectionManager = new WaConnectionManager_1.WaConnectionManager({
+        logger,
+        options,
+        authClient,
+        keepAlive,
+        nodeOrchestrator,
+        nodeTransport,
+        getPassiveTasks: () => passiveTasks,
+        clearStoredCredentials: runtime.clearStoredState,
+        onPostPairReconnected: () => {
+            runtime.emitEvent('connection', {
+                status: 'open',
+                reason: 'connected',
+                code: null,
+                isLogout: false,
+                isNewLogin: true
+            });
+        }
+    });
+    if (mediaConnCacheFallback !== null) {
+        connectionManager.setMediaConnCache(mediaConnCacheFallback);
+    }
+    scheduleReconnectAfterPairing = () => connectionManager?.scheduleReconnectAfterPairing();
+    const disconnectWithClientSideEffects = async (reason, isLogout, code) => {
+        abPropsCoordinator.reset();
+        offlineResume.reset();
+        privacyCoordinator.stopAccountSyncRefresh();
+        await connectionManager?.disconnect();
+        runtime.emitEvent('connection', {
+            status: 'close',
+            reason,
+            code,
+            isLogout,
+            isNewLogin: false
+        });
+    };
+    const connectWithClientSideEffects = async (reason) => {
+        runtime.resumeIncomingEvents();
+        await connectionManager?.connect(runtime.handleIncomingFrame);
+        if (!authClient.getCurrentCredentials()?.meJid) {
+            return;
+        }
+        runtime.emitEvent('connection', {
+            status: 'open',
+            reason,
+            code: null,
+            isLogout: false,
+            isNewLogin: false
+        });
+    };
+    const clearStoredCredentialsWithClientSideEffects = async () => {
+        await connectionManager?.clearStoredCredentials();
+    };
+    const streamControl = (0, WaStreamControlCoordinator_1.createStreamControlHandler)({
+        logger,
+        getComms: () => connectionManager?.getComms() ?? null,
+        clearPendingQueries: (error) => nodeOrchestrator.clearPending(error),
+        clearMediaConnCache: () => {
+            mediaConnCacheFallback = null;
+            connectionManager?.setMediaConnCache(null);
+        },
+        disconnect: disconnectWithClientSideEffects,
+        clearStoredCredentials: clearStoredCredentialsWithClientSideEffects,
+        connect: connectWithClientSideEffects
+    });
+    const incomingMessageAckOptions = {
+        logger,
+        sendNode: runtime.sendNode,
+        getMeJid: () => getCurrentCredentials()?.meJid,
+        getMeLid: () => getCurrentCredentials()?.meLid,
+        signalProtocol,
+        senderKeyManager,
+        onDecryptFailure: (context, error) => retryCoordinator.onDecryptFailure(context, error),
+        requestPlaceholderResend: (context) => retryCoordinator.onUnavailableMessage(context),
+        emitIncomingMessage: (event) => {
+            void runtime
+                .handleIncomingMessageEvent(event)
+                .catch((err) => runtime.handleError((0, primitives_1.toError)(err)));
+        },
+        emitNewsletterMessageUpdate: (event) => runtime.emitEvent('newsletter_message_update', event),
+        emitUnavailableMessage: (event) => runtime.emitEvent('message_unavailable', event),
+        emitUnhandledStanza: (event) => runtime.emitEvent('debug_unhandled_stanza', event),
+        emitDecryptedPayload: (build) => {
+            // Built only if someone is subscribed: the payload carries a copy of
+            // the plaintext and a redacted node, and this runs per `<enc>`.
+            if (!runtime.hasEventListener('debug_decrypted_payload')) {
+                return;
+            }
+            runtime.emitEvent('debug_decrypted_payload', build());
+        }
+    };
+    const handleClientDirtyBits = (dirtyBits) => (0, dirty_1.handleDirtyBits)({
+        logger,
+        queryWithContext: runtime.queryWithContext,
+        getCurrentCredentials,
+        syncAppState: runtime.syncAppState,
+        generateUsyncSid,
+        syncAccountPrivacy: async () => {
+            await privacyCoordinator.refreshFromAccountSync();
+        },
+        emitBlocklist: (blocklist) => runtime.emitEvent('blocklist', blocklist),
+        newsletterListSubscribed: () => newsletterCoordinator.listSubscribed()
+    }, dirtyBits);
+    const offlineResume = new WaOfflineResumeCoordinator_1.WaOfflineResumeCoordinator({
+        logger,
+        runtime: {
+            sendNode: (node) => nodeOrchestrator.sendNode(node, false),
+            emitOfflineResume: (event) => runtime.emitEvent('offline_resume', event)
+        }
+    });
+    const incomingNode = new WaIncomingNodeCoordinator_1.WaIncomingNodeCoordinator({
+        logger,
+        offlineResume,
+        runtime: createIncomingNodeRuntime({
+            logger,
+            emitEvent: runtime.emitEvent,
+            authClient,
+            connectionManager,
+            nodeOrchestrator,
+            streamControl,
+            mediaMessageBuildOptions,
+            retryCoordinator,
+            mediaRetryRequester,
+            messageDispatch,
+            sendNode: runtime.sendNode,
+            syncAppState: runtime.syncAppState,
+            disconnect: disconnectWithClientSideEffects,
+            clearStoredCredentials: clearStoredCredentialsWithClientSideEffects,
+            getCurrentCredentials,
+            handleClientDirtyBits,
+            incomingMessageAckOptions
+        })
+    });
+    incomingNode.registerIncomingHandler({
+        tag: constants_1.WA_NODE_TAGS.NOTIFICATION,
+        subtype: constants_1.WA_NOTIFICATION_TYPES.NEWSLETTER,
+        prepend: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
+        handler: async (node) => {
+            const newsletterJid = node.attrs.from;
+            if (!newsletterJid || !(0, jid_1.isNewsletterJid)(newsletterJid)) {
+                return false;
+            }
+            const firstChild = (0, helpers_1.getFirstNodeChild)(node);
+            const childTag = firstChild?.tag;
+            const action = childTag === constants_1.WA_NEWSLETTER_NOTIFICATION_TAGS.LIVE_UPDATES
+                ? 'live_updates'
+                : 'unknown';
+            runtime.emitEvent('newsletter', {
+                rawNode: node,
+                stanzaId: node.attrs.id,
+                chatJid: newsletterJid,
+                stanzaType: node.attrs.type,
+                offline: node.attrs.offline !== undefined,
+                newsletterJid,
+                action,
+                subType: childTag
+            });
+            if (action === 'live_updates') {
+                (0, newsletter_1.processNewsletterLiveUpdates)(node, {
+                    logger,
+                    emitIncomingMessage: incomingMessageAckOptions.emitIncomingMessage,
+                    emitNewsletterMessageUpdate: incomingMessageAckOptions.emitNewsletterMessageUpdate,
+                    emitUnhandledStanza: incomingMessageAckOptions.emitUnhandledStanza
+                });
+            }
+            return false;
+        }
+    });
+    incomingNode.registerIncomingHandler({
+        tag: constants_1.WA_NODE_TAGS.NOTIFICATION,
+        subtype: constants_1.WA_NOTIFICATION_TYPES.ENCRYPT,
+        prepend: true,
+        handler: async (node) => {
+            const firstChild = (0, helpers_1.getFirstNodeChild)(node);
+            if (!firstChild) {
+                return false;
+            }
+            const childTag = firstChild.tag;
+            // <count value="N"/> – server prekeys running low
+            if (childTag === 'count') {
+                const ackNode = (0, global_1.buildAckNode)({
+                    kind: 'notification',
+                    node,
+                    includeType: false
+                });
+                await runtime.sendNode(ackNode);
+                const tasks = passiveTasks;
+                if (!tasks) {
+                    logger.warn('encrypt-count: passive tasks not available');
+                    return true;
+                }
+                await tasks.handlePreKeyLowNotification().catch((error) => {
+                    logger.warn('encrypt-count: prekey upload failed', {
+                        message: (0, primitives_1.toError)(error).message
+                    });
+                });
+                return true;
+            }
+            // <digest/> – digest key sync
+            if (childTag === 'digest') {
+                const ackNode = (0, global_1.buildAckNode)({
+                    kind: 'notification',
+                    node,
+                    includeType: false
+                });
+                await runtime.sendNode(ackNode);
+                const tasks = passiveTasks;
+                if (!tasks) {
+                    logger.warn('encrypt-digest: passive tasks not available');
+                    return true;
+                }
+                await tasks.handleDigestNotification().catch((error) => {
+                    logger.warn('encrypt-digest: digest sync failed', {
+                        message: (0, primitives_1.toError)(error).message
+                    });
+                });
+                return true;
+            }
+            // <identity/> – contact identity key changed
+            if (childTag === 'identity') {
+                const parsed = (0, identity_1.parseIdentityChangeNotification)(node);
+                if (!parsed) {
+                    return false;
+                }
+                const ackNode = (0, global_1.buildAckNode)({
+                    kind: 'notification',
+                    node,
+                    includeType: false
+                });
+                await runtime.sendNode(ackNode);
+                const address = (0, jid_1.parseSignalAddressFromJid)(parsed.fromJid);
+                if (address.device !== 0) {
+                    logger.debug('identity-change: ignoring companion device', {
+                        jid: parsed.fromJid
+                    });
+                    return true;
+                }
+                const meJid = getCurrentCredentials()?.meJid;
+                if (meJid) {
+                    const meUser = (0, jid_1.toUserJid)(meJid);
+                    const fromUser = (0, jid_1.toUserJid)(parsed.fromJid);
+                    if (meUser === fromUser) {
+                        logger.error('self primary identity changed, disconnecting');
+                        void connectionManager?.getComms()?.stopComms();
+                        await disconnectWithClientSideEffects(constants_1.WA_DISCONNECT_REASONS.PRIMARY_IDENTITY_KEY_CHANGE, true, null);
+                        await clearStoredCredentialsWithClientSideEffects();
+                        return true;
+                    }
+                }
+                const oldIdentity = await sessionStore.identity.getRemoteIdentity(address);
+                if (oldIdentity) {
+                    logger.info('identity-change: clearing session', {
+                        jid: parsed.fromJid
+                    });
+                    await sessionStore.session.deleteSession(address);
+                    const userJid = (0, jid_1.toUserJid)(parsed.fromJid);
+                    await trustedContactToken.reissueOnIdentityChange(userJid).catch((error) => {
+                        logger.warn('identity-change: reissue tc token failed', {
+                            message: (0, primitives_1.toError)(error).message
+                        });
+                    });
+                }
+                runtime.emitEvent('debug_notification', {
+                    rawNode: node,
+                    stanzaId: parsed.stanzaId,
+                    chatJid: parsed.fromJid,
+                    stanzaType: constants_1.WA_NOTIFICATION_TYPES.ENCRYPT,
+                    offline: node.attrs.offline !== undefined,
+                    notificationType: constants_1.WA_NOTIFICATION_TYPES.ENCRYPT,
+                    classification: 'core',
+                    details: {
+                        kind: 'identity_change',
+                        displayName: parsed.displayName,
+                        lid: parsed.lid,
+                        hadPreviousIdentity: !!oldIdentity
+                    }
+                });
+                return true;
+            }
+            return false;
+        }
+    });
+    incomingNode.registerIncomingHandler({
+        tag: constants_1.WA_NODE_TAGS.NOTIFICATION,
+        subtype: constants_1.WA_NOTIFICATION_TYPES.ACCOUNT_SYNC,
+        prepend: true,
+        /**
+         * The stanza carries the changed `<category>` inline, but it is a
+         * trigger only: the payload is a partial view, so the whole set is
+         * refetched instead. Observer only - returning false keeps the
+         * generic notification handler responsible for the ack and the
+         * `debug_notification` emit, leaving wire behavior unchanged.
+         */
+        // eslint-disable-next-line @typescript-eslint/require-await
+        handler: async (node) => {
+            if ((0, helpers_1.findNodeChild)(node, constants_1.WA_NODE_TAGS.PRIVACY)) {
+                privacyCoordinator.scheduleAccountSyncRefresh();
+            }
+            const usernameEvent = (0, username_1.parseOwnUsernameNotification)(node);
+            if (usernameEvent) {
+                runtime.emitEvent('own_username', usernameEvent);
+            }
+            return false;
+        }
+    });
+    incomingNode.registerIncomingHandler({
+        tag: constants_1.WA_NODE_TAGS.NOTIFICATION,
+        subtype: constants_1.WA_NOTIFICATION_TYPES.DEVICES,
+        prepend: true,
+        handler: async (node) => {
+            const parsed = (0, devices_1.parseDeviceNotification)(node);
+            if (!parsed) {
+                return false;
+            }
+            const ackNode = (0, global_1.buildAckNode)({
+                kind: 'notification',
+                node,
+                includeType: false
+            });
+            await runtime.sendNode(ackNode);
+            const userJid = (0, jid_1.toUserJid)(parsed.fromJid);
+            if (parsed.action === devices_1.DEVICE_NOTIFICATION_ACTIONS.REMOVE) {
+                const baseAddress = (0, jid_1.parseSignalAddressFromJid)(parsed.fromJid);
+                for (const device of parsed.devices) {
+                    const address = {
+                        user: baseAddress.user,
+                        server: baseAddress.server,
+                        device: device.deviceId
+                    };
+                    await sessionStore.session.deleteSession(address).catch((error) => {
+                        logger.warn('devices-notification: delete session failed', {
+                            message: (0, primitives_1.toError)(error).message
+                        });
+                    });
+                }
+            }
+            if (sessionStore.deviceList) {
+                await sessionStore.deviceList.deleteUserDevices(userJid).catch((error) => {
+                    logger.warn('devices-notification: invalidate cache failed', {
+                        message: (0, primitives_1.toError)(error).message
+                    });
+                });
+            }
+            if (parsed.action === devices_1.DEVICE_NOTIFICATION_ACTIONS.UPDATE) {
+                signalDeviceSync.syncDeviceList([userJid]).catch((error) => {
+                    logger.warn('devices-notification: sync device list failed', {
+                        message: (0, primitives_1.toError)(error).message
+                    });
+                });
+            }
+            runtime.emitEvent('debug_notification', {
+                rawNode: node,
+                stanzaId: parsed.stanzaId,
+                chatJid: parsed.fromJid,
+                stanzaType: constants_1.WA_NOTIFICATION_TYPES.DEVICES,
+                offline: node.attrs.offline !== undefined,
+                notificationType: constants_1.WA_NOTIFICATION_TYPES.DEVICES,
+                classification: 'core',
+                details: {
+                    kind: 'device_list_change',
+                    action: parsed.action,
+                    devices: parsed.devices
+                }
+            });
+            return true;
+        }
+    });
+    incomingNode.registerIncomingHandler({
+        tag: constants_1.WA_NODE_TAGS.NOTIFICATION,
+        subtype: constants_1.WA_PRIVACY_TOKEN_NOTIFICATION_TYPE,
+        prepend: true,
+        handler: async (node) => {
+            const fromJid = node.attrs.from ?? node.attrs.sender_lid;
+            if (!fromJid) {
+                return false;
+            }
+            const tokens = (0, privacy_token_1.parsePrivacyTokenNotification)(node);
+            if (tokens.length === 0) {
+                return false;
+            }
+            await trustedContactToken.handleIncomingToken(fromJid, tokens);
+            const ackNode = (0, global_1.buildAckNode)({
+                kind: 'notification',
+                node,
+                typeOverride: constants_1.WA_PRIVACY_TOKEN_NOTIFICATION_TYPE
+            });
+            await runtime.sendNode(ackNode);
+            return true;
+        }
+    });
+    incomingNode.registerIncomingHandler({
+        tag: constants_1.WA_NODE_TAGS.NOTIFICATION,
+        subtype: constants_1.WA_NOTIFICATION_TYPES.SERVER,
+        prepend: true,
+        handler: async (node) => {
+            const firstChild = (0, helpers_1.getFirstNodeChild)(node);
+            if (!firstChild || firstChild.tag !== constants_1.WA_NODE_TAGS.ABPROPS) {
+                return false;
+            }
+            const ackNode = (0, global_1.buildAckNode)({
+                kind: 'notification',
+                node,
+                includeType: false
+            });
+            await runtime.sendNode(ackNode);
+            abPropsCoordinator.sync();
+            return true;
+        }
+    });
+    passiveTasks = new WaPassiveTasksCoordinator_1.WaPassiveTasksCoordinator({
+        logger,
+        signalStore: sessionStore.signal,
+        preKeyStore: sessionStore.preKey,
+        signalDigestSync,
+        signalRotateKey,
+        runtime: createPassiveTasksRuntime({
+            queryWithContext: runtime.queryWithContext,
+            authClient,
+            nodeOrchestrator,
+            receiptQueue,
+            getCurrentCredentials,
+            abPropsCoordinator,
+            markOnlineOnConnect: options.markOnlineOnConnect ?? false
+        }),
+        mobilePrimary: isMobilePrimary,
+        appStateSync
+    });
+    const lowLevelCoordinator = (0, WaLowLevelCoordinator_1.createLowLevelCoordinator)({
+        logger,
+        nodeOrchestrator,
+        incomingNode,
+        receiptQueue,
+        isConnected: () => connectionManager?.isConnected() ?? false,
+        defaultIqTimeoutMs: options.iqTimeoutMs
+    });
+    const mobileCoordinator = new WaMobileCoordinator_1.WaMobileCoordinator({
+        logger,
+        authClient,
+        messageDispatch,
+        chatCoordinator: appStateMutations,
+        deviceSync: signalDeviceSync,
+        appStateStore: sessionStore.appState,
+        queryWithContext: runtime.queryWithContext,
+        emitEvent: runtime.emitEvent,
+        registerIncomingHandler: (registration) => incomingNode.registerIncomingHandler(registration),
+        isMobilePrimary,
+        persistence: options.companionHost?.persistence,
+        includePem: options.companionHost?.includePem
+    });
+    return {
+        nodeTransport,
+        nodeOrchestrator,
+        keepAlive,
+        mediaTransfer,
+        mediaMessageBuildOptions,
+        messageClient,
+        senderKeyManager,
+        signalProtocol,
+        signalDigestSync,
+        signalDeviceSync,
+        signalIdentitySync,
+        signalMissingPreKeysSync,
+        signalRotateKey,
+        signalSessionSync,
+        sessionResolver,
+        authClient,
+        messageDispatch,
+        messageCoordinator,
+        presenceCoordinator,
+        retryCoordinator,
+        appStateSync,
+        chatCoordinator: appStateMutations,
+        streamControl,
+        incomingNode,
+        lowLevelCoordinator,
+        passiveTasks,
+        groupCoordinator,
+        statusCoordinator,
+        broadcastListCoordinator,
+        newsletterCoordinator,
+        privacyCoordinator,
+        profileCoordinator,
+        businessCoordinator,
+        botCoordinator,
+        emailCoordinator,
+        receiptQueue,
+        connectionManager,
+        trustedContactToken,
+        abPropsCoordinator,
+        peerDataOperation,
+        mobileCoordinator,
+        isMobilePrimary
+    };
+}

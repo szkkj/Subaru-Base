@@ -1,0 +1,71 @@
+import { WA_DEFAULTS, WA_IQ_TYPES, WA_NODE_TAGS } from '../../protocol/constants.js';
+import { buildSignedPreKeyRotateIq } from '../api/prekeys.js';
+import { generateSignedPreKey } from '../registration/keygen.js';
+import { parseIqError } from '../../transport/node/query.js';
+/**
+ * Generates a fresh signed prekey and uploads it to the server. Handles the
+ * `406`/`409`/`5xx` error codes by signaling whether a digest re-validation
+ * is required.
+ */
+export class SignalRotateKeyApi {
+    constructor(options) {
+        this.logger = options.logger;
+        this.query = options.query;
+        this.signalStore = options.signalStore;
+        this.defaultTimeoutMs = options.defaultTimeoutMs ?? WA_DEFAULTS.IQ_TIMEOUT_MS;
+    }
+    /**
+     * Rotates the signed prekey by generating a new one (next key id) and
+     * uploading it. Returns `shouldDigestKey: true` when the caller should
+     * re-run a digest validation after the rotation.
+     */
+    async rotateSignedPreKey(timeoutMs = this.defaultTimeoutMs) {
+        const [registrationInfo, currentSignedPreKey] = await Promise.all([
+            this.signalStore.getRegistrationInfo(),
+            this.signalStore.getSignedPreKey()
+        ]);
+        if (!registrationInfo) {
+            throw new Error('signal rotate key requires registration info');
+        }
+        const nextSignedPreKey = await generateSignedPreKey(currentSignedPreKey ? currentSignedPreKey.keyId + 1 : 1, registrationInfo.identityKeyPair.privKey);
+        await this.signalStore.setSignedPreKey(nextSignedPreKey);
+        this.logger.info('signal signed prekey uploading', {
+            keyId: nextSignedPreKey.keyId,
+            timeoutMs
+        });
+        const response = await this.query(buildSignedPreKeyRotateIq(nextSignedPreKey), timeoutMs);
+        if (response.tag !== WA_NODE_TAGS.IQ) {
+            throw new Error(`invalid signal rotate response tag: ${response.tag}`);
+        }
+        if (response.attrs.type === WA_IQ_TYPES.RESULT) {
+            this.logger.info('signal signed prekey upload completed', {
+                keyId: nextSignedPreKey.keyId
+            });
+            return { shouldDigestKey: false };
+        }
+        if (response.attrs.type !== WA_IQ_TYPES.ERROR) {
+            throw new Error(`invalid signal rotate response type: ${response.attrs.type ?? 'unknown'}`);
+        }
+        const failure = parseIqError(response);
+        const errorCode = failure.numericCode;
+        if (errorCode === 406) {
+            this.logger.warn('signal rotate key generated bad key');
+            return { shouldDigestKey: false, errorCode };
+        }
+        if (errorCode === 409) {
+            this.logger.warn('signal rotate key validation mismatch');
+            return { shouldDigestKey: true, errorCode };
+        }
+        if (errorCode !== undefined && errorCode >= 500) {
+            this.logger.warn('signal rotate key server error', {
+                errorCode
+            });
+            return { shouldDigestKey: false, errorCode };
+        }
+        this.logger.warn('signal rotate key unrecognized error', {
+            errorCode,
+            errorText: failure.text
+        });
+        return { shouldDigestKey: true, ...(errorCode !== undefined ? { errorCode } : {}) };
+    }
+}

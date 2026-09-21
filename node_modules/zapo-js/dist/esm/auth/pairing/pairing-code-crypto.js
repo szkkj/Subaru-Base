@@ -1,0 +1,85 @@
+import { aesCtrDecrypt, aesCtrEncrypt, aesGcmEncrypt, hkdf, pbkdf2Sha256, randomBytesAsync } from '../../crypto/index.js';
+import { X25519 } from '../../crypto/curves/X25519.js';
+import { WA_PAIRING_KDF_INFO } from '../../protocol/constants.js';
+import { concatBytes, TEXT_ENCODER } from '../../util/bytes.js';
+const CROCKFORD_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTVWXYZ';
+export const PBKDF2_ITERATIONS = 2 << 16;
+const PAIRING_AES_KEY_BYTES = 32;
+export function encodeBytesToCrockford(bytes) {
+    let bitCount = 0;
+    let value = 0;
+    let out = '';
+    for (let i = 0; i < bytes.length; i += 1) {
+        value = (value << 8) | bytes[i];
+        bitCount += 8;
+        while (bitCount >= 5) {
+            out += CROCKFORD_ALPHABET[(value >>> (bitCount - 5)) & 31];
+            bitCount -= 5;
+        }
+    }
+    if (bitCount > 0) {
+        out += CROCKFORD_ALPHABET[(value << (5 - bitCount)) & 31];
+    }
+    return out;
+}
+export function normalizeCustomPairingCode(input) {
+    const stripped = input.replace(/-/g, '').toUpperCase();
+    if (stripped.length !== 8) {
+        throw new Error(`custom pairing code must be 8 characters, got ${stripped.length}`);
+    }
+    for (let i = 0; i < stripped.length; i += 1) {
+        if (CROCKFORD_ALPHABET.indexOf(stripped[i]) < 0) {
+            throw new Error(`custom pairing code contains invalid character "${stripped[i]}" (allowed: ${CROCKFORD_ALPHABET})`);
+        }
+    }
+    return stripped;
+}
+export async function createCompanionHello(options = {}) {
+    const normalizedCustomCode = options.customCode !== undefined ? normalizeCustomPairingCode(options.customCode) : null;
+    const [companionEphemeralKeyPair, salt, counter, codeBytes] = await Promise.all([
+        X25519.generateKeyPair(),
+        randomBytesAsync(32),
+        randomBytesAsync(16),
+        normalizedCustomCode !== null ? Promise.resolve(null) : randomBytesAsync(5)
+    ]);
+    const pairingCode = normalizedCustomCode ?? encodeBytesToCrockford(codeBytes);
+    const cipherKey = await pbkdf2Sha256(TEXT_ENCODER.encode(pairingCode), salt, PBKDF2_ITERATIONS, PAIRING_AES_KEY_BYTES);
+    const encrypted = aesCtrEncrypt(cipherKey, counter, companionEphemeralKeyPair.pubKey);
+    return {
+        pairingCode,
+        companionEphemeralKeyPair,
+        wrappedCompanionEphemeralPub: concatBytes([salt, counter, encrypted])
+    };
+}
+export async function completeCompanionFinish(args) {
+    if (args.wrappedPrimaryEphemeralPub.length <= 48) {
+        throw new Error('invalid wrapped primary payload');
+    }
+    const pairingCipherKey = await pbkdf2Sha256(TEXT_ENCODER.encode(args.pairingCode), args.wrappedPrimaryEphemeralPub.subarray(0, 32), PBKDF2_ITERATIONS, PAIRING_AES_KEY_BYTES);
+    const primaryEphemeralPub = aesCtrDecrypt(pairingCipherKey, args.wrappedPrimaryEphemeralPub.subarray(32, 48), args.wrappedPrimaryEphemeralPub.subarray(48));
+    if (primaryEphemeralPub.length === 0) {
+        throw new Error('empty primary ephemeral public key');
+    }
+    const [sharedEphemeral, sharedIdentity, bundleSalt, bundleSecret, bundleIv] = await Promise.all([
+        X25519.scalarMult(args.companionEphemeralPrivKey, primaryEphemeralPub),
+        X25519.scalarMult(args.registrationIdentityKeyPair.privKey, args.primaryIdentityPub),
+        randomBytesAsync(32),
+        randomBytesAsync(32),
+        randomBytesAsync(12)
+    ]);
+    const bundleEncryptionKey = hkdf(sharedEphemeral, bundleSalt, WA_PAIRING_KDF_INFO.LINK_CODE_BUNDLE, 32);
+    const plaintextBundle = concatBytes([
+        args.registrationIdentityKeyPair.pubKey,
+        args.primaryIdentityPub,
+        bundleSecret
+    ]);
+    const encryptedBundle = aesGcmEncrypt(bundleEncryptionKey, bundleIv, plaintextBundle);
+    const wrappedKeyBundle = concatBytes([bundleSalt, bundleIv, encryptedBundle]);
+    const advMaterial = concatBytes([sharedEphemeral, sharedIdentity, bundleSecret]);
+    const advSecret = hkdf(advMaterial, null, WA_PAIRING_KDF_INFO.ADV_SECRET, 32);
+    return {
+        wrappedKeyBundle,
+        companionIdentityPublic: args.registrationIdentityKeyPair.pubKey,
+        advSecret
+    };
+}

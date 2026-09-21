@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WA_PAIRING_KDF_INFO = exports.WA_SIGNALING = void 0;
+const bytes_1 = require("../util/bytes");
+exports.WA_SIGNALING = Object.freeze({
+    LINK_CODE_STAGE_COMPANION_HELLO: 'companion_hello',
+    LINK_CODE_STAGE_GET_COUNTRY_CODE: 'get_country_code',
+    LINK_CODE_STAGE_COMPANION_FINISH: 'companion_finish',
+    LINK_CODE_STAGE_REFRESH_CODE: 'refresh_code',
+    LINK_CODE_STAGE_PRIMARY_HELLO: 'primary_hello',
+    COMPANION_REG_REFRESH_NOTIFICATION: 'companion_reg_refresh'
+});
+exports.WA_PAIRING_KDF_INFO = Object.freeze({
+    LINK_CODE_BUNDLE: bytes_1.TEXT_ENCODER.encode('link_code_pairing_key_bundle_encryption_key'),
+    ADV_SECRET: bytes_1.TEXT_ENCODER.encode('adv_secret')
+});

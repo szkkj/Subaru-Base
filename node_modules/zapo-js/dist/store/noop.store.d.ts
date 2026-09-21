@@ -1,0 +1,16 @@
+import type { WaChatMetadataStore } from './contracts/chat-metadata.store';
+import type { WaContactStore } from './contracts/contact.store';
+import type { WaDeviceListStore } from './contracts/device-list.store';
+import type { WaGroupMetadataStore } from './contracts/group-metadata.store';
+import type { WaMessageSecretStore } from './contracts/message-secret.store';
+import type { WaMessageStore } from './contracts/message.store';
+import type { WaRetryStore } from './contracts/retry.store';
+import type { WaThreadStore } from './contracts/thread.store';
+export declare const NOOP_MESSAGE_SECRET_STORE: WaMessageSecretStore;
+export declare const NOOP_MESSAGE_STORE: WaMessageStore;
+export declare const NOOP_THREAD_STORE: WaThreadStore;
+export declare const NOOP_CONTACT_STORE: WaContactStore;
+export declare const NOOP_RETRY_STORE: WaRetryStore;
+export declare const NOOP_CHAT_METADATA_STORE: WaChatMetadataStore;
+export declare const NOOP_GROUP_METADATA_STORE: WaGroupMetadataStore;
+export declare const NOOP_DEVICE_LIST_STORE: WaDeviceListStore;

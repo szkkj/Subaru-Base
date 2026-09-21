@@ -1,0 +1,81 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WA_GROUP_NOTIFICATION_TAGS = exports.WA_REGISTRATION_NOTIFICATION_TAGS = exports.WA_NEWSLETTER_NOTIFICATION_TAGS = exports.WA_BUSINESS_NOTIFICATION_TAGS = exports.WA_NOTIFICATION_TYPES = void 0;
+exports.WA_NOTIFICATION_TYPES = Object.freeze({
+    GROUP: 'w:gp2',
+    ENCRYPT: 'encrypt',
+    DEVICES: 'devices',
+    ACCOUNT_SYNC: 'account_sync',
+    SERVER: 'server',
+    REGISTRATION: 'registration',
+    NEWSLETTER: 'newsletter',
+    BUSINESS: 'business',
+    PICTURE: 'picture',
+    MEDIA_RETRY: 'mediaretry',
+    PASSKEY_PROLOGUE_REQUEST: 'passkey_prologue_request',
+    CRSC_CONTINUATION: 'crsc_continuation'
+});
+exports.WA_BUSINESS_NOTIFICATION_TAGS = Object.freeze({
+    VERIFIED_NAME: 'verified_name',
+    REMOVE: 'remove',
+    PROFILE: 'profile',
+    PRODUCT_CATALOG: 'product_catalog',
+    SUBSCRIPTIONS: 'subscriptions',
+    FEATURE_FLAGS: 'feature_flags'
+});
+exports.WA_NEWSLETTER_NOTIFICATION_TAGS = Object.freeze({
+    LIVE_UPDATES: 'live_updates'
+});
+exports.WA_REGISTRATION_NOTIFICATION_TAGS = Object.freeze({
+    WA_OLD_REGISTRATION: 'wa_old_registration',
+    DEVICE_LOGOUT: 'device_logout'
+});
+exports.WA_GROUP_NOTIFICATION_TAGS = Object.freeze({
+    REMOVE: 'remove',
+    ADD: 'add',
+    DEMOTE: 'demote',
+    DELETE: 'delete',
+    PROMOTE: 'promote',
+    MODIFY: 'modify',
+    CREATE: 'create',
+    SUBJECT: 'subject',
+    DESCRIPTION: 'description',
+    LOCKED: 'locked',
+    UNLOCKED: 'unlocked',
+    ANNOUNCEMENT: 'announcement',
+    NOT_ANNOUNCEMENT: 'not_announcement',
+    NO_FREQUENTLY_FORWARDED: 'no_frequently_forwarded',
+    FREQUENTLY_FORWARDED_OK: 'frequently_forwarded_ok',
+    INVITE: 'invite',
+    EPHEMERAL: 'ephemeral',
+    NOT_EPHEMERAL: 'not_ephemeral',
+    REVOKE: 'revoke',
+    SUSPENDED: 'suspended',
+    UNSUSPENDED: 'unsuspended',
+    GROWTH_LOCKED: 'growth_locked',
+    GROWTH_UNLOCKED: 'growth_unlocked',
+    LINK: 'link',
+    UNLINK: 'unlink',
+    LINKED_GROUP_PROMOTE: 'linked_group_promote',
+    LINKED_GROUP_DEMOTE: 'linked_group_demote',
+    MEMBERSHIP_APPROVAL_MODE: 'membership_approval_mode',
+    MEMBERSHIP_APPROVAL_REQUEST: 'membership_approval_request',
+    CREATED_MEMBERSHIP_REQUESTS: 'created_membership_requests',
+    REVOKED_MEMBERSHIP_REQUESTS: 'revoked_membership_requests',
+    ALLOW_NON_ADMIN_SUB_GROUP_CREATION: 'allow_non_admin_sub_group_creation',
+    NOT_ALLOW_NON_ADMIN_SUB_GROUP_CREATION: 'not_allow_non_admin_sub_group_creation',
+    ALLOW_ADMIN_REPORTS: 'allow_admin_reports',
+    NOT_ALLOW_ADMIN_REPORTS: 'not_allow_admin_reports',
+    REPORTS: 'reports',
+    CREATED_SUB_GROUP_SUGGESTION: 'created_sub_group_suggestion',
+    REVOKED_SUB_GROUP_SUGGESTIONS: 'revoked_sub_group_suggestions',
+    CHANGE_NUMBER: 'change_number',
+    MEMBER_ADD_MODE: 'member_add_mode',
+    AUTO_ADD_DISABLED: 'auto_add_disabled',
+    IS_CAPI_HOSTED_GROUP: 'is_capi_hosted_group',
+    GROUP_SAFETY_CHECK: 'group_safety_check',
+    LIMIT_SHARING_ENABLED: 'limit_sharing_enabled',
+    MISSING_PARTICIPANT_IDENTIFICATION: 'missing_participant_identification',
+    GROUP_HISTORY: 'group_history',
+    NO_GROUP_HISTORY: 'no_group_history'
+});

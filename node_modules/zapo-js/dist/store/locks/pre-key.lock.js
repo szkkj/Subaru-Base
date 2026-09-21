@@ -1,0 +1,33 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.withPreKeyLock = withPreKeyLock;
+const SharedExclusiveGate_1 = require("../../infra/perf/SharedExclusiveGate");
+const StoreLock_1 = require("../../infra/perf/StoreLock");
+const WA_PREKEY_KEY = 'prekey:prekeys';
+const WA_PREKEY_SERVER_KEY = 'prekey:serverHasPreKeys';
+const WA_PREKEY_CLEAR_KEY = 'prekey:clear';
+// consume is independent of the counter/generation and atomic in the store, so it
+// uses a per-id key instead of WA_PREKEY_KEY: no queueing behind generation/upload.
+const WA_PREKEY_CONSUME_PREFIX = 'prekey:consume:';
+function withPreKeyLock(store) {
+    const lock = new StoreLock_1.StoreLock();
+    const gate = new SharedExclusiveGate_1.SharedExclusiveGate();
+    const destroyStore = store;
+    return {
+        putPreKey: (record) => gate.runShared(() => lock.run(WA_PREKEY_KEY, () => store.putPreKey(record))),
+        getOrGenPreKeys: (count, generator) => gate.runShared(() => lock.run(WA_PREKEY_KEY, () => store.getOrGenPreKeys(count, generator))),
+        getPreKeyById: (keyId) => gate.runShared(() => store.getPreKeyById(keyId)),
+        getPreKeysById: (keyIds) => gate.runShared(() => store.getPreKeysById(keyIds)),
+        consumePreKeyById: (keyId) => gate.runShared(() => lock.run(`${WA_PREKEY_CONSUME_PREFIX}${keyId}`, () => store.consumePreKeyById(keyId))),
+        getOrGenSinglePreKey: (generator) => gate.runShared(() => lock.run(WA_PREKEY_KEY, () => store.getOrGenSinglePreKey(generator))),
+        markKeyAsUploaded: (keyId) => gate.runShared(() => lock.run(WA_PREKEY_KEY, () => store.markKeyAsUploaded(keyId))),
+        setServerHasPreKeys: (value) => gate.runShared(() => lock.run(WA_PREKEY_SERVER_KEY, () => store.setServerHasPreKeys(value))),
+        getServerHasPreKeys: () => gate.runShared(() => store.getServerHasPreKeys()),
+        clear: () => gate.runExclusive(() => lock.run(WA_PREKEY_CLEAR_KEY, () => store.clear())),
+        destroy: async () => {
+            await gate.close();
+            await lock.shutdown();
+            await destroyStore.destroy?.();
+        }
+    };
+}

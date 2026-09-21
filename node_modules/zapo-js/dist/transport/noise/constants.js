@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ROOT_CA_PUBLIC_KEY_HEX = exports.ROOT_CA_SERIAL = exports.NOISE_XX_FALLBACK_NAME = exports.NOISE_IK_NAME = exports.NOISE_XX_NAME = exports.WA_PROTO_HEADER = void 0;
+const bytes_1 = require("../../util/bytes");
+exports.WA_PROTO_HEADER = new Uint8Array([87, 65, 6, 3]);
+exports.NOISE_XX_NAME = bytes_1.TEXT_ENCODER.encode('Noise_XX_25519_AESGCM_SHA256\0\0\0\0');
+exports.NOISE_IK_NAME = bytes_1.TEXT_ENCODER.encode('Noise_IK_25519_AESGCM_SHA256\0\0\0\0');
+exports.NOISE_XX_FALLBACK_NAME = bytes_1.TEXT_ENCODER.encode('Noise_XXfallback_25519_AESGCM_SHA256');
+exports.ROOT_CA_SERIAL = 0;
+exports.ROOT_CA_PUBLIC_KEY_HEX = '142375574d0a587166aae71ebe516437c4a28b73e3695c6ce1f7f9545da8ee6b';

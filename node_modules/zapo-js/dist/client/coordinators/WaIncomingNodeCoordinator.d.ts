@@ -1,0 +1,75 @@
+import type { WaAuthCredentials, WaSuccessPersistAttributes } from '../../auth/types';
+import type { WaOfflineResumeCoordinator } from '../coordinators/WaOfflineResumeCoordinator';
+import type { WaDirtyBit } from '../events/dirty';
+import type { WaAccountTakeoverNoticeEvent, WaBusinessEvent, WaGroupEvent, WaIncomingCallEvent, WaIncomingChatstateEvent, WaIncomingErrorStanzaEvent, WaIncomingFailureEvent, WaIncomingNodeHandlerRegistration, WaIncomingNotificationEvent, WaIncomingPresenceEvent, WaIncomingReceiptEvent, WaIncomingStanzaFilter, WaIncomingUnhandledStanzaEvent, WaMexNotificationEvent, WaOfflineThreadMetadataEvent, WaPictureEvent, WaRegistrationCodeEvent } from '../types';
+import type { Logger } from '../../infra/log/types';
+import type { WaConnectionCode, WaDisconnectReason } from '../../protocol/stream';
+import { type WaStreamControlNodeResult } from '../../transport/stream/parse';
+import type { BinaryNode } from '../../transport/types';
+interface WaIncomingNodeRuntime {
+    readonly handleStreamControlResult: (result: WaStreamControlNodeResult) => Promise<void>;
+    readonly persistSuccessAttributes: (attributes: WaSuccessPersistAttributes) => Promise<void>;
+    readonly emitSuccessNode: (node: BinaryNode) => void;
+    readonly updateClockSkewFromSuccess: (serverUnixSeconds: number) => void;
+    readonly shouldWarmupMediaConn: () => boolean;
+    readonly warmupMediaConn: () => Promise<void>;
+    readonly persistRoutingInfo: (routingInfo: Uint8Array) => Promise<void>;
+    readonly tryResolvePendingNode: (node: BinaryNode) => boolean;
+    readonly handleGenericIncomingNode: (node: BinaryNode) => Promise<boolean>;
+    readonly handleIncomingIqSetNode: (node: BinaryNode) => Promise<boolean>;
+    readonly handleLinkCodeNotificationNode: (node: BinaryNode) => Promise<boolean>;
+    readonly handleCompanionRegRefreshNotificationNode: (node: BinaryNode) => Promise<boolean>;
+    readonly handleIncomingMessageNode: (node: BinaryNode) => Promise<boolean>;
+    readonly sendNode: (node: BinaryNode) => Promise<void>;
+    readonly handleIncomingRetryReceipt: (node: BinaryNode) => Promise<void>;
+    readonly handleMediaRetryNotification: (node: BinaryNode) => void;
+    readonly trackOutboundReceipt: (node: BinaryNode) => Promise<void>;
+    readonly emitIncomingReceipt: (event: WaIncomingReceiptEvent) => void;
+    readonly emitIncomingPresence: (event: WaIncomingPresenceEvent) => void;
+    readonly emitIncomingChatstate: (event: WaIncomingChatstateEvent) => void;
+    readonly emitIncomingCall: (event: WaIncomingCallEvent) => void;
+    readonly getCurrentCredentials: () => WaAuthCredentials | null;
+    readonly emitIncomingFailure: (event: WaIncomingFailureEvent) => void;
+    readonly emitIncomingErrorStanza: (event: WaIncomingErrorStanzaEvent) => void;
+    readonly emitIncomingNotification: (event: WaIncomingNotificationEvent) => void;
+    readonly emitOfflineThreadMetadata: (event: WaOfflineThreadMetadataEvent) => void;
+    readonly emitMexNotification: (event: WaMexNotificationEvent) => void;
+    readonly emitRegistrationCode: (event: WaRegistrationCodeEvent) => void;
+    readonly emitAccountTakeoverNotice: (event: WaAccountTakeoverNoticeEvent) => void;
+    readonly emitGroupEvent: (event: WaGroupEvent) => void;
+    readonly emitBusinessEvent: (event: WaBusinessEvent) => void;
+    readonly emitPictureEvent: (event: WaPictureEvent) => void;
+    readonly emitUnhandledIncomingNode: (event: WaIncomingUnhandledStanzaEvent) => void;
+    readonly syncAppState: () => Promise<void>;
+    readonly stopComms: () => void;
+    readonly disconnect: (reason: WaDisconnectReason, isLogout: boolean, code: WaConnectionCode | null) => Promise<void>;
+    readonly clearStoredCredentials: () => Promise<void>;
+    readonly parseDirtyBits: (nodes: readonly BinaryNode[]) => readonly WaDirtyBit[];
+    readonly handleDirtyBits: (dirtyBits: readonly WaDirtyBit[]) => Promise<void>;
+}
+interface WaIncomingNodeCoordinatorOptions {
+    readonly logger: Logger;
+    readonly runtime: WaIncomingNodeRuntime;
+    readonly offlineResume: WaOfflineResumeCoordinator;
+}
+export declare class WaIncomingNodeCoordinator {
+    private readonly logger;
+    private readonly runtime;
+    private readonly offlineResume;
+    private readonly nodeHandlerRegistry;
+    private readonly stanzaFilters;
+    private mediaConnWarmupPromise;
+    constructor(options: WaIncomingNodeCoordinatorOptions);
+    handleIncomingNode(node: BinaryNode): Promise<void>;
+    registerIncomingStanzaFilter(filter: WaIncomingStanzaFilter): () => void;
+    private applyStanzaFilters;
+    registerIncomingHandler(registration: WaIncomingNodeHandlerRegistration): () => void;
+    unregisterIncomingHandler(registration: WaIncomingNodeHandlerRegistration): boolean;
+    private dispatchIncomingNode;
+    private isRetryReceiptType;
+    private registerDefaultIncomingHandlers;
+    private handleSuccessNode;
+    private scheduleMediaConnWarmup;
+    private handleInfoBulletinNode;
+}
+export {};

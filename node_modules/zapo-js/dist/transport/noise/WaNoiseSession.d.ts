@@ -1,0 +1,35 @@
+import type { Logger } from '../../infra/log/types';
+import type { WaNoiseConfig } from '../types';
+export declare class WaNoiseSession {
+    private readonly sendWire;
+    private readonly logger;
+    private writeChain;
+    private frameCodec;
+    private handshakeInbox;
+    private handshakeInboxHead;
+    private handshakeWaiter;
+    private handshakeRejecter;
+    private pendingDecryptedFrames;
+    private closedError;
+    private noiseSocket;
+    private serverStaticKey;
+    private trustedRootCa;
+    private readonly handshakeFrameTimeoutMs;
+    constructor(sendWire: (payload: Uint8Array) => Promise<void>, logger?: Logger);
+    start(config: WaNoiseConfig): Promise<void>;
+    encryptFrame(frame: Uint8Array): Promise<Uint8Array>;
+    pushWireChunk(chunk: Uint8Array): Promise<readonly Uint8Array[]>;
+    onSocketClosed(error?: Error): void;
+    private decryptFramesBatch;
+    reset(): void;
+    getServerStaticKey(): Uint8Array | null;
+    private fullHandshake;
+    private resumeHandshake;
+    private tryResumeHandshakeWithIk;
+    private resumeHandshakeWithFallback;
+    private continueFullHandshake;
+    private sendHandshakeFrame;
+    private sendAndReceiveHandshakeFrame;
+    private waitHandshakeFrame;
+    private decodeBufferedPostHandshakeFrames;
+}

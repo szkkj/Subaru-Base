@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WA_BUSINESS_HOURS_MODES = exports.WA_BUSINESS_HOURS_DAYS = void 0;
+exports.WA_BUSINESS_HOURS_DAYS = Object.freeze({
+    SUN: 'sun',
+    MON: 'mon',
+    TUE: 'tue',
+    WED: 'wed',
+    THU: 'thu',
+    FRI: 'fri',
+    SAT: 'sat'
+});
+/**
+ * Per-day open mode accepted by the `business_profile` edit IQ. A closed day is
+ * expressed by omitting it from the config entirely, not by a dedicated mode.
+ * `open_time` / `close_time` are only meaningful for `specific_hours`.
+ */
+exports.WA_BUSINESS_HOURS_MODES = Object.freeze({
+    OPEN_24H: 'open_24h',
+    SPECIFIC_HOURS: 'specific_hours',
+    APPOINTMENT_ONLY: 'appointment_only'
+});

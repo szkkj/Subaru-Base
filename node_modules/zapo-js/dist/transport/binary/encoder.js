@@ -1,0 +1,333 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.encodeBinaryNode = encodeBinaryNode;
+exports.encodeBinaryNodeStanza = encodeBinaryNodeStanza;
+const constants_1 = require("../../protocol/constants");
+const constants_2 = require("../binary/constants");
+const bytes_1 = require("../../util/bytes");
+class ByteWriter {
+    constructor(initialCapacity = 256) {
+        this.buffer = new Uint8Array(initialCapacity);
+        this.offset = 0;
+    }
+    writeUint8(value) {
+        this.ensure(1);
+        this.buffer[this.offset] = value & 0xff;
+        this.offset += 1;
+    }
+    writeUint16(value) {
+        this.ensure(2);
+        this.buffer[this.offset] = (value >>> 8) & 0xff;
+        this.buffer[this.offset + 1] = value & 0xff;
+        this.offset += 2;
+    }
+    writeUint32(value) {
+        this.ensure(4);
+        this.buffer[this.offset] = (value >>> 24) & 0xff;
+        this.buffer[this.offset + 1] = (value >>> 16) & 0xff;
+        this.buffer[this.offset + 2] = (value >>> 8) & 0xff;
+        this.buffer[this.offset + 3] = value & 0xff;
+        this.offset += 4;
+    }
+    writeBytes(value) {
+        this.ensure(value.length);
+        this.buffer.set(value, this.offset);
+        this.offset += value.length;
+    }
+    reserveUint8() {
+        this.ensure(1);
+        const at = this.offset;
+        this.offset += 1;
+        return at;
+    }
+    patchUint8(at, value) {
+        this.buffer[at] = value & 0xff;
+    }
+    writeUtf8(value, maxBytes) {
+        this.ensure(maxBytes);
+        const result = bytes_1.TEXT_ENCODER.encodeInto(value, this.buffer.subarray(this.offset));
+        this.offset += result.written;
+        return result.written;
+    }
+    toUint8Array() {
+        return this.buffer.subarray(0, this.offset);
+    }
+    ensure(extra) {
+        const needed = this.offset + extra;
+        if (needed <= this.buffer.length) {
+            return;
+        }
+        let size = this.buffer.length;
+        while (size < needed) {
+            size *= 2;
+        }
+        const next = new Uint8Array(size);
+        next.set(this.buffer);
+        this.buffer = next;
+    }
+}
+const PACKED_NONE = 0;
+const PACKED_NIBBLE = 1;
+const PACKED_HEX = 2;
+function classifyPackedString(value) {
+    const n = value.length;
+    if (n === 0 || n >= 128)
+        return PACKED_NONE;
+    let nibbleOk = true;
+    let hexOk = true;
+    for (let i = 0; i < n; i += 1) {
+        const code = value.charCodeAt(i);
+        if (code >= 48 && code <= 57)
+            continue;
+        if (code === 45 || code === 46) {
+            hexOk = false;
+            if (!nibbleOk)
+                return PACKED_NONE;
+            continue;
+        }
+        if (code >= 65 && code <= 70) {
+            nibbleOk = false;
+            if (!hexOk)
+                return PACKED_NONE;
+            continue;
+        }
+        return PACKED_NONE;
+    }
+    return nibbleOk ? PACKED_NIBBLE : PACKED_HEX;
+}
+function toNibble(value, index, packedType) {
+    const code = value.charCodeAt(index);
+    if (code >= 48 && code <= 57) {
+        return code - 48;
+    }
+    if (packedType === constants_2.NIBBLE_8) {
+        if (code === 45) {
+            return 10;
+        }
+        if (code === 46) {
+            return 11;
+        }
+    }
+    if (packedType === constants_2.HEX_8 && code >= 65 && code <= 70) {
+        return code - 55;
+    }
+    throw new Error(`cannot nibble encode char code ${code}`);
+}
+function writePackedString(value, packedType, writer) {
+    const odd = value.length % 2 === 1;
+    writer.writeUint8(packedType);
+    let length = Math.ceil(value.length / 2);
+    if (odd) {
+        length |= 0x80;
+    }
+    writer.writeUint8(length);
+    for (let i = 0; i < value.length; i += 2) {
+        const high = toNibble(value, i, packedType);
+        let low = 0x0f;
+        if (i + 1 < value.length) {
+            low = toNibble(value, i + 1, packedType);
+        }
+        writer.writeUint8((high << 4) | low);
+    }
+}
+function writeBinaryLength(length, writer) {
+    if (!Number.isSafeInteger(length) || length < 0) {
+        throw new Error(`invalid binary length ${length}`);
+    }
+    if (length < 256) {
+        writer.writeUint8(constants_2.BINARY_8);
+        writer.writeUint8(length);
+        return;
+    }
+    if (length < 1 << 20) {
+        writer.writeUint8(constants_2.BINARY_20);
+        writer.writeUint8((length >>> 16) & 0xff);
+        writer.writeUint8((length >>> 8) & 0xff);
+        writer.writeUint8(length & 0xff);
+        return;
+    }
+    if (!(length < 4294967296)) {
+        throw new Error(`binary with length ${length} is too big for WAP protocol`);
+    }
+    writer.writeUint8(constants_2.BINARY_32);
+    writer.writeUint32(length);
+}
+function writeUtf8WithLength(value, writer) {
+    if (value.length < 86) {
+        writer.writeUint8(constants_2.BINARY_8);
+        const lengthAt = writer.reserveUint8();
+        const written = writer.writeUtf8(value, value.length * 3);
+        writer.patchUint8(lengthAt, written);
+        return;
+    }
+    const encoded = bytes_1.TEXT_ENCODER.encode(value);
+    writeBinaryLength(encoded.length, writer);
+    writer.writeBytes(encoded);
+}
+function writeString(value, writer) {
+    const token = constants_2.MERGED_TOKEN_MAP.get(value);
+    if (token !== undefined) {
+        if (token < constants_2.MERGED_TOKEN_DICTIONARY_FLAG) {
+            writer.writeUint8(token);
+        }
+        else {
+            writer.writeUint8(constants_2.DICTIONARY_0 + ((token >>> 8) & 0xff));
+            writer.writeUint8(token & 0xff);
+        }
+        return;
+    }
+    const packed = classifyPackedString(value);
+    if (packed === PACKED_NIBBLE) {
+        writePackedString(value, constants_2.NIBBLE_8, writer);
+        return;
+    }
+    if (packed === PACKED_HEX) {
+        writePackedString(value, constants_2.HEX_8, writer);
+        return;
+    }
+    writeUtf8WithLength(value, writer);
+}
+const KNOWN_JID_SERVERS = [
+    constants_1.WA_DEFAULTS.HOST_DOMAIN,
+    constants_1.WA_DEFAULTS.LID_SERVER,
+    constants_1.WA_DEFAULTS.GROUP_SERVER,
+    constants_1.WA_DEFAULTS.NEWSLETTER_SERVER,
+    constants_1.WA_DEFAULTS.BROADCAST_SERVER,
+    constants_1.WA_DEFAULTS.HOSTED_LID_SERVER,
+    constants_1.WA_DEFAULTS.HOSTED_SERVER,
+    constants_1.WA_DEFAULTS.BOT_SERVER,
+    constants_1.WA_DEFAULTS.MSGR_SERVER,
+    constants_1.WA_DEFAULTS.INTEROP_SERVER
+];
+function matchKnownServer(value, from) {
+    const length = value.length - from;
+    for (let i = 0; i < KNOWN_JID_SERVERS.length; i += 1) {
+        const server = KNOWN_JID_SERVERS[i];
+        if (server.length === length && value.startsWith(server, from)) {
+            return server;
+        }
+    }
+    return null;
+}
+function tryWriteJid(value, writer) {
+    const atIndex = value.indexOf('@');
+    if (atIndex <= 0 || atIndex === value.length - 1) {
+        return false;
+    }
+    if (value.indexOf('@', atIndex + 1) !== -1) {
+        return false;
+    }
+    let userEnd = atIndex;
+    let device = 0;
+    const colonIndex = value.indexOf(':');
+    if (colonIndex !== -1 && colonIndex < atIndex) {
+        if (colonIndex === atIndex - 1) {
+            return false;
+        }
+        for (let i = colonIndex + 1; i < atIndex; i += 1) {
+            const digit = value.charCodeAt(i) - 48;
+            if (digit < 0 || digit > 9) {
+                return false;
+            }
+            device = device * 10 + digit;
+            if (device > 255) {
+                return false;
+            }
+        }
+        userEnd = colonIndex;
+    }
+    const server = matchKnownServer(value, atIndex + 1) ?? value.slice(atIndex + 1);
+    let domainType = -1;
+    if (server === constants_1.WA_DEFAULTS.LID_SERVER) {
+        domainType = constants_2.JID_U_DOMAIN_TYPE_LID;
+    }
+    else if (server === constants_1.WA_DEFAULTS.HOSTED_LID_SERVER) {
+        domainType = constants_2.JID_U_DOMAIN_TYPE_HOSTED_LID;
+    }
+    else if (server === constants_1.WA_DEFAULTS.HOST_DOMAIN) {
+        domainType = constants_2.JID_U_DOMAIN_TYPE_PN;
+    }
+    else if (server === constants_1.WA_DEFAULTS.HOSTED_SERVER) {
+        domainType = constants_2.JID_U_DOMAIN_TYPE_HOSTED;
+    }
+    if (domainType !== -1 && device !== 0 && userEnd > 0) {
+        writer.writeUint8(constants_2.JID_U);
+        writer.writeUint8(domainType);
+        writer.writeUint8(device);
+        writeString(value.slice(0, userEnd), writer);
+        return true;
+    }
+    writer.writeUint8(constants_2.JID_PAIR);
+    if (userEnd === 0) {
+        writer.writeUint8(constants_2.LIST_EMPTY);
+    }
+    else {
+        writeString(value.slice(0, userEnd), writer);
+    }
+    writeString(server, writer);
+    return true;
+}
+function writeListSize(size, writer) {
+    if (!Number.isSafeInteger(size) || size < 0) {
+        throw new Error(`invalid list size ${size}`);
+    }
+    if (size < 256) {
+        writer.writeUint8(constants_2.LIST_8);
+        writer.writeUint8(size);
+        return;
+    }
+    if (!(size < 1 << 16)) {
+        throw new Error(`list with size ${size} is too large for WAP protocol`);
+    }
+    writer.writeUint8(constants_2.LIST_16);
+    writer.writeUint16(size);
+}
+function writeNodeInternal(node, writer) {
+    const keys = Object.keys(node.attrs);
+    const attrsLen = keys.length;
+    const hasContent = node.content !== null && node.content !== undefined;
+    const listSize = 1 + attrsLen * 2 + (hasContent ? 1 : 0);
+    writeListSize(listSize, writer);
+    writeString(node.tag, writer);
+    for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i];
+        writeString(key, writer);
+        const value = node.attrs[key];
+        if (!tryWriteJid(value, writer)) {
+            writeString(value, writer);
+        }
+    }
+    if (!hasContent) {
+        return;
+    }
+    const content = node.content;
+    if (typeof content === 'string') {
+        writeUtf8WithLength(content, writer);
+        return;
+    }
+    if (content instanceof Uint8Array) {
+        writeBinaryLength(content.length, writer);
+        writer.writeBytes(content);
+        return;
+    }
+    writeListSize(content.length, writer);
+    for (const child of content) {
+        writeNodeInternal(child, writer);
+    }
+}
+/** Encodes a {@link BinaryNode} into its raw WhatsApp binary representation. */
+function encodeBinaryNode(node) {
+    const writer = new ByteWriter();
+    writeNodeInternal(node, writer);
+    return writer.toUint8Array();
+}
+/**
+ * Encodes a {@link BinaryNode} as a transport stanza – prefixes the bytes
+ * with the 1-byte flag (`0x00`) the WebSocket framing expects.
+ */
+function encodeBinaryNodeStanza(node) {
+    const writer = new ByteWriter();
+    writer.writeUint8(0x00);
+    writeNodeInternal(node, writer);
+    return writer.toUint8Array();
+}

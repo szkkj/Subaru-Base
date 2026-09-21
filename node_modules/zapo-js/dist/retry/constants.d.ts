@@ -1,0 +1,21 @@
+export declare const MAX_RETRY_ATTEMPTS = 5;
+export declare const RETRY_KEYS_MIN_COUNT = 2;
+export declare const RETRY_OUTBOUND_TTL_MS: number;
+export declare const RETRY_RECEIPT_VERSION = "1";
+export declare const RETRY_REASON: Readonly<{
+    readonly UnknownError: 0;
+    readonly SignalErrorNoSession: 1;
+    readonly SignalErrorInvalidKey: 2;
+    readonly SignalErrorInvalidKeyId: 3;
+    readonly SignalErrorInvalidMessage: 4;
+    readonly SignalErrorInvalidSignature: 5;
+    readonly SignalErrorFutureMessage: 6;
+    readonly SignalErrorBadMac: 7;
+    readonly SignalErrorInvalidSession: 8;
+    readonly SignalErrorInvalidMsgKey: 9;
+    readonly BadBroadcastEphemeralSetting: 10;
+    readonly UnknownCompanionNoPrekey: 11;
+    readonly AdvFailure: 12;
+    readonly StatusRevokeDelay: 13;
+}>;
+export type WaRetryReasonCode = (typeof RETRY_REASON)[keyof typeof RETRY_REASON];

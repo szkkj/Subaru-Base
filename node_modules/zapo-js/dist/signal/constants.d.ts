@@ -1,0 +1,14 @@
+export declare const SIGNAL_VERSION = 3;
+export declare const SIGNAL_GROUP_VERSION = 3;
+export declare const SIGNAL_MAC_SIZE = 8;
+export declare const MAX_PREV_SESSIONS = 40;
+export declare const MAX_UNUSED_KEYS = 2000;
+export declare const FUTURE_MESSAGES_MAX = 2000;
+export declare const SENDER_KEY_FUTURE_MESSAGES_MAX = 20000;
+export declare const MESSAGE_KEY_LABEL: Readonly<Uint8Array>;
+export declare const CHAIN_KEY_LABEL: Readonly<Uint8Array>;
+export declare const WHISPER_GROUP_INFO: Readonly<Uint8Array>;
+export declare const WHISPER_MESSAGE_KEYS_INFO: Readonly<Uint8Array>;
+export declare const WHISPER_TEXT_INFO: Readonly<Uint8Array>;
+export declare const WHISPER_RATCHET_INFO: Readonly<Uint8Array>;
+export declare const SIGNAL_PREFIX: Readonly<Uint8Array>;

@@ -1,0 +1,155 @@
+import { createPrivateKey, createPublicKey, diffieHellman, generateKeyPair, generateKeyPairSync } from 'node:crypto';
+import { promisify } from 'node:util';
+const generateKeyPairAsync = promisify(generateKeyPair);
+import { X25519_PKCS8_PREFIX, X25519_SPKI_PREFIX } from '../curves/constants.js';
+import { pkcs8FromRawPrivate } from '../curves/types.js';
+import { FE_ONE } from '../math/constants.js';
+import { fe, feAdd, feFromBytes, feInv, feMul, fePack, feSub } from '../math/fe.js';
+import { resolveNativeCryptoBackend } from '../nativeBackend.js';
+import { assertByteLength, concatBytes, decodeBase64Url, toBytesView } from '../../util/bytes.js';
+const nativeX25519ScalarMult = (() => {
+    if (process.env.ZAPO_X25519_FORCE_JS)
+        return null;
+    const mod = resolveNativeCryptoBackend();
+    if (mod && typeof mod.x25519ScalarMult === 'function') {
+        return mod.x25519ScalarMult;
+    }
+    return null;
+})();
+const diffieHellmanWithCallback = diffieHellman;
+let diffieHellmanAsync = null;
+let diffieHellmanAsyncProbed = false;
+function resolveDiffieHellmanAsync() {
+    if (diffieHellmanAsyncProbed)
+        return diffieHellmanAsync;
+    diffieHellmanAsyncProbed = true;
+    try {
+        const probe = generateKeyPairSync('x25519');
+        const result = diffieHellman({ privateKey: probe.privateKey, publicKey: probe.publicKey }, () => { });
+        if (result === undefined) {
+            diffieHellmanAsync = promisify(diffieHellmanWithCallback);
+        }
+    }
+    catch {
+        // callback form not supported by this runtime; stay on sync path
+    }
+    return diffieHellmanAsync;
+}
+// Pre-allocated temps for montgomeryToEdwardsPublic (safe: single-threaded)
+const _mx = fe();
+const _m1 = fe();
+const _m2 = fe();
+const _m3 = fe();
+// p-1 = 2^255-20 in LE bytes: 0xEC, 0xFF×30, 0x7F
+// Mask bit 255 before comparing (non-canonical inputs may have it set)
+function isFieldPMinus1(b) {
+    if (b[0] !== 0xec || (b[31] & 0x7f) !== 0x7f)
+        return false;
+    for (let i = 1; i < 31; i++)
+        if (b[i] !== 0xff)
+            return false;
+    return true;
+}
+/**
+ * Applies the standard curve25519 scalar clamping in place and returns the
+ * same buffer for chaining. Throws on non-32-byte inputs.
+ */
+export function clampCurvePrivateKeyInPlace(privateKey) {
+    assertByteLength(privateKey, 32, `invalid curve25519 private key length ${privateKey.length}`);
+    privateKey[0] &= 248;
+    privateKey[31] &= 127;
+    privateKey[31] |= 64;
+    return privateKey;
+}
+/**
+ * Converts a 32-byte Montgomery (curve25519) public key to its Edwards form
+ * for XEdDSA verification, applying the supplied `signBit` (`0x80` mask).
+ * Throws on the field-`p-1` low-order point.
+ */
+export function montgomeryToEdwardsPublic(curvePublicKey, signBit) {
+    assertByteLength(curvePublicKey, 32, `invalid curve25519 public key length ${curvePublicKey.length}`);
+    if (isFieldPMinus1(curvePublicKey)) {
+        throw new Error('invalid curve25519 low-order public key');
+    }
+    feFromBytes(_mx, curvePublicKey);
+    feSub(_m1, _mx, FE_ONE);
+    feAdd(_m2, _mx, FE_ONE);
+    feInv(_m3, _m2);
+    feMul(_m1, _m1, _m3);
+    const encoded = new Uint8Array(32);
+    fePack(encoded, _m1);
+    encoded[31] = (encoded[31] & 0x7f) | (signBit & 0x80);
+    return encoded;
+}
+const privateKeyObjectCache = new WeakMap();
+const publicKeyObjectCache = new WeakMap();
+function x25519PrivateKeyObject(privKey) {
+    const cached = privateKeyObjectCache.get(privKey);
+    if (cached) {
+        return cached;
+    }
+    const keyObject = createPrivateKey({
+        key: pkcs8FromRawPrivate(X25519_PKCS8_PREFIX, privKey),
+        format: 'der',
+        type: 'pkcs8'
+    });
+    privateKeyObjectCache.set(privKey, keyObject);
+    return keyObject;
+}
+function x25519PublicKeyObject(pubKey) {
+    const cached = publicKeyObjectCache.get(pubKey);
+    if (cached) {
+        return cached;
+    }
+    const keyObject = createPublicKey({
+        key: concatBytes([X25519_SPKI_PREFIX, pubKey]),
+        format: 'der',
+        type: 'spki'
+    });
+    publicKeyObjectCache.set(pubKey, keyObject);
+    return keyObject;
+}
+/**
+ * X25519 key-pair generation and Diffie-Hellman scalar multiplication
+ * backed by Node's native primitives.
+ */
+export class X25519 {
+    /** Generates a fresh X25519 key pair. */
+    static async generateKeyPair() {
+        const { privateKey } = await generateKeyPairAsync('x25519');
+        const jwk = privateKey.export({ format: 'jwk' });
+        return {
+            pubKey: decodeBase64Url(jwk.x, 'x25519 public key'),
+            privKey: decodeBase64Url(jwk.d, 'x25519 private key')
+        };
+    }
+    /** Derives the matching public key from a 32-byte X25519 private key. */
+    static keyPairFromPrivateKey(privKey) {
+        assertByteLength(privKey, 32, 'x25519 private key must be 32 bytes');
+        const jwk = x25519PrivateKeyObject(privKey).export({ format: 'jwk' });
+        return {
+            pubKey: decodeBase64Url(jwk.x, 'x25519 public key'),
+            privKey
+        };
+    }
+    /**
+     * Computes the X25519 shared secret between `privKey` and `pubKey`.
+     * Uses Node's async DH path when supported, otherwise falls back to sync.
+     */
+    static async scalarMult(privKey, pubKey) {
+        assertByteLength(privKey, 32, 'x25519 private key must be 32 bytes');
+        assertByteLength(pubKey, 32, 'x25519 public key must be 32 bytes');
+        if (nativeX25519ScalarMult) {
+            return toBytesView(nativeX25519ScalarMult(privKey, pubKey));
+        }
+        const opts = {
+            privateKey: x25519PrivateKeyObject(privKey),
+            publicKey: x25519PublicKeyObject(pubKey)
+        };
+        const dhAsync = resolveDiffieHellmanAsync();
+        if (dhAsync) {
+            return toBytesView(await dhAsync(opts));
+        }
+        return toBytesView(diffieHellman(opts));
+    }
+}

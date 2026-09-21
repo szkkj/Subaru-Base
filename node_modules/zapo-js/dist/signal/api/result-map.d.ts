@@ -1,0 +1,1 @@
+export declare function registerParsedResultByRawAndCanonicalKey<T>(parsedByRawKey: Map<string, T>, parsedByCanonicalKey: Map<string, T>, rawKey: string, canonicalKey: string, result: T, isPreferred: (value: T) => boolean): void;
