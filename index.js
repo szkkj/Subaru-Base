@@ -3487,6 +3487,14 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
               participant: alvo,
             },
           });
+          await subaru.sendMessage(from, {
+            delete: {
+              remoteJid: from,
+              fromMe: false,
+              id: info.key.id,
+              participant: sender || senderLid,
+            },
+          });
           react("🗑");
           break;
 
