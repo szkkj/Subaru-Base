@@ -20,6 +20,7 @@ import { fileURLToPath } from "url";
 import os from "os";
 import { createRequire } from "module";
 import LRU from "pixl-cache";
+import crypto from "crypto";
 import {
   getGroupMetadataSafe,
   groupMetadataCache,
@@ -220,32 +221,27 @@ function createZapoSocketAdapter(client) {
     });
   });
 
-  client.on("auth_qr", async () => {
+  client.on("auth_qr", async ({ qr } = {}) => {
     if (process.argv.includes("--code")) {
       if (global.__pairingRequested) return;
       global.__pairingRequested = true;
 
-      const readline = await import("readline");
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-      });
+      const number = global.__pairingNumber;
+      if (!number) {
+        console.error("❌ Número não capturado. Rode com --code.");
+        return;
+      }
 
-      const raw = await new Promise((resolve) => {
-        rl.question("Insira o número de telefone para conectar: ", resolve);
-      });
-      rl.close();
-
-      const number = raw.replace(/\D/g, "");
       try {
         await client.auth.requestPairingCode(number, true);
       } catch (err) {
         console.error("❌ Erro ao pedir pairing code:", err?.message || err);
+        global.__pairingRequested = false;
       }
       return;
     }
 
-    ev.emit("connection.update", { qr: null });
+    if (qr) ev.emit("connection.update", { qr });
   });
 
   client.on("auth_qr", ({ qr }) => {
@@ -274,6 +270,40 @@ function createZapoSocketAdapter(client) {
         ? { error: { output: { statusCode: event.isLogout ? 401 : 500 } } }
         : undefined,
     });
+  });
+
+  client.on("group", (event) => {
+    const jid = event.groupJid;
+    if (!jid) return;
+
+    const invalidatesAdmins = [
+      "add",
+      "remove",
+      "promote",
+      "demote",
+      "linked_group_promote",
+      "linked_group_demote",
+    ];
+    if (invalidatesAdmins.includes(event.action)) {
+      if (typeof groupMetadataCache.delete === "function")
+        groupMetadataCache.delete(jid);
+      else if (typeof groupMetadataCache.del === "function")
+        groupMetadataCache.del(jid);
+    }
+
+    if (["add", "remove", "promote", "demote"].includes(event.action)) {
+      const participants = (event.participants || [])
+        .map((p) => p.jid || p.lidJid || p.phoneJid)
+        .filter(Boolean);
+      if (participants.length) {
+        ev.emit("group-participants.update", {
+          id: jid,
+          author: event.authorJid,
+          participants,
+          action: event.action,
+        });
+      }
+    }
   });
 
   const sock = {
@@ -441,6 +471,34 @@ async function sendViaZapo(client, jid, content, options) {
   return attachBaileysKey(jid, r);
 }
 
+function sniffMimetype(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 4) return undefined;
+  const b = buffer;
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg";
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47)
+    return "image/png";
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return "image/gif";
+  if (
+    b.length >= 12 &&
+    b[0] === 0x52 &&
+    b[1] === 0x49 &&
+    b[2] === 0x46 &&
+    b[3] === 0x46 &&
+    b.slice(8, 12).toString("ascii") === "WEBP"
+  )
+    return "image/webp";
+  if (b.length >= 8 && b.slice(4, 8).toString("ascii") === "ftyp")
+    return "video/mp4";
+  if (b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3)
+    return "video/webm";
+  if (b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46)
+    return "application/pdf";
+  if (b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) return "audio/mpeg";
+  if (b[0] === 0xff && (b[1] & 0xe0) === 0xe0) return "audio/mpeg";
+  if (b.slice(0, 4).toString("ascii") === "OggS") return "audio/ogg";
+  return undefined;
+}
+
 async function getOrUploadZapoMedia(client, media) {
   const {
     type,
@@ -449,8 +507,16 @@ async function getOrUploadZapoMedia(client, media) {
     gifPlayback,
     ptt,
   } = media;
-  const cacheKey =
-    typeof source === "object" && source?.url ? source.url : null;
+  const isUrlSource =
+    typeof source === "object" && !Buffer.isBuffer(source) && source?.url;
+
+  let cacheKey = null;
+  if (isUrlSource) {
+    cacheKey = source.url;
+  } else if (Buffer.isBuffer(source)) {
+    cacheKey =
+      "buf:" + crypto.createHash("sha256").update(source).digest("hex");
+  }
 
   if (cacheKey && mUC.has(cacheKey)) {
     return mUC.get(cacheKey);
@@ -458,10 +524,18 @@ async function getOrUploadZapoMedia(client, media) {
 
   let buffer = source;
   let mimetype = explicitMimetype;
-  if (typeof source === "object" && source?.url) {
+
+  if (isUrlSource) {
     const { buffer: fetched, contentType } = await fetchUrlMedia(source.url);
     buffer = fetched;
     mimetype = mimetype || contentType || extMimeFallback(source.url);
+  }
+
+  if (!mimetype) mimetype = sniffMimetype(buffer);
+  if (!mimetype) {
+    throw new Error(
+      `Não foi possível determinar o mimetype da mídia (tipo: ${type}). Passe "mimetype" explicitamente no content.`,
+    );
   }
 
   const uploadType =

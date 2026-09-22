@@ -28,6 +28,7 @@ const {
   baseVersion,
   baseRaikken,
   RaikkenKey,
+  engine,
 } = require("../dono/configs/settings.json", { with: { type: "json" } });
 import {
   os,
@@ -62,6 +63,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🔋✿ິ̸𖥔࣪ *Uptime:* ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞⚙️✿ິ̸𖥔࣪ *Prefixo:* ${prefix}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞📌✿ິ̸𖥔࣪ *Criador:* ${donoName}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✨✿ິ̸𖥔࣪ *Engine:* ${engine}
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫🫧࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╼┛`,
     },
@@ -77,6 +79,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞👛𖥔࣪Uptime: ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🔰𖥔࣪Prefixo: ${prefix}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞💛𖥔࣪Criador: ${donoName}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✨𖥔࣪Engine: ${engine}
 ┃ _“Se não é vantagem pra mim, não me interessa.”_
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫🪙࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓💰໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`,
@@ -93,6 +96,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞💢𖥔࣪Uptime: ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🩸𖥔࣪Prefixo: ${prefix}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🖤𖥔࣪Criador: ${donoName}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞🍷𖥔࣪Engine: ${engine}
 ┃࣪ ┃ _“Nada me derruba, eu sou invencível!”_
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫🩶࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓♥️໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`,
@@ -109,6 +113,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🗯️𖥔࣪Uptime: ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞💢𖥔࣪Prefixo: ${prefix}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞♥️𖥔࣪Criador: ${donoName}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞⛈️𖥔࣪Engine: ${engine}
 ┃࣪ ┃ _“A fúria me guia, e ninguém me segura!”_
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💔࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓♥️໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`,
@@ -125,6 +130,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞❄️𖥔࣪Uptime: ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🩸𖥔࣪Prefixo: ${prefix}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🖤𖥔࣪Criador: ${donoName}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞☁️𖥔࣪Engine: ${engine}
 ┃࣪ ┃ _“Tudo que posso ganhar, eu vou conquistar!”_
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫🪙࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓💰໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`,
@@ -141,6 +147,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞❄️𖥔࣪Uptime: ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🌷𖥔࣪Prefixo: ${prefix}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🩵𖥔࣪Criador: ${donoName}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞🕊️𖥔࣪Engine: ${engine}
 ┃ _“Se posso adiar, por que correr agora?”_
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫🩵࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🟦໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`,
@@ -157,6 +164,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞😏𖥔࣪Uptime: ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🔥𖥔࣪Prefixo: ${prefix}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞💜𖥔࣪Criador: ${donoName}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞🌹𖥔࣪Engine: ${engine}
 ┃࣪ ┃_“Desejo e charme estão do meu lado.”_
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫👑࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🤤໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`,
@@ -172,6 +180,7 @@ function escolherPersonalidadeSubaru(pushname, data, hora, tempoAtivo) {
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞𖥔࣪Hora: ${hora}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞𖥔࣪Uptime: ${tempoAtivo}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞𖥔࣪Prefixo: ${prefix}
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞𖥔࣪Engine: ${engine}
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞🤍𖥔࣪Criador: ${donoName}
 ┃ _“Tudo que quero, eu tomo com vontade!”_
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫🪙࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯

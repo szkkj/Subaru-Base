@@ -28,7 +28,8 @@ import { handleCmds } from "./index.js";
 const settings = require("./dono/configs/settings.json");
 const { prefix, donoName, donoNmr, pairKey, logsCvs } = settings;
 
-//console.info = (...a) => String(a[0]).includes("session") || console._info?.(...a);
+console.info = (...a) =>
+  String(a[0]).includes("session") || console._info?.(...a);
 
 const pk = pairKey.toUpperCase();
 const fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
@@ -295,6 +296,7 @@ const startConnection = async () => {
 
   subaru.ev.on("group-participants.update", async (update) => {
     const { id, action, participants } = update;
+    groupMetadataCache.delete(id);
     const groupSettingsPath = `./database/grupos/${id}.json`;
     if (!fs.existsSync(groupSettingsPath)) return;
     const groupSettings = getGroupConfig(id);

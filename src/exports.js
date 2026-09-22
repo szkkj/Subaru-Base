@@ -58,6 +58,10 @@ const mss = {
   erro: "Poxa, infelizmente deu erro. Tente novamente mais tarde",
 };
 
+const menuimg = fs.readFileSync(
+  path.join(__dirname, "../database/imgs/menuimg.jpg"),
+);
+
 async function botSemKey(subaru, grupoName, comando, from) {
   try {
     if (RaikkenKey === "suakey" || RaikkenKey === "raikkenv2") {
@@ -163,4 +167,5 @@ export {
   rgtake,
   botSemKey,
   LRU,
+  menuimg,
 };

@@ -62,6 +62,7 @@ import {
   util,
   rgtake,
   botSemKey,
+  menuimg,
 } from "./src/exports.js";
 
 import { createRequire } from "module";
@@ -119,6 +120,8 @@ import {
   CatBox,
   dellCase,
   groupConfigCache,
+  getGroupConfig,
+  getGroupMetadataSafe,
 } from "./src/functions.js";
 
 import {
@@ -148,7 +151,6 @@ import { getSimilarity } from "./database/outros/similaridade.js";
 const selo = seloSz;
 
 const {
-  menuimg,
   erroImg,
   defaultAvatar,
   imgnazista,
@@ -203,23 +205,6 @@ const {
   errocmd,
   rnkputa,
 } = require("./dono/configs/links.json");
-
-async function getGroupMetadataSafe(groupId, subaru) {
-  const cached = cacheService.getGroupMetadata(groupId);
-  if (cached) return cached;
-  const meta = await cacheService.updateFromAPI(groupId, subaru);
-  if (meta) return meta;
-  return { id: groupId, subject: "Grupo Desconhecido", participants: [] };
-}
-
-function getGroupConfig(id) {
-  const cached = groupConfigCache.get(id);
-  if (cached) return cached;
-  if (!fs.existsSync(`./database/grupos/${id}.json`)) return null;
-  const config = JSON.parse(fs.readFileSync(`./database/grupos/${id}.json`));
-  groupConfigCache.set(id, config);
-  return config;
-}
 
 /* ===========================//INICIO\\================================ */
 const handleCmds = async (subaru, msg) => {
@@ -2158,7 +2143,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
               await subaru.sendMessage(
                 from,
                 {
-                  image: { url: menuimg },
+                  image: menuimg,
                   caption: menugeral(data, hora, prefix, donoName),
                 },
                 { quoted: seloSz },
@@ -2179,7 +2164,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
               await subaru.sendMessage(
                 from,
                 {
-                  image: { url: menuimg },
+                  image: menuimg,
                   caption: menumembros(data, hora, prefix, donoName),
                 },
                 { quoted: seloSz },
@@ -2201,7 +2186,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
               await subaru.sendMessage(
                 from,
                 {
-                  image: { url: menuimg },
+                  image: menuimg,
                   caption: menuAdm(data, hora, prefix, donoName),
                 },
                 { quoted: seloSz },
@@ -2222,7 +2207,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
               await subaru.sendMessage(
                 from,
                 {
-                  image: { url: menuimg },
+                  image: menuimg,
                   caption: menubn(data, hora, prefix, donoName),
                 },
                 { quoted: seloSz },
@@ -3482,8 +3467,14 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
           }
           break;
 
-        case "del":
+        case "deletar":
         case "d":
+          console.log("DEBUG isBotGroupAdmins:", {
+            numeroBot,
+            botLid2,
+            groupAdmins,
+            isBotGroupAdmins,
+          });
           if (!isGroup) return reply(mss.grupo);
           if (!isGroupAdmins) return reply(mss.adm);
           if (!isBotGroupAdmins) return reply(mss.botadm);
