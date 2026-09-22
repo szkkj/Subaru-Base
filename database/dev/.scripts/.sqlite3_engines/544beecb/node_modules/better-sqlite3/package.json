@@ -1,0 +1,67 @@
+{
+  "name": "better-sqlite3",
+  "version": "13.0.3",
+  "description": "The fastest and simplest library for SQLite in Node.js.",
+  "homepage": "http://github.com/WiseLibs/better-sqlite3",
+  "author": "Joshua Wise <joshuathomaswise@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/WiseLibs/better-sqlite3.git"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./linux-x64": "./lib/linux-x64.js",
+    "./linux-arm64": "./lib/linux-arm64.js",
+    "./linuxmusl-x64": "./lib/linuxmusl-x64.js",
+    "./linuxmusl-arm64": "./lib/linuxmusl-arm64.js",
+    "./darwin-x64": "./lib/darwin-x64.js",
+    "./darwin-arm64": "./lib/darwin-arm64.js",
+    "./win32-x64": "./lib/win32-x64.js",
+    "./win32-arm64": "./lib/win32-arm64.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "binding.gyp",
+    "src/**/*.[ch]pp",
+    "lib/**",
+    "deps/**",
+    "prebuilds/**"
+  ],
+  "gypfile": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "node-addon-api": "^8.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.8",
+    "cli-color": "^2.0.3",
+    "fs-extra": "^11.1.1",
+    "mocha": "^11.7.5",
+    "node-gyp": "^10.3.1",
+    "nodemark": "^0.3.0",
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
+  },
+  "scripts": {
+    "build-release": "node-gyp clean && node-gyp rebuild --release --force_build=1",
+    "build-debug": "node-gyp clean && node-gyp rebuild --debug --force_build=1",
+    "test": "mocha --exit --slow=75 --timeout=5000",
+    "benchmark": "node benchmark",
+    "download": "bash ./deps/download.sh",
+    "clean": "rm -rf node_modules build prebuilds"
+  },
+  "license": "MIT",
+  "keywords": [
+    "sql",
+    "sqlite",
+    "sqlite3",
+    "transactions",
+    "user-defined functions",
+    "aggregate functions",
+    "window functions",
+    "database"
+  ]
+}

@@ -1,15 +1,18 @@
 {
   "name": "Subaru-base",
-  "version": "4.2.3",
+  "version": "5.0.0",
   "author": "https://github.com/szkkj",
   "main": "conection.js",
   "type": "module",
   "description": "Bot de WhatsApp open-source baseado em Baileys, com recursos completos de música, mídia, automação de grupos, brincadeiras, jogos, utilitários e integração com IA. Suporta comandos interativos, sistemas anti-abuso, conversão de mídia e menus dinâmicos — ideal para servidores, grupos e pessoas que querem um bot poderoso e personalizável.",
   "scripts": {
-    "start": "while true; do node conection.js --code; sleep 1; done"
+    "start": "while true; do node conection.js; sleep 1; done",
+    "clear": "bash ./database/dev/.scripts/clear.sh"
   },
   "dependencies": {
+    "@irithell-js/better-sqlite3-termux": "^1.0.13",
     "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "@zapo-js/store-sqlite": "^1.3.0",
     "axios": "^1.9.0",
     "chalk": "^4.1.2",
     "file-type": "16.5.3",
@@ -25,5 +28,11 @@
     "ws": "^8.18.2",
     "zapo-js": "^1.9.0",
     "zod": "^3.25.7"
+  },
+  "irithell": {
+    "sqliteVersion": "13.0.3"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.8"
   }
 }

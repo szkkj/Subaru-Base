@@ -1,7 +1,7 @@
 class InteractiveValidationError extends Error {
   constructor(message, { context, errors = [], warnings = [], example } = {}) {
     super(message);
-    this.name = 'InteractiveValidationError';
+    this.name = "InteractiveValidationError";
     this.context = context;
     this.errors = errors;
     this.warnings = warnings;
@@ -14,71 +14,108 @@ class InteractiveValidationError extends Error {
       context: this.context,
       errors: this.errors,
       warnings: this.warnings,
-      example: this.example
+      example: this.example,
     };
   }
   formatDetailed() {
     const lines = [
-      `[${this.name}] ${this.message}${this.context ? ' (' + this.context + ')' : ''}`
+      `[${this.name}] ${this.message}${this.context ? " (" + this.context + ")" : ""}`,
     ];
     if (this.errors?.length) {
-      lines.push('Errors:');
-      this.errors.forEach(e => lines.push('  - ' + e));
+      lines.push("Errors:");
+      this.errors.forEach((e) => lines.push("  - " + e));
     }
     if (this.warnings?.length) {
-      lines.push('Warnings:');
-      this.warnings.forEach(w => lines.push('  - ' + w));
+      lines.push("Warnings:");
+      this.warnings.forEach((w) => lines.push("  - " + w));
     }
     if (this.example) {
-      lines.push('Example payload:', JSON.stringify(this.example, null, 2));
+      lines.push("Example payload:", JSON.stringify(this.example, null, 2));
     }
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }
 
 const EXAMPLE_PAYLOADS = {
   sendButtons: {
-    text: 'Choose an option',
+    text: "Choose an option",
     buttons: [
-      { id: 'opt1', text: 'Option 1' },
-      { id: 'opt2', text: 'Option 2' },
-      { name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: 'Visit Site', url: 'https://example.com' }) }
+      { id: "opt1", text: "Option 1" },
+      { id: "opt2", text: "Option 2" },
+      {
+        name: "cta_url",
+        buttonParamsJson: JSON.stringify({
+          display_text: "Visit Site",
+          url: "https://example.com",
+        }),
+      },
     ],
-    footer: 'Footer text'
+    footer: "Footer text",
   },
   sendInteractiveMessage: {
-    text: 'Pick an action',
+    text: "Pick an action",
     interactiveButtons: [
-      { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: 'Hello', id: 'hello' }) },
-      { name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text: 'Copy Code', copy_code: 'ABC123' }) }
+      {
+        name: "quick_reply",
+        buttonParamsJson: JSON.stringify({
+          display_text: "Hello",
+          id: "hello",
+        }),
+      },
+      {
+        name: "cta_copy",
+        buttonParamsJson: JSON.stringify({
+          display_text: "Copy Code",
+          copy_code: "ABC123",
+        }),
+      },
     ],
-    footer: 'Footer'
-  }
+    footer: "Footer",
+  },
 };
 
-const SEND_BUTTONS_ALLOWED_COMPLEX = new Set(['cta_url', 'cta_copy', 'cta_call']);
+const SEND_BUTTONS_ALLOWED_COMPLEX = new Set([
+  "cta_url",
+  "cta_copy",
+  "cta_call",
+]);
 const INTERACTIVE_ALLOWED_NAMES = new Set([
-  'quick_reply', 'cta_url', 'cta_copy', 'cta_call', 'cta_catalog', 'cta_reminder', 'cta_cancel_reminder',
-  'address_message', 'send_location', 'open_webview', 'mpm', 'wa_payment_transaction_details',
-  'automated_greeting_message_view_catalog', 'galaxy_message', 'single_select'
+  "quick_reply",
+  "cta_url",
+  "cta_copy",
+  "cta_call",
+  "cta_catalog",
+  "cta_reminder",
+  "cta_cancel_reminder",
+  "address_message",
+  "send_location",
+  "open_webview",
+  "mpm",
+  "wa_payment_transaction_details",
+  "automated_greeting_message_view_catalog",
+  "galaxy_message",
+  "single_select",
 ]);
 
 const REQUIRED_FIELDS_MAP = {
-  cta_url: ['display_text', 'url'],
-  cta_copy: ['display_text', 'copy_code'],
-  cta_call: ['display_text', 'phone_number'],
-  cta_catalog: ['business_phone_number'],
-  cta_reminder: ['display_text'],
-  cta_cancel_reminder: ['display_text'],
-  address_message: ['display_text'],
-  send_location: ['display_text'],
-  open_webview: ['title', 'link'],
-  mpm: ['product_id'],
-  wa_payment_transaction_details: ['transaction_id'],
-  automated_greeting_message_view_catalog: ['business_phone_number', 'catalog_product_id'],
-  galaxy_message: ['flow_token', 'flow_id'],
-  single_select: ['title', 'sections'],
-  quick_reply: ['display_text', 'id']
+  cta_url: ["display_text", "url"],
+  cta_copy: ["display_text", "copy_code"],
+  cta_call: ["display_text", "phone_number"],
+  cta_catalog: ["business_phone_number"],
+  cta_reminder: ["display_text"],
+  cta_cancel_reminder: ["display_text"],
+  address_message: ["display_text"],
+  send_location: ["display_text"],
+  open_webview: ["title", "link"],
+  mpm: ["product_id"],
+  wa_payment_transaction_details: ["transaction_id"],
+  automated_greeting_message_view_catalog: [
+    "business_phone_number",
+    "catalog_product_id",
+  ],
+  galaxy_message: ["flow_token", "flow_id"],
+  single_select: ["title", "sections"],
+  quick_reply: ["display_text", "id"],
 };
 
 function parseButtonParams(name, buttonParamsJson, errors, warnings, index) {
@@ -95,14 +132,16 @@ function parseButtonParams(name, buttonParamsJson, errors, warnings, index) {
       errors.push(`button[${index}] (${name}) missing required field '${f}'`);
     }
   }
-  if (name === 'open_webview' && parsed.link) {
-    if (typeof parsed.link !== 'object' || !parsed.link.url) {
+  if (name === "open_webview" && parsed.link) {
+    if (typeof parsed.link !== "object" || !parsed.link.url) {
       errors.push(`button[${index}] (open_webview) link.url required`);
     }
   }
-  if (name === 'single_select') {
+  if (name === "single_select") {
     if (!Array.isArray(parsed.sections) || parsed.sections.length === 0) {
-      errors.push(`button[${index}] (single_select) sections must be non-empty array`);
+      errors.push(
+        `button[${index}] (single_select) sections must be non-empty array`,
+      );
     }
   }
   return parsed;
@@ -111,39 +150,45 @@ function parseButtonParams(name, buttonParamsJson, errors, warnings, index) {
 function validateSendButtonsPayload(data) {
   const errors = [];
   const warnings = [];
-  if (!data || typeof data !== 'object') {
-    return { valid: false, errors: ['payload must be an object'], warnings };
+  if (!data || typeof data !== "object") {
+    return { valid: false, errors: ["payload must be an object"], warnings };
   }
-  if (!data.text || typeof data.text !== 'string') {
-    errors.push('text is mandatory and must be a string');
+  if (!data.text || typeof data.text !== "string") {
+    errors.push("text is mandatory and must be a string");
   }
   if (!Array.isArray(data.buttons) || data.buttons.length === 0) {
-    errors.push('buttons is mandatory and must be a non-empty array');
+    errors.push("buttons is mandatory and must be a non-empty array");
   } else {
     data.buttons.forEach((btn, i) => {
-      if (!btn || typeof btn !== 'object') {
+      if (!btn || typeof btn !== "object") {
         errors.push(`button[${i}] must be an object`);
         return;
       }
       if (btn.id && btn.text) {
-        if (typeof btn.id !== 'string' || typeof btn.text !== 'string') {
-          errors.push(`button[${i}] legacy quick reply id/text must be strings`);
+        if (typeof btn.id !== "string" || typeof btn.text !== "string") {
+          errors.push(
+            `button[${i}] legacy quick reply id/text must be strings`,
+          );
         }
         return;
       }
       if (btn.name && btn.buttonParamsJson) {
         if (!SEND_BUTTONS_ALLOWED_COMPLEX.has(btn.name)) {
-          errors.push(`button[${i}] name '${btn.name}' not allowed in sendButtons`);
+          errors.push(
+            `button[${i}] name '${btn.name}' not allowed in sendButtons`,
+          );
           return;
         }
-        if (typeof btn.buttonParamsJson !== 'string') {
+        if (typeof btn.buttonParamsJson !== "string") {
           errors.push(`button[${i}] buttonParamsJson must be string`);
           return;
         }
         parseButtonParams(btn.name, btn.buttonParamsJson, errors, warnings, i);
         return;
       }
-      errors.push(`button[${i}] invalid shape (must be legacy quick reply or named ${Array.from(SEND_BUTTONS_ALLOWED_COMPLEX).join(', ')})`);
+      errors.push(
+        `button[${i}] invalid shape (must be legacy quick reply or named ${Array.from(SEND_BUTTONS_ALLOWED_COMPLEX).join(", ")})`,
+      );
     });
   }
   return { valid: errors.length === 0, errors, warnings };
@@ -152,21 +197,26 @@ function validateSendButtonsPayload(data) {
 function validateSendInteractiveMessagePayload(data) {
   const errors = [];
   const warnings = [];
-  if (!data || typeof data !== 'object') {
-    return { valid: false, errors: ['payload must be an object'], warnings };
+  if (!data || typeof data !== "object") {
+    return { valid: false, errors: ["payload must be an object"], warnings };
   }
-  if (!data.text || typeof data.text !== 'string') {
-    errors.push('text is mandatory and must be a string');
+  if (!data.text || typeof data.text !== "string") {
+    errors.push("text is mandatory and must be a string");
   }
-  if (!Array.isArray(data.interactiveButtons) || data.interactiveButtons.length === 0) {
-    errors.push('interactiveButtons is mandatory and must be a non-empty array');
+  if (
+    !Array.isArray(data.interactiveButtons) ||
+    data.interactiveButtons.length === 0
+  ) {
+    errors.push(
+      "interactiveButtons is mandatory and must be a non-empty array",
+    );
   } else {
     data.interactiveButtons.forEach((btn, i) => {
-      if (!btn || typeof btn !== 'object') {
+      if (!btn || typeof btn !== "object") {
         errors.push(`interactiveButtons[${i}] must be an object`);
         return;
       }
-      if (!btn.name || typeof btn.name !== 'string') {
+      if (!btn.name || typeof btn.name !== "string") {
         errors.push(`interactiveButtons[${i}] missing name`);
         return;
       }
@@ -174,7 +224,7 @@ function validateSendInteractiveMessagePayload(data) {
         errors.push(`interactiveButtons[${i}] name '${btn.name}' not allowed`);
         return;
       }
-      if (!btn.buttonParamsJson || typeof btn.buttonParamsJson !== 'string') {
+      if (!btn.buttonParamsJson || typeof btn.buttonParamsJson !== "string") {
         errors.push(`interactiveButtons[${i}] buttonParamsJson must be string`);
         return;
       }
@@ -187,8 +237,8 @@ function validateSendInteractiveMessagePayload(data) {
 function validateInteractiveMessageContent(content) {
   const errors = [];
   const warnings = [];
-  if (!content || typeof content !== 'object') {
-    return { errors: ['content must be an object'], warnings, valid: false };
+  if (!content || typeof content !== "object") {
+    return { errors: ["content must be an object"], warnings, valid: false };
   }
   const interactive = content.interactiveMessage;
   if (!interactive) {
@@ -196,31 +246,39 @@ function validateInteractiveMessageContent(content) {
   }
   const nativeFlow = interactive.nativeFlowMessage;
   if (!nativeFlow) {
-    errors.push('interactiveMessage.nativeFlowMessage missing');
+    errors.push("interactiveMessage.nativeFlowMessage missing");
     return { errors, warnings, valid: false };
   }
   if (!Array.isArray(nativeFlow.buttons)) {
-    errors.push('nativeFlowMessage.buttons must be an array');
+    errors.push("nativeFlowMessage.buttons must be an array");
     return { errors, warnings, valid: false };
   }
   if (nativeFlow.buttons.length === 0) {
-    warnings.push('nativeFlowMessage.buttons is empty');
+    warnings.push("nativeFlowMessage.buttons is empty");
   }
   nativeFlow.buttons.forEach((btn, i) => {
-    if (!btn || typeof btn !== 'object') {
+    if (!btn || typeof btn !== "object") {
       errors.push(`buttons[${i}] is not an object`);
       return;
     }
     if (!btn.buttonParamsJson) {
-      warnings.push(`buttons[${i}] missing buttonParamsJson (may fail to render)`);
-    } else if (typeof btn.buttonParamsJson !== 'string') {
+      warnings.push(
+        `buttons[${i}] missing buttonParamsJson (may fail to render)`,
+      );
+    } else if (typeof btn.buttonParamsJson !== "string") {
       errors.push(`buttons[${i}] buttonParamsJson must be string`);
     } else {
-      try { JSON.parse(btn.buttonParamsJson); } catch (e) { warnings.push(`buttons[${i}] buttonParamsJson invalid JSON (${e.message})`); }
+      try {
+        JSON.parse(btn.buttonParamsJson);
+      } catch (e) {
+        warnings.push(
+          `buttons[${i}] buttonParamsJson invalid JSON (${e.message})`,
+        );
+      }
     }
     if (!btn.name) {
       warnings.push(`buttons[${i}] missing name; defaulting to quick_reply`);
-      btn.name = 'quick_reply';
+      btn.name = "quick_reply";
     }
   });
   return { errors, warnings, valid: errors.length === 0 };
@@ -231,20 +289,20 @@ function buildInteractiveButtons(buttons = []) {
     if (b && b.name && b.buttonParamsJson) return b;
     if (b && (b.id || b.text)) {
       return {
-        name: 'quick_reply',
+        name: "quick_reply",
         buttonParamsJson: JSON.stringify({
-          display_text: b.text || b.displayText || 'Button ' + (i + 1),
-          id: b.id || ('quick_' + (i + 1))
-        })
+          display_text: b.text || b.displayText || "Button " + (i + 1),
+          id: b.id || "quick_" + (i + 1),
+        }),
       };
     }
     if (b && b.buttonId && b.buttonText?.displayText) {
       return {
-        name: 'quick_reply',
+        name: "quick_reply",
         buttonParamsJson: JSON.stringify({
           display_text: b.buttonText.displayText,
-          id: b.buttonId
-        })
+          id: b.buttonId,
+        }),
       };
     }
     return b;
@@ -258,59 +316,82 @@ function validateAuthoringButtons(buttons) {
     return { errors: [], warnings: [], valid: true, cleaned: [] };
   }
   if (!Array.isArray(buttons)) {
-    errors.push('buttons must be an array');
+    errors.push("buttons must be an array");
     return { errors, warnings, valid: false, cleaned: [] };
   }
   const SOFT_BUTTON_CAP = 25;
   if (buttons.length === 0) {
-    warnings.push('buttons array is empty');
+    warnings.push("buttons array is empty");
   } else if (buttons.length > SOFT_BUTTON_CAP) {
-    warnings.push(`buttons count (${buttons.length}) exceeds soft cap of ${SOFT_BUTTON_CAP}; may be rejected by client`);
+    warnings.push(
+      `buttons count (${buttons.length}) exceeds soft cap of ${SOFT_BUTTON_CAP}; may be rejected by client`,
+    );
   }
   const cleaned = buttons.map((b, idx) => {
-    if (b == null || typeof b !== 'object') {
+    if (b == null || typeof b !== "object") {
       errors.push(`button[${idx}] is not an object`);
       return b;
     }
     if (b.name && b.buttonParamsJson) {
-      if (typeof b.buttonParamsJson !== 'string') {
+      if (typeof b.buttonParamsJson !== "string") {
         errors.push(`button[${idx}] buttonParamsJson must be string`);
       } else {
         try {
           JSON.parse(b.buttonParamsJson);
         } catch (e) {
-          errors.push(`button[${idx}] buttonParamsJson is not valid JSON: ${e.message}`);
+          errors.push(
+            `button[${idx}] buttonParamsJson is not valid JSON: ${e.message}`,
+          );
         }
       }
       return b;
     }
     if (b.id || b.text || b.displayText) {
       if (!(b.id || b.text || b.displayText)) {
-        errors.push(`button[${idx}] legacy shape missing id or text/displayText`);
+        errors.push(
+          `button[${idx}] legacy shape missing id or text/displayText`,
+        );
       }
       return b;
     }
-    if (b.buttonId && b.buttonText && typeof b.buttonText === 'object' && b.buttonText.displayText) {
+    if (
+      b.buttonId &&
+      b.buttonText &&
+      typeof b.buttonText === "object" &&
+      b.buttonText.displayText
+    ) {
       return b;
     }
     if (b.buttonParamsJson) {
-      if (typeof b.buttonParamsJson !== 'string') {
-        warnings.push(`button[${idx}] has non-string buttonParamsJson; will attempt to stringify`);
+      if (typeof b.buttonParamsJson !== "string") {
+        warnings.push(
+          `button[${idx}] has non-string buttonParamsJson; will attempt to stringify`,
+        );
         try {
           b.buttonParamsJson = JSON.stringify(b.buttonParamsJson);
         } catch {
-          errors.push(`button[${idx}] buttonParamsJson could not be serialized`);
+          errors.push(
+            `button[${idx}] buttonParamsJson could not be serialized`,
+          );
         }
       } else {
-        try { JSON.parse(b.buttonParamsJson); } catch (e) { warnings.push(`button[${idx}] buttonParamsJson not valid JSON (${e.message})`); }
+        try {
+          JSON.parse(b.buttonParamsJson);
+        } catch (e) {
+          warnings.push(
+            `button[${idx}] buttonParamsJson not valid JSON (${e.message})`,
+          );
+        }
       }
       if (!b.name) {
         warnings.push(`button[${idx}] missing name; defaulting to quick_reply`);
-        b.name = 'quick_reply';
+        b.name = "quick_reply";
       }
       return b;
     }
-    warnings.push(`button[${idx}] unrecognized shape; passing through unchanged`);
+    warnings.push(
+      `button[${idx}] unrecognized shape; passing through unchanged`,
+    );
     return b;
   });
   return { errors, warnings, valid: errors.length === 0, cleaned };
@@ -318,11 +399,11 @@ function validateAuthoringButtons(buttons) {
 
 function getButtonType(message) {
   if (message.listMessage) {
-    return 'list';
+    return "list";
   } else if (message.buttonsMessage) {
-    return 'buttons';
+    return "buttons";
   } else if (message.interactiveMessage?.nativeFlowMessage) {
-    return 'native_flow';
+    return "native_flow";
   }
   return null;
 }
@@ -331,71 +412,90 @@ function getButtonArgs(message) {
   const nativeFlow = message.interactiveMessage?.nativeFlowMessage;
   const firstButtonName = nativeFlow?.buttons?.[0]?.name;
   const nativeFlowSpecials = [
-    'mpm', 'cta_catalog', 'send_location',
-    'call_permission_request', 'wa_payment_transaction_details',
-    'automated_greeting_message_view_catalog'
+    "mpm",
+    "cta_catalog",
+    "send_location",
+    "call_permission_request",
+    "wa_payment_transaction_details",
+    "automated_greeting_message_view_catalog",
   ];
-  if (nativeFlow && (firstButtonName === 'review_and_pay' || firstButtonName === 'payment_info')) {
+  if (
+    nativeFlow &&
+    (firstButtonName === "review_and_pay" || firstButtonName === "payment_info")
+  ) {
     return {
-      tag: 'biz',
+      tag: "biz",
       attrs: {
-        native_flow_name: firstButtonName === 'review_and_pay' ? 'order_details' : firstButtonName
-      }
+        native_flow_name:
+          firstButtonName === "review_and_pay"
+            ? "order_details"
+            : firstButtonName,
+      },
     };
   } else if (nativeFlow && nativeFlowSpecials.includes(firstButtonName)) {
     return {
-      tag: 'biz',
+      tag: "biz",
       attrs: {},
-      content: [{
-        tag: 'interactive',
-        attrs: {
-          type: 'native_flow',
-          v: '1'
-        },
-        content: [{
-          tag: 'native_flow',
+      content: [
+        {
+          tag: "interactive",
           attrs: {
-            v: '2',
-            name: firstButtonName
-          }
-        }]
-      }]
+            type: "native_flow",
+            v: "1",
+          },
+          content: [
+            {
+              tag: "native_flow",
+              attrs: {
+                v: "2",
+                name: firstButtonName,
+              },
+            },
+          ],
+        },
+      ],
     };
   } else if (nativeFlow || message.buttonsMessage) {
     return {
-      tag: 'biz',
+      tag: "biz",
       attrs: {},
-      content: [{
-        tag: 'interactive',
-        attrs: {
-          type: 'native_flow',
-          v: '1'
-        },
-        content: [{
-          tag: 'native_flow',
+      content: [
+        {
+          tag: "interactive",
           attrs: {
-            v: '9',
-            name: 'mixed'
-          }
-        }]
-      }]
+            type: "native_flow",
+            v: "1",
+          },
+          content: [
+            {
+              tag: "native_flow",
+              attrs: {
+                v: "9",
+                name: "mixed",
+              },
+            },
+          ],
+        },
+      ],
     };
   } else if (message.listMessage) {
     return {
-      tag: 'biz',
+      tag: "biz",
       attrs: {},
-      content: [{
-        tag: 'list',
-        attrs: {
-          v: '2',
-          type: 'product_list'
-        }
-      }]
+      content: [
+        {
+          tag: "list",
+          attrs: {
+            v: "2",
+            type: "product_list",
+          },
+        },
+      ],
     };
   } else {
     return {
-      tag: 'biz',
-      attrs: {}
+      tag: "biz",
+      attrs: {},
     };
   }
 }
@@ -404,15 +504,15 @@ function convertToInteractiveMessage(content) {
   if (content.interactiveButtons && content.interactiveButtons.length > 0) {
     const interactiveMessage = {
       nativeFlowMessage: {
-        buttons: content.interactiveButtons.map(btn => ({
-          name: btn.name || 'quick_reply',
-          buttonParamsJson: btn.buttonParamsJson
-        }))
-      }
+        buttons: content.interactiveButtons.map((btn) => ({
+          name: btn.name || "quick_reply",
+          buttonParamsJson: btn.buttonParamsJson,
+        })),
+      },
     };
     if (content.title || content.subtitle) {
       interactiveMessage.header = {
-        title: content.title || content.subtitle || ''
+        title: content.title || content.subtitle || "",
       };
     }
     if (content.text) {
@@ -434,55 +534,103 @@ function convertToInteractiveMessage(content) {
 
 async function sendInteractiveMessage(sock, jid, content, options = {}) {
   if (!sock) {
-  throw new InteractiveValidationError('Socket is required', { context: 'sendInteractiveMessage' });
+    throw new InteractiveValidationError("Socket is required", {
+      context: "sendInteractiveMessage",
+    });
   }
   if (content && Array.isArray(content.interactiveButtons)) {
     const strict = validateSendInteractiveMessagePayload(content);
     if (!strict.valid) {
-      throw new InteractiveValidationError('Interactive authoring payload invalid', {
-        context: 'sendInteractiveMessage.validateSendInteractiveMessagePayload',
-        errors: strict.errors,
-        warnings: strict.warnings,
-        example: EXAMPLE_PAYLOADS.sendInteractiveMessage
-      });
+      throw new InteractiveValidationError(
+        "Interactive authoring payload invalid",
+        {
+          context:
+            "sendInteractiveMessage.validateSendInteractiveMessagePayload",
+          errors: strict.errors,
+          warnings: strict.warnings,
+          example: EXAMPLE_PAYLOADS.sendInteractiveMessage,
+        },
+      );
     }
-    if (strict.warnings.length) console.warn('sendInteractiveMessage warnings:', strict.warnings);
+    if (strict.warnings.length)
+      console.warn("sendInteractiveMessage warnings:", strict.warnings);
   }
   const convertedContent = convertToInteractiveMessage(content);
-  const { errors: contentErrors, warnings: contentWarnings, valid: contentValid } = validateInteractiveMessageContent(convertedContent);
+  const {
+    errors: contentErrors,
+    warnings: contentWarnings,
+    valid: contentValid,
+  } = validateInteractiveMessageContent(convertedContent);
   if (!contentValid) {
-    throw new InteractiveValidationError('Converted interactive content invalid', {
-      context: 'sendInteractiveMessage.validateInteractiveMessageContent',
-      errors: contentErrors,
-      warnings: contentWarnings,
-      example: convertToInteractiveMessage(EXAMPLE_PAYLOADS.sendInteractiveMessage)
-    });
+    throw new InteractiveValidationError(
+      "Converted interactive content invalid",
+      {
+        context: "sendInteractiveMessage.validateInteractiveMessageContent",
+        errors: contentErrors,
+        warnings: contentWarnings,
+        example: convertToInteractiveMessage(
+          EXAMPLE_PAYLOADS.sendInteractiveMessage,
+        ),
+      },
+    );
   }
   if (contentWarnings.length) {
-    console.warn('Interactive content warnings:', contentWarnings);
+    console.warn("Interactive content warnings:", contentWarnings);
   }
-  let generateWAMessageFromContent, relayMessage, normalizeMessageContent, isJidGroup, generateMessageIDV2;
-  const candidatePkgs = ['baileys', '@whiskeysockets/baileys', '@adiwajshing/baileys'];
+  if (sock.type === "zapo") {
+    return sock.sendMessage(jid, convertedContent, options);
+  }
+
+  let generateWAMessageFromContent,
+    relayMessage,
+    normalizeMessageContent,
+    isJidGroup,
+    generateMessageIDV2;
+  const candidatePkgs = [
+    "baileys",
+    "@whiskeysockets/baileys",
+    "@adiwajshing/baileys",
+  ];
   let loaded = false;
   for (const pkg of candidatePkgs) {
     if (loaded) break;
     try {
       const mod = await import(pkg);
-      generateWAMessageFromContent = mod.generateWAMessageFromContent || mod.Utils?.generateWAMessageFromContent;
-      normalizeMessageContent = mod.normalizeMessageContent || mod.Utils?.normalizeMessageContent;
+      generateWAMessageFromContent =
+        mod.generateWAMessageFromContent ||
+        mod.Utils?.generateWAMessageFromContent;
+      normalizeMessageContent =
+        mod.normalizeMessageContent || mod.Utils?.normalizeMessageContent;
       isJidGroup = mod.isJidGroup || mod.WABinary?.isJidGroup;
-      generateMessageIDV2 = mod.generateMessageIDV2 || mod.Utils?.generateMessageIDV2 || mod.generateMessageID || mod.Utils?.generateMessageID;
+      generateMessageIDV2 =
+        mod.generateMessageIDV2 ||
+        mod.Utils?.generateMessageIDV2 ||
+        mod.generateMessageID ||
+        mod.Utils?.generateMessageID;
       relayMessage = sock.relayMessage;
-      if (generateWAMessageFromContent && normalizeMessageContent && isJidGroup && relayMessage) {
+      if (
+        generateWAMessageFromContent &&
+        normalizeMessageContent &&
+        isJidGroup &&
+        relayMessage
+      ) {
         loaded = true;
       }
-    } catch (_) { /* try next */ }
+    } catch (_) {
+      /* try next */
+    }
   }
   if (!loaded) {
-    throw new InteractiveValidationError('Missing baileys internals', {
-      context: 'sendInteractiveMessage.dynamicImport',
-      errors: ['generateWAMessageFromContent or normalizeMessageContent not found in installed packages: baileys / @whiskeysockets/baileys / @adiwajshing/baileys'],
-      example: { install: 'npm i baileys', requireUsage: "const { generateWAMessageFromContent } = require('baileys')" }
+    throw new InteractiveValidationError("Missing baileys internals", {
+      context: "sendInteractiveMessage.dynamicImport",
+      errors: [
+        "generateWAMessageFromContent or normalizeMessageContent not found in installed packages: baileys / @whiskeysockets/baileys / @adiwajshing/baileys",
+      ],
+      example: {
+        install: "npm i baileys",
+        requireUsage:
+          "const { generateWAMessageFromContent } = require('baileys')",
+      },
     });
   }
   const userJid = sock.authState?.creds?.me?.id || sock.user?.id;
@@ -491,7 +639,7 @@ async function sendInteractiveMessage(sock, jid, content, options = {}) {
     userJid,
     messageId: generateMessageIDV2(userJid),
     timestamp: new Date(),
-    ...options
+    ...options,
   });
   const normalizedContent = normalizeMessageContent(fullMsg.message);
   const buttonType = getButtonType(normalizedContent);
@@ -501,9 +649,9 @@ async function sendInteractiveMessage(sock, jid, content, options = {}) {
     const isPrivate = !isJidGroup(jid);
     additionalNodes.push(buttonsNode);
     if (isPrivate) {
-      additionalNodes.push({ tag: 'bot', attrs: { biz_bot: '1' } });
+      additionalNodes.push({ tag: "bot", attrs: { biz_bot: "1" } });
     }
-   /* console.log('Interactive send: ', {
+    /* console.log('Interactive send: ', {
       type: buttonType,
       nodes: additionalNodes.map(n => ({ tag: n.tag, attrs: n.attrs })),
       private: !isJidGroup(jid)
@@ -514,13 +662,13 @@ async function sendInteractiveMessage(sock, jid, content, options = {}) {
     useCachedGroupMetadata: options.useCachedGroupMetadata,
     additionalAttributes: options.additionalAttributes || {},
     statusJidList: options.statusJidList,
-    additionalNodes
+    additionalNodes,
   });
   const isPrivateChat = !isJidGroup(jid);
   if (sock.config?.emitOwnEvents && isPrivateChat) {
     process.nextTick(() => {
       if (sock.processingMutex?.mutex && sock.upsertMessage) {
-        sock.processingMutex.mutex(() => sock.upsertMessage(fullMsg, 'append'));
+        sock.processingMutex.mutex(() => sock.upsertMessage(fullMsg, "append"));
       }
     });
   }
@@ -529,30 +677,39 @@ async function sendInteractiveMessage(sock, jid, content, options = {}) {
 
 async function sendInteractiveButtonsBasic(sock, jid, data = {}, options = {}) {
   if (!sock) {
-  throw new InteractiveValidationError('Socket is required', { context: 'sendButtons' });
-  }
-  const { text = '', footer = '', title, subtitle, buttons = [] } = data;
-  const strict = validateSendButtonsPayload({ text, buttons, title, subtitle, footer });
-  if (!strict.valid) {
-    throw new InteractiveValidationError('Buttons payload invalid', {
-      context: 'sendButtons.validateSendButtonsPayload',
-      errors: strict.errors,
-      warnings: strict.warnings,
-      example: EXAMPLE_PAYLOADS.sendButtons
+    throw new InteractiveValidationError("Socket is required", {
+      context: "sendButtons",
     });
   }
-  if (strict.warnings.length) console.warn('sendButtons warnings:', strict.warnings);
+  const { text = "", footer = "", title, subtitle, buttons = [] } = data;
+  const strict = validateSendButtonsPayload({
+    text,
+    buttons,
+    title,
+    subtitle,
+    footer,
+  });
+  if (!strict.valid) {
+    throw new InteractiveValidationError("Buttons payload invalid", {
+      context: "sendButtons.validateSendButtonsPayload",
+      errors: strict.errors,
+      warnings: strict.warnings,
+      example: EXAMPLE_PAYLOADS.sendButtons,
+    });
+  }
+  if (strict.warnings.length)
+    console.warn("sendButtons warnings:", strict.warnings);
   const { errors, warnings, cleaned } = validateAuthoringButtons(buttons);
   if (errors.length) {
-    throw new InteractiveValidationError('Authoring button objects invalid', {
-      context: 'sendButtons.validateAuthoringButtons',
+    throw new InteractiveValidationError("Authoring button objects invalid", {
+      context: "sendButtons.validateAuthoringButtons",
       errors,
       warnings,
-      example: EXAMPLE_PAYLOADS.sendButtons.buttons
+      example: EXAMPLE_PAYLOADS.sendButtons.buttons,
     });
   }
   if (warnings.length) {
-    console.warn('Button validation warnings:', warnings);
+    console.warn("Button validation warnings:", warnings);
   }
   const interactiveButtons = buildInteractiveButtons(cleaned);
   const payload = { text, footer, interactiveButtons };
@@ -561,62 +718,71 @@ async function sendInteractiveButtonsBasic(sock, jid, data = {}, options = {}) {
   return sendInteractiveMessage(sock, jid, payload, options);
 }
 
-
 const sendAlbumMessage = async (finn, jid, album, options = {}) => {
-const { randomBytes } = require("crypto");
-const {
+  const { randomBytes } = require("crypto");
+  const {
     generateWAMessage,
     generateWAMessageFromContent,
     generateMessageIDV2,
-} = require("@whiskeysockets/baileys");
-    const userJid = finn.user.id;
-    if (!Array.isArray(album) || album.length === 0)
-        throw new Error("album deve ser um array com pelo menos 1 item.");
-    const albumMsg = generateWAMessageFromContent(jid, {
-        albumMessage: {
-            expectedImageCount: album.filter(i => "image" in i).length,
-            expectedVideoCount: album.filter(i => "video" in i).length,
-        },
-    }, { userJid, ...options });
-    await finn.relayMessage(jid, albumMsg.message, { messageId: albumMsg.key.id });
-    for (const media of album) {
-        let content;
-        if ("image" in media) {
-            content = {
-                image: media.image,
-                ...(media.caption ? { caption: media.caption } : {}),
-            };
-        } else if ("video" in media) {
-            content = {
-                video: media.video,
-                ...(media.caption    ? { caption: media.caption }          : {}),
-                ...(media.gifPlayback !== undefined ? { gifPlayback: media.gifPlayback } : {}),
-            };
-        } else {
-            continue;
-        }
-
-        const mediaMsg = await generateWAMessage(jid, content, {
-            userJid,
-            upload: async (stream, opts) => {
-                return finn.waUploadToServer(stream, { ...opts });
-            },
-            ...options,
-        });
-
-        mediaMsg.message.messageContextInfo = {
-            messageSecret: randomBytes(32),
-            messageAssociation: {
-                associationType: 1,
-                parentMessageKey: albumMsg.key,
-            },
-        };
-
-        await finn.relayMessage(jid, mediaMsg.message, { messageId: mediaMsg.key.id });
-        await new Promise(r => setTimeout(r, 800));
+  } = require("@whiskeysockets/baileys");
+  const userJid = finn.user.id;
+  if (!Array.isArray(album) || album.length === 0)
+    throw new Error("album deve ser um array com pelo menos 1 item.");
+  const albumMsg = generateWAMessageFromContent(
+    jid,
+    {
+      albumMessage: {
+        expectedImageCount: album.filter((i) => "image" in i).length,
+        expectedVideoCount: album.filter((i) => "video" in i).length,
+      },
+    },
+    { userJid, ...options },
+  );
+  await finn.relayMessage(jid, albumMsg.message, {
+    messageId: albumMsg.key.id,
+  });
+  for (const media of album) {
+    let content;
+    if ("image" in media) {
+      content = {
+        image: media.image,
+        ...(media.caption ? { caption: media.caption } : {}),
+      };
+    } else if ("video" in media) {
+      content = {
+        video: media.video,
+        ...(media.caption ? { caption: media.caption } : {}),
+        ...(media.gifPlayback !== undefined
+          ? { gifPlayback: media.gifPlayback }
+          : {}),
+      };
+    } else {
+      continue;
     }
 
-    return albumMsg;
+    const mediaMsg = await generateWAMessage(jid, content, {
+      userJid,
+      upload: async (stream, opts) => {
+        return finn.waUploadToServer(stream, { ...opts });
+      },
+      ...options,
+    });
+
+    mediaMsg.message.messageContextInfo = {
+      messageSecret: randomBytes(32),
+      messageAssociation: {
+        associationType: 1,
+        parentMessageKey: albumMsg.key,
+      },
+    };
+
+    await finn.relayMessage(jid, mediaMsg.message, {
+      messageId: mediaMsg.key.id,
+    });
+    await new Promise((r) => setTimeout(r, 800));
+  }
+
+  return albumMsg;
 };
 
 export {
@@ -629,5 +795,5 @@ export {
   getButtonArgs,
   sendInteractiveMessage,
   sendInteractiveButtonsBasic as sendButtons,
-  sendAlbumMessage
+  sendAlbumMessage,
 };

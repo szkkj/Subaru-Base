@@ -18,88 +18,74 @@ import {
   getRandomSaudacao,
   esperar,
   groupConfigCache,
-} from "./dono/functions.js";
+  getGroupConfig,
+  getGroupMetadataSafe,
+  groupMetadataCache,
+  messageCache,
+} from "./src/functions.js";
 import { handleCmds } from "./index.js";
 
 const settings = require("./dono/configs/settings.json");
-const {
-  prefix,
-  donoName,
-  donoNmr,
-  pairKey,
-  logsCvs,
-} = settings;
+const { prefix, donoName, donoNmr, pairKey, logsCvs } = settings;
 
-console.info = (...a) =>
-  String(a[0]).includes("session") || console._info?.(...a);
+//console.info = (...a) => String(a[0]).includes("session") || console._info?.(...a);
 
 const pk = pairKey.toUpperCase();
-const groupMetadataCache = new LRU({ maxItems: 50, maxAge: 300 });
-const messageCache = new LRU({ maxItems: 200, maxAge: 600 });
 const fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
 const well = fs.readFileSync("./database/imgs/well.png");
 
-async function getGroupMetadataSafe(groupId, subaru) {
-  if (groupMetadataCache.has(groupId)) return groupMetadataCache.get(groupId);
-  if (!groupId.endsWith("@g.us")) return null;
-  try {
-    const meta = await subaru.groupMetadata(groupId);
-    groupMetadataCache.set(groupId, meta);
-    cacheService.saveGroupMetadata(groupId, meta);
-    return meta;
-  } catch (e) {
-    console.error(`Erro ao buscar metadata do grupo ${groupId}:`, e);
-    return { subject: "Grupo Desconhecido", participants: [] };
-  }
-}
-
-function getGroupConfig(id) {
-  const cached = groupConfigCache.get(id);
-  if (cached) return cached;
-  if (!fs.existsSync(`./database/grupos/${id}.json`)) return null;
-  const config = JSON.parse(fs.readFileSync(`./database/grupos/${id}.json`));
-  groupConfigCache.set(id, config);
-  return config;
-}
-
 const startConnection = async () => {
-  const subaru = await createEngine(settings);
-
-  if (
-    subaru.type === "baileys" &&
-    process.argv.includes("--code") &&
-    !subaru.authState.creds.registered
-  ) {
+  if (process.argv.includes("--code") && !global.__pairingNumber) {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
     process.stdout.write("Insira o número de telefone para conectar: \n");
-    const phoneNumber_raw = await new Promise((resolve) =>
-      rl.once("line", resolve),
-    );
-    const phoneNumber = phoneNumber_raw.replace(/\D/g, "");
-    const code = await subaru.requestPairingCode(phoneNumber, pk);
-    process.stdout.write(
-      `Seu código de pareamento: ${code?.match(/.{1,4}/g)?.join("-") || code}\n`,
-    );
+    const raw = await new Promise((resolve) => rl.once("line", resolve));
     rl.close();
+    global.__pairingNumber = raw.replace(/\D/g, "");
+    console.log(`📱 Número: ${global.__pairingNumber}\n`);
   }
+
+  const subaru = await createEngine(settings);
 
   let isRestart = false;
   let reconnectAttempts = 0;
+  let pairingCodeRequested = false;
 
   subaru.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
-    if (qr && !process.argv.includes("--code")) {
+    if (
+      subaru.type === "baileys" &&
+      process.argv.includes("--code") &&
+      !subaru.authState.creds.registered &&
+      !pairingCodeRequested &&
+      global.__pairingNumber
+    ) {
+      pairingCodeRequested = true;
+      try {
+        await esperar(1000);
+        const code = await subaru.requestPairingCode(
+          global.__pairingNumber,
+          pk,
+        );
+        process.stdout.write(
+          `\n✅ Código de pareamento: ${code?.match(/.{1,4}/g)?.join("-") || code}\n\n`,
+        );
+      } catch (err) {
+        console.error("❌ Erro ao pedir pairing code:", err?.message || err);
+        pairingCodeRequested = false;
+      }
+    }
+
+    if (qr && subaru.type === "baileys" && !process.argv.includes("--code")) {
       qrcode.generate(qr, { small: true });
       console.log("\n📱 Escaneie o QR code acima com o WhatsApp\n");
     }
 
     if (connection === "close") {
-      const shouldReconnect =
-        lastDisconnect?.error?.output?.statusCode !== 401;
+      const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== 401;
       console.log(
         `Conexão fechada. Motivo: ${lastDisconnect?.error?.output?.statusCode}.`,
       );
@@ -348,15 +334,20 @@ const startConnection = async () => {
         });
       }
     } catch (e) {
-      console.error(`Erro no evento 'group-participants.update' para o grupo ${id}:`, e,);
+      console.error(
+        `Erro no evento 'group-participants.update' para o grupo ${id}:`,
+        e,
+      );
       if (e?.data === 403) {
-        console.log(`Bot foi removido do grupo ${id}. Excluindo arquivo de configuração.`,);
+        console.log(
+          `Bot foi removido do grupo ${id}. Excluindo arquivo de configuração.`,
+        );
         fs.unlinkSync(groupSettingsPath);
       }
     }
     cacheService.saveGroupMetadata(update, groupMetadata);
   });
-
+  await subaru.start?.();
   return subaru;
 };
 

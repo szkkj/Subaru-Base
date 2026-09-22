@@ -1,11 +1,14 @@
 (async () => {
-	const { Sticker } = require('../sticker.js');
-	const st = new Sticker();
-	st.options.edit = 'primas' // piramide | borda | primas | circle
-	st.addFile('https://i.stack.imgur.com/EMKmn.png')
-	st.metadata = {pack: 'Sabrina-BOT', author: 'Vitinho', emojis: ['😶']}
-	await await st.start().then(console.log).catch(error => st.error(error))
-})()
+  const { Sticker } = require("../sticker.js");
+  const st = new Sticker();
+  st.options.edit = "primas"; // piramide | borda | primas | circle
+  st.addFile("https://i.stack.imgur.com/EMKmn.png");
+  st.metadata = { pack: "Sabrina-BOT", author: "Vitinho", emojis: ["😶"] };
+  await await st
+    .start()
+    .then(console.log)
+    .catch((error) => st.error(error));
+})();
 
 /*
 —⟩ Nota:

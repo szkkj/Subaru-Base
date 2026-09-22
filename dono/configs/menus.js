@@ -1,8 +1,13 @@
-import fs from 'fs'
-import { fileURLToPath } from 'url'
+import fs from "fs";
+import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url)
-const menumembros = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
+const __filename = fileURLToPath(import.meta.url);
+const menumembros = (
+  data,
+  hora,
+  prefix,
+  donoName,
+) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
 ╭┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╮
 ┃͜⃟📆 Data: ${data}
 ┃͜⃟⌛ Hora: ${hora}
@@ -45,9 +50,14 @@ const menumembros = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿�
 ┃͜⃟${prefix}dislike (função Tinder)
 ┃ ╰────────────────────
 ┃ ╰┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`;
 
-const menuAdm = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
+const menuAdm = (
+  data,
+  hora,
+  prefix,
+  donoName,
+) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
 ╭┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╮
 ┃͜⃟📆 Data: ${data}
 ┃͜⃟⌛ Hora: ${hora}
@@ -79,9 +89,14 @@ const menuAdm = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾
 ┃͜⃟${prefix}clear / limpar
 ┃ ╰────────────────────
 ┃ ╰┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`;
 
-const menubn = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
+const menubn = (
+  data,
+  hora,
+  prefix,
+  donoName,
+) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
 ╭┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╮
 ┃͜⃟📆 Data: ${data}
 ┃͜⃟⌛ Hora: ${hora}
@@ -95,9 +110,14 @@ const menubn = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾�
 ┃͜⃟${prefix}resetarvelha / rv
 ┃ ╰────────────────────
 ┃ ╰┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`;
 
-const menudono = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
+const menudono = (
+  data,
+  hora,
+  prefix,
+  donoName,
+) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
 ╭┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╮
 ┃͜⃟📆 Data: ${data}
 ┃͜⃟⌛ Hora: ${hora}
@@ -113,9 +133,14 @@ const menudono = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 ┃͜⃟${prefix}banchat
 ┃ ╰────────────────────
 ┃ ╰┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`;
 
-const menugeral = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
+const menugeral = (
+  data,
+  hora,
+  prefix,
+  donoName,
+) => `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
 ╭┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╮
 ┃͜⃟📆 Data: ${data}
 ┃͜⃟⌛ Hora: ${hora}
@@ -186,11 +211,11 @@ const menugeral = (data, hora, prefix, donoName) => `┏╾ׁ═╼࡙ᷓ✿࡙�
 ┃͜⃟${prefix}banchat
 ┃────────────────────
 ┃╰┈᳝𑂳໋֕𔓕┉۪࣮᪲۟۫━⵿໋݊┅᮫🫧࣭࣪┅⵿᳝━໋࣪─͚۪֘┉᪲𔓕໋┈᩿╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙✿╾ᷓ═╼┛`;
 
-export { menumembros, menuAdm, menubn, menudono, menugeral }
+export { menumembros, menuAdm, menubn, menudono, menugeral };
 
 fs.watchFile(__filename, () => {
-    console.log(`Arquivo '${__filename}' foi modificado. Reiniciando...`)
-    process.exit()
-})
+  console.log(`Arquivo '${__filename}' foi modificado. Reiniciando...`);
+  process.exit();
+});

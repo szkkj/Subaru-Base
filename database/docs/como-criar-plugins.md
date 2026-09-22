@@ -79,11 +79,11 @@ Esse entendimento evita 99% dos erros comuns.
   - validar argumentos
   - executar ações
   - responder o usuário
-  - tratar erros  
+  - tratar erros
 
   O core **não corrige** erros do seu comando.
 
-```json 
+```json
 - 📁 **Estrutura do Subaru-Base**
 Subaru-Base/
 📁 database/
@@ -118,10 +118,11 @@ Subaru-Base/
 
 📌 **Resumo importante:**  
 Se o plugin:
+
 - usa apenas os parâmetros do `run`
 - não cria conexões
 - não acessa o core
-- segue o padrão documentado  
+- segue o padrão documentado
 
 ➡️ Ele funciona **sem ajustes**, tanto para humanos quanto para IAs.
 
@@ -133,11 +134,13 @@ Todos os comandos do Subaru-Base são carregados a partir do sistema de **plugin
 Esses arquivos ficam organizados em diretórios específicos, de acordo com **nível de permissão**.
 
 📂 Diretório principal de plugins:
+
 ```
 ./dono/plugins/
 ```
 
 Dentro desse diretório, os comandos são obrigatoriamente separados por categoria:
+
 - `owner` → comandos exclusivos do dono do bot
 - `adm` → comandos para administradores de grupo
 - `members` → comandos livres para qualquer usuário
@@ -150,6 +153,7 @@ Dentro desse diretório, os comandos são obrigatoriamente separados por categor
 ```
 
 📌 **Regras importantes sobre essa estrutura**
+
 - Cada arquivo representa um único comando
 - O nome do arquivo não define o comando — quem define é a propriedade `name`
 - O core do bot varre automaticamente essas pastas e carrega os plugins
@@ -187,18 +191,35 @@ Isso já é um comando funcional.
 ### 🧱 Plugin Base ESM (modelo oficial)
 
 ```js
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
+import path from "path";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const { prefix, botName, donoName, donoNmr, idCanal } = require(path.join(__dirname, '../../configs/settings.json'));
+const { prefix, botName, donoName, donoNmr, idCanal } = require(
+  path.join(__dirname, "../../configs/settings.json"),
+);
 
 export const name = "base";
-export const run = async ({ finn, msg, args, from, sender, isGroup, pushname, reply, seloSz, react, isAdm, isDono, isGroupAdmins, isBotGroupAdmins }) => {
+export const run = async ({
+  finn,
+  msg,
+  args,
+  from,
+  sender,
+  isGroup,
+  pushname,
+  reply,
+  seloSz,
+  react,
+  isAdm,
+  isDono,
+  isGroupAdmins,
+  isBotGroupAdmins,
+}) => {
   try {
     await finn.sendMessage(from, {
       text:
@@ -208,7 +229,7 @@ export const run = async ({ finn, msg, args, from, sender, isGroup, pushname, re
         `🔹 Grupo: ${isGroup ? "Sim" : "Não"}\n` +
         `🔹 Args: ${args.length ? args.join(" ") : "(nenhum)"}\n` +
         `🔹 Bot adm? ${isBotGroupAdmins}\n` +
-        `🔹 Nome do dono: ${donoName}`
+        `🔹 Nome do dono: ${donoName}`,
     });
   } catch (e) {
     console.error(`❌ Erro no plugin base`, e);
@@ -222,12 +243,14 @@ export const run = async ({ finn, msg, args, from, sender, isGroup, pushname, re
 ### 🧪 Exemplos rápidos ESM
 
 **🏓 Ping**
+
 ```js
 export const name = "ping";
 export const run = async ({ reply }) => reply("🏓 Pong!");
 ```
 
 **🔒 Apenas grupos**
+
 ```js
 export const name = "grupo";
 export const run = async ({ isGroup, from, finn }) => {
@@ -237,6 +260,7 @@ export const run = async ({ isGroup, from, finn }) => {
 ```
 
 **🔥 Reagir**
+
 ```js
 export const name = "react";
 export const run = async ({ react }) => react("🔥");
@@ -268,7 +292,7 @@ export const run = async ({ finn, from, isGroup, pushname, seloSz, react }) => {
 
 ### 🤖 Prompt pronto para IA (ESM)
 
-```
+````
 Crie um comando para Subaru-Base usando o sistema de plugins ESM.
 Repositório oficial: https://github.com/szkkj/Subaru-Base/
 
@@ -333,20 +357,21 @@ export const run = async ({ finn, msg, args, from, sender, isGroup, pushname, re
     await finn.sendMessage(from, { text: "⚠️ Erro ao executar o comando." });
   }
 };
-```
+````
 
 Comando desejado:
 (descreva aqui como você quer o comando, o que vai fazer, etc.)
-```
+
+````
 
 ---
 
 ## 🟡 Padrão CJS (legado)
 
 > [!WARNING]
-> O padrão CJS ainda é suportado, mas **somente se o arquivo for salvo com a extensão `.cjs`**.  
-> Com `"type": "module"` no `package.json`, arquivos `.js` são tratados como ESM automaticamente.  
-> **Se criar um plugin CJS e salvar como `.js`, o bot vai quebrar.**  
+> O padrão CJS ainda é suportado, mas **somente se o arquivo for salvo com a extensão `.cjs`**.
+> Com `"type": "module"` no `package.json`, arquivos `.js` são tratados como ESM automaticamente.
+> **Se criar um plugin CJS e salvar como `.js`, o bot vai quebrar.**
 > Use `.cjs` obrigatoriamente para plugins no padrão antigo.
 
 ### 🧩 Estrutura mínima CJS
@@ -359,7 +384,7 @@ module.exports = {
     await subaru.sendMessage(from, { text: "Olá mundo" });
   }
 };
-```
+````
 
 ---
 
@@ -369,7 +394,22 @@ module.exports = {
 // salvar como: base.cjs
 module.exports = {
   name: "base",
-  run: async ({ subaru, msg, args, from, sender, isGroup, pushname, reply, seloSz, react, isAdm, isDono, isGroupAdmins, isBotGroupAdmins }) => {
+  run: async ({
+    subaru,
+    msg,
+    args,
+    from,
+    sender,
+    isGroup,
+    pushname,
+    reply,
+    seloSz,
+    react,
+    isAdm,
+    isDono,
+    isGroupAdmins,
+    isBotGroupAdmins,
+  }) => {
     try {
       await subaru.sendMessage(from, {
         text:
@@ -377,13 +417,15 @@ module.exports = {
           `👉 Comando: *${module.exports.name}*\n` +
           `🔹 Autor: ${sender.split("@")[0]}\n` +
           `🔹 Grupo: ${isGroup ? "Sim" : "Não"}\n` +
-          `🔹 Args: ${args.length ? args.join(" ") : "(nenhum)"}`
+          `🔹 Args: ${args.length ? args.join(" ") : "(nenhum)"}`,
       });
     } catch (e) {
       console.error(`❌ Erro no plugin base`, e);
-      await subaru.sendMessage(from, { text: "⚠️ Erro ao executar o comando." });
+      await subaru.sendMessage(from, {
+        text: "⚠️ Erro ao executar o comando.",
+      });
     }
-  }
+  },
 };
 ```
 
@@ -392,32 +434,36 @@ module.exports = {
 ### 🧪 Exemplos rápidos CJS
 
 **🏓 Ping**
+
 ```js
 // ping.cjs
 module.exports = {
   name: "ping",
-  run: async ({ reply }) => reply("🏓 Pong!")
+  run: async ({ reply }) => reply("🏓 Pong!"),
 };
 ```
 
 **🔒 Apenas grupos**
+
 ```js
 // grupo.cjs
 module.exports = {
   name: "grupo",
   run: async ({ isGroup, from, subaru }) => {
-    if (!isGroup) return subaru.sendMessage(from, { text: "❌ Apenas em grupos." });
+    if (!isGroup)
+      return subaru.sendMessage(from, { text: "❌ Apenas em grupos." });
     subaru.sendMessage(from, { text: "✅ Grupo detectado." });
-  }
+  },
 };
 ```
 
 **🔥 Reagir**
+
 ```js
 // react.cjs
 module.exports = {
   name: "react",
-  run: async ({ react }) => react("🔥")
+  run: async ({ react }) => react("🔥"),
 };
 ```
 
@@ -425,7 +471,7 @@ module.exports = {
 
 ### 🤖 Prompt pronto para IA (CJS)
 
-```
+````
 Crie um comando para Subaru-Base usando o padrão CJS legado.
 IMPORTANTE: salve o arquivo com extensão .cjs obrigatoriamente.
 
@@ -451,10 +497,11 @@ module.exports = {
     }
   }
 };
-```
+````
 
 Comando desejado:
 (descreva aqui como você quer o comando)
+
 ```
 
 ---
@@ -551,7 +598,7 @@ Ao seguir **todas as regras e conceitos deste documento**, o resultado final esp
 - O resultado é previsível, estável e reutilizável
 
 ---
-    
+
 ### ✅ Em resumo
 
 Se o plugin:
@@ -564,3 +611,4 @@ Então o resultado final é:
 > **Um comando pronto para produção, seguro, estável e 100% compatível com o Subaru-Base.**
 
 <p align="center">✨ Subaru-Base • Sistema de plugins</p>
+```

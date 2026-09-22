@@ -34,6 +34,7 @@ import {
   InteractiveValidationError,
   sendButtons,
 } from "./database/dev/botoes.js";
+import { prepareMediaHeader } from "./database/dev/.scripts/engine.js";
 
 import {
   os,
@@ -61,7 +62,7 @@ import {
   util,
   rgtake,
   botSemKey,
-} from "./dono/exports.js";
+} from "./src/exports.js";
 
 import { createRequire } from "module";
 import { fileURLToPath } from "url";
@@ -117,8 +118,8 @@ import {
   UploadFileUgu,
   CatBox,
   dellCase,
-  groupConfigCache
-} from "./dono/functions.js";
+  groupConfigCache,
+} from "./src/functions.js";
 
 import {
   selogpt,
@@ -141,7 +142,8 @@ import {
   seloloc,
   seloSticker,
   spiral,
-} from "./dono/fileSz.js";
+  enviarBan,
+} from "./src/fileSz.js";
 import { getSimilarity } from "./database/outros/similaridade.js";
 const selo = seloSz;
 
@@ -344,17 +346,39 @@ const handleCmds = async (subaru, msg) => {
   const isQuotedViewOnce =
     quotedType === "viewOnceMessage" || quotedType === "viewOnceMessageV2";
   const isQuotedDocW = quotedType === "documentWithCaptionMessage";
-  const imgCaption = (isQuotedImage ? quoted?.imageMessage?.caption : info.message?.imageMessage?.caption) || "";
-  const vidCaption = (isQuotedVideo ? quoted?.videoMessage?.caption : info.message?.videoMessage?.caption) || "";
-  const convText = (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
-  const extdText = (isQuotedText ? quoted?.extendedTextMessage?.text : info.message?.extendedTextMessage?.text) || "";
-  const docNoCap = (isQuotedDocument ? quoted?.documentMessage?.caption : info.message?.documentMessage?.caption) || "";
+  const imgCaption =
+    (isQuotedImage
+      ? quoted?.imageMessage?.caption
+      : info.message?.imageMessage?.caption) || "";
+  const vidCaption =
+    (isQuotedVideo
+      ? quoted?.videoMessage?.caption
+      : info.message?.videoMessage?.caption) || "";
+  const convText =
+    (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
+  const extdText =
+    (isQuotedText
+      ? quoted?.extendedTextMessage?.text
+      : info.message?.extendedTextMessage?.text) || "";
+  const docNoCap =
+    (isQuotedDocument
+      ? quoted?.documentMessage?.caption
+      : info.message?.documentMessage?.caption) || "";
   const docWCap =
     (isQuotedDocW
       ? quoted?.documentWithCaptionMessage?.message?.documentMessage?.caption
       : info.message?.documentWithCaptionMessage?.message?.documentMessage
           ?.caption) || "";
-  const mediaInfo = isQuotedImage ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message.extendedTextMessage.contextInfo.message.imageMessage : isQuotedVideo ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message.extendedTextMessage.contextInfo.message.videoMessage : isQuotedSticker ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message.extendedTextMessage.contextInfo.message.stickerMessage : info;
+  const mediaInfo = isQuotedImage
+    ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message
+        .extendedTextMessage.contextInfo.message.imageMessage
+    : isQuotedVideo
+      ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message
+          .extendedTextMessage.contextInfo.message.videoMessage
+      : isQuotedSticker
+        ? JSON.parse(JSON.stringify(info).replace("quotedM", "m")).message
+            .extendedTextMessage.contextInfo.message.stickerMessage
+        : info;
 
   function getGroupAdmins(participants) {
     let admins = [];
@@ -375,7 +399,13 @@ const handleCmds = async (subaru, msg) => {
   function getSenderLid(msg) {
     const { jidDecode, jidEncode } = baileysPkg;
     try {
-      const sender = msg?.key?.participant || msg?.key?.remoteJid || msg?.key?.remoteLid || msg?.key?.participantLid || msg?.key?.participantAlt || "";
+      const sender =
+        msg?.key?.participant ||
+        msg?.key?.remoteJid ||
+        msg?.key?.remoteLid ||
+        msg?.key?.participantLid ||
+        msg?.key?.participantAlt ||
+        "";
       const user = jidDecode(sender)?.user || sender.split("@")[0] || "";
       const lid = jidEncode(user, "lid");
       return { jid: sender, lid };
@@ -384,7 +414,7 @@ const handleCmds = async (subaru, msg) => {
       return { jid: null, lid: null };
     }
   }
-  const emoji = "🌹"
+  const emoji = "🌹";
   const groupMetadata = isGroup ? await getGroupMetadataSafe(from, subaru) : "";
   const participants = isGroup ? await groupMetadata.participants : "";
   const groupName = isGroup ? groupMetadata.subject : "";
@@ -423,8 +453,15 @@ const handleCmds = async (subaru, msg) => {
   const pushname = info.pushName ? info.pushName : "";
   const numeroBot = subaru.user.id.split(":")[0] + "@s.whatsapp.net";
   const isDono = sender.includes(donoNmr) || sender === donoLid;
-  const isBotGroupAdmins = groupAdmins.includes(botLid2) || groupAdmins.includes(numeroBot) || false;
-  const isGroupAdmins = groupAdmins.includes(sender) || groupAdmins.includes(senderLid) || groupAdmins.includes(senderJid) || groupAdmins.includes(sender2) || isDono || false;
+  const isBotGroupAdmins =
+    groupAdmins.includes(botLid2) || groupAdmins.includes(numeroBot) || false;
+  const isGroupAdmins =
+    groupAdmins.includes(sender) ||
+    groupAdmins.includes(senderLid) ||
+    groupAdmins.includes(senderJid) ||
+    groupAdmins.includes(sender2) ||
+    isDono ||
+    false;
   const isAdm = isGroupAdmins;
   const participantes = isGroup
     ? groupMetadata.participants.map((usuario) => usuario.id)
@@ -547,7 +584,7 @@ const handleCmds = async (subaru, msg) => {
       { quoted: info },
     );
   };
-  //====================( FUNÇÕES DE MENÇÃO )====================//
+
   // Envia uma imagem mencionando usuários no texto.
   const mencionarIMG = async (teks = "", FileN, membrosGrupo = []) => {
     const memberr = [];
@@ -730,14 +767,11 @@ const handleCmds = async (subaru, msg) => {
       console.log(e);
     }
   }
-  //====================( FIM - FUNÇÕES DO RENAME )====================//
-
-  //====================( FUNÇÕES DE REAÇÃO )====================//
   // Reage a uma mensagem
   const react = (reassao) => {
     subaru.sendMessage(from, { react: { text: reassao, key: info.key } });
   };
-
+  // aliase
   const reagir = (reassao) => {
     subaru.sendMessage(from, { react: { text: reassao, key: info.key } });
   };
@@ -748,7 +782,6 @@ const handleCmds = async (subaru, msg) => {
   const warningReact = () => react("⚠️");
   const errorReact = () => react("❌");
 
-  //====================( FUNÇÕES DE FIGURINHA / STICKER )====================//
   // Converte imagem para figurinha.
   const sendImageAsSticker2 = async (
     subaru,
@@ -858,32 +891,43 @@ const handleCmds = async (subaru, msg) => {
 
   function ModificaGrupo(index) {
     fs.writeFileSync(PastaDeGrupos, JSON.stringify(index, null, 2) + "\n");
-    groupConfigCache.set(from, index); 
+    groupConfigCache.set(from, index);
   }
   function setNes(index) {
     fs.writeFileSync(nescj, JSON.stringify(index, null, 2) + "\n");
-    groupConfigCache.set(from, index); 
+    groupConfigCache.set(from, index);
   }
   function setGp(index) {
     fs.writeFileSync(PastaDeGrupos, JSON.stringify(index, null, 2) + "\n");
+    groupConfigCache.set(from, index);
   }
 
   //====================( CONSTS DE GRUPOS )====================//
   const isAntiLink = isGroup ? ArquivosDosGrupos?.[0]?.antilink : undefined;
-  const BemVindoAcao = isGroup ? ArquivosDosGrupos?.[0]?.bemVindo?.[0] : undefined;
-  const isBemVindo = isGroup ? ArquivosDosGrupos?.[0]?.bemVindo?.[0]?.ativo : undefined;
+  const BemVindoAcao = isGroup
+    ? ArquivosDosGrupos?.[0]?.bemVindo?.[0]
+    : undefined;
+  const isBemVindo = isGroup
+    ? ArquivosDosGrupos?.[0]?.bemVindo?.[0]?.ativo
+    : undefined;
   const isAntiImg = isGroup ? ArquivosDosGrupos?.[0]?.antiimg : undefined;
   const isAntiVid = isGroup ? ArquivosDosGrupos?.[0]?.antivideo : undefined;
   const isAntiAudio = isGroup ? ArquivosDosGrupos?.[0]?.antiaudio : undefined;
-  const isAntiSticker = isGroup ? ArquivosDosGrupos?.[0]?.antisticker : undefined;
+  const isAntiSticker = isGroup
+    ? ArquivosDosGrupos?.[0]?.antisticker
+    : undefined;
   const isAntiDoc = isGroup ? ArquivosDosGrupos?.[0]?.antidoc : undefined;
   const isAntiCtt = isGroup ? ArquivosDosGrupos?.[0]?.antictt : undefined;
   const isAntiLoc = isGroup ? ArquivosDosGrupos[0].antiloc : undefined;
   const isBanchat = isGroup ? ArquivosDosGrupos?.[0].banchat : undefined;
   const isSimih = isGroup ? ArquivosDosGrupos?.[0].simih : undefined;
   const isModobn = isGroup ? ArquivosDosGrupos?.[0].modobn : undefined;
-  const isAntiArq = isGroup ? ArquivosDosGrupos?.[0].antiarquivamento.ativo : undefined;
-  const isAutoSticker = isGroup ? ArquivosDosGrupos?.[0].autosticker : undefined;
+  const isAntiArq = isGroup
+    ? ArquivosDosGrupos?.[0].antiarquivamento.ativo
+    : undefined;
+  const isAutoSticker = isGroup
+    ? ArquivosDosGrupos?.[0].autosticker
+    : undefined;
   const isAutoDown = isGroup ? ArquivosDosGrupos?.[0].autodown : undefined;
   //====================( FIM CONSTS DE GRUPOS )====================//
 
@@ -934,13 +978,16 @@ const handleCmds = async (subaru, msg) => {
   }
 
   //====================( SIMILARITY / SIMILARIDADE )====================//
-  let findindex = fs.readFileSync("index.js").toString().match(/case\s+'(.+?)'/g);
-  
+  let findindex = fs
+    .readFileSync("index.js")
+    .toString()
+    .match(/case\s+'(.+?)'/g);
+
   const getallcases = () => {
     const content = fs.readFileSync("index.js", "utf-8");
     const matches = content.matchAll(/case\s+'(.+?)'/g);
-    return [...matches].map(match => match[1]);
-};
+    return [...matches].map((match) => match[1]);
+  };
   const rmLetras = (txt) => {
     return txt
       .toLowerCase()
@@ -972,10 +1019,8 @@ const handleCmds = async (subaru, msg) => {
     return query.replace(/#p#/g, prefix).replace(/#pc#/g, prefix + comando);
   };
 
-  //======(JOGO-DA-VELHA)=======(Função)===\\
   //=========(FUNÇÃO-JOGO-DA-VELHA)=========\\
   //By: Spiral
-  //Agora menciona a pessoa ao invés de mostrar o lid
   const { validmove, setGame } = require("./database/tictactoe/index.js");
   const argss = body.split(/ +/g);
   function normalizeJid(jid = "") {
@@ -1292,7 +1337,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
         );
       } catch (e) {
         console.log(e);
-        botSemKey(subaru, groupName, comando);
+        botSemKey(subaru, groupName, comando, from);
       }
       return;
     }
@@ -1433,18 +1478,32 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
     }
 
     if (isSimih && isGroup && budy != undefined) {
-      if (["imageMessage", "audioMessage", "stickerMessage"].includes(type) ||info.key.fromMe) {return; } //1
+      if (
+        ["imageMessage", "audioMessage", "stickerMessage"].includes(type) ||
+        info.key.fromMe
+      ) {
+        return;
+      } //1
       try {
         const persona = escolherPersonalidadeSubaru();
         const simiPersonality = `${persona.prompt}`;
-        const { data } = await axios.post(`${baseRaikken}/api/ia/chat-simi?apikey=${RaikkenKey}`,
-          {message: budy,
-            personality: simiPersonality,
-          },);
-        if (data && data.response) { await subaru.sendMessage( from, { text: data.response }, { quoted: info });
+        const { data } = await axios.post(
+          `${baseRaikken}/api/ia/chat-simi?apikey=${RaikkenKey}`,
+          { message: budy, personality: simiPersonality },
+        );
+        if (data && data.response) {
+          await subaru.sendMessage(
+            from,
+            { text: data.response },
+            { quoted: info },
+          );
         } else {
           const errorMessage = "Não entendi! Pode me explicar melhor?";
-          await subaru.sendMessage( from, { text: errorMessage }, { quoted: info });
+          await subaru.sendMessage(
+            from,
+            { text: errorMessage },
+            { quoted: info },
+          );
         }
       } catch (err) {
         if (err.response && err.response.data && err.response.data.error) {
@@ -1619,7 +1678,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
             if (isGroupAdmins) {
               return;
             }
-            enviarBan(`*Links não são permitidos aqui!*`);
+            enviarBan(
+              `*Links não são permitidos aqui!*`,
+              subaru,
+              from,
+              info.key,
+              sender || senderLid,
+            );
             await subaru.sendMessage(from, {
               delete: {
                 remoteJid: from,
@@ -1648,7 +1713,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
       if (isGroupAdmins) {
         return;
       }
-      await enviarBan(`*Imagens não são permitidos aqui!*`);
+      await enviarBan(
+        `*Imagens não são permitidos aqui!*`,
+        subaru,
+        from,
+        info.key,
+        sender || senderLid,
+      );
       await subaru.sendMessage(from, {
         delete: {
           remoteJid: from,
@@ -1672,7 +1743,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
       if (isGroupAdmins) {
         return;
       }
-      await enviarBan(`*Contatos não são permitidos aqui!*`);
+      await enviarBan(
+        `*Contatos não são permitidos aqui!*`,
+        subaru,
+        from,
+        info.key,
+        sender || senderLid,
+      );
       await subaru.sendMessage(from, {
         delete: {
           remoteJid: from,
@@ -1697,7 +1774,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
       if (isGroupAdmins) {
         return;
       }
-      await enviarBan(`*Figurinhas não são permitidos aqui!*`);
+      await enviarBan(
+        `*Figurinhas não são permitidos aqui!*`,
+        subaru,
+        from,
+        info.key,
+        sender || senderLid,
+      );
       await subaru.sendMessage(from, {
         delete: {
           remoteJid: from,
@@ -1722,7 +1805,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
       if (isGroupAdmins) {
         return;
       }
-      await enviarBan(`*Localização não são permitidos aqui!*`);
+      await enviarBan(
+        `*Localização não são permitidos aqui!*`,
+        subaru,
+        from,
+        info.key,
+        sender || senderLid,
+      );
       await subaru.sendMessage(from, {
         delete: {
           remoteJid: from,
@@ -1747,7 +1836,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
       if (isGroupAdmins) {
         return;
       }
-      await enviarBan(`*Documentos não são permitidos aqui!*`);
+      await enviarBan(
+        `*Documentos não são permitidos aqui!*`,
+        subaru,
+        from,
+        info.key,
+        sender || senderLid,
+      );
       await subaru.sendMessage(from, {
         delete: {
           remoteJid: from,
@@ -1790,7 +1885,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
       if (isGroupAdmins) {
         return;
       }
-      await enviarBan(`*Vídeos não são permitidos aqui!*`);
+      await enviarBan(
+        `*Vídeos não são permitidos aqui!*`,
+        subaru,
+        from,
+        info.key,
+        sender || senderLid,
+      );
       await subaru.sendMessage(from, {
         delete: {
           remoteJid: from,
@@ -1812,7 +1913,13 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
       if (isGroupAdmins) {
         return;
       }
-      await enviarBan(`*Áudios não são permitidos aqui!*`);
+      await enviarBan(
+        `*Áudios não são permitidos aqui!*`,
+        subaru,
+        from,
+        info.key,
+        sender || senderLid,
+      );
       await subaru.sendMessage(from, {
         delete: {
           remoteJid: from,
@@ -1899,6 +2006,23 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
 > - senderLid: ${senderLid || "não veio"}`,
             });
           }
+          console.log("DEBUG ADMIN:", {
+            sender,
+            senderLid,
+            senderJid,
+            botLid2,
+            numeroBot,
+            groupMembers: groupMembers.map((m) => ({
+              id: m.id,
+              jid: m.jid,
+              lid: m.lid,
+              admin: m.admin,
+            })),
+            groupAdmins,
+            isGroupAdmins,
+            isBotGroupAdmins,
+            isImage,
+          });
           break;
 
         case "menu": {
@@ -1918,9 +2042,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
             return `${h}:${m}:${s}`;
           };
 
-          const {
-            escolherPersonalidadeSubaru,
-          } = require("./dono/functions.js");
+          const { escolherPersonalidadeSubaru } = require("./src/functions.js");
           const tempoAtivo = formatarTempo(process.uptime());
           const persona = escolherPersonalidadeSubaru(
             pushname,
@@ -1934,10 +2056,11 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
             let videoHeader = null;
             if (videoAleaSz && fs.existsSync(videoAleaSz)) {
               const videoBuffer = fs.readFileSync(videoAleaSz);
-              videoHeader = await prepareWAMessageMedia(
-                { video: videoBuffer, gifPlayback: true },
-                { upload: subaru.waUploadToServer },
-              );
+              videoHeader = await prepareMediaHeader(subaru, videoBuffer, {
+                type: "video",
+                mimetype: "video/mp4",
+                gifPlayback: true,
+              });
             }
 
             const interactiveMessage = {
@@ -2132,7 +2255,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
           {
             const {
               escolherPersonalidadeSubaru,
-            } = require("./dono/functions.js");
+            } = require("./src/functions.js");
             const persona = escolherPersonalidadeSubaru();
             if (!q) {
               return reply("Diga o que quer perguntar.");
@@ -2226,7 +2349,7 @@ ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
             }
           }
           break;
-          
+
         /* ====( AQUI AINDA SÃO CMDS DE MEMBROS, MAS APENAS BRINCADEIRAS )==== */
         case "jogodavelha": {
           if (!isGroup) return reply("Só grupos!");
@@ -3548,1541 +3671,6 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
           }, 10000);
           break;
 
-        //=====( ABAIXO OS COMANDOS DA API )=====\\
-        case "removebg": {
-          try {
-            const tempDir = "./database/temp";
-            if (!fs.existsSync(tempDir))
-              fs.mkdirSync(tempDir, { recursive: true });
-
-            let imageUrl;
-            const saveTempAndUpload = async (mediaBuffer) => {
-              const tempPath = `${tempDir}/removebg_${Date.now()}.jpg`;
-              fs.writeFileSync(tempPath, mediaBuffer);
-              let url;
-              try {
-                url = await CatBox(tempPath);
-              } catch {
-                const uploaded = await UploadFileUgu(tempPath);
-                url = uploaded.url;
-              }
-              fs.unlinkSync(tempPath);
-              return url;
-            };
-
-            if (isQuotedImage) {
-              const mediaBuffer = await downloadMediaMessage(
-                { message: { imageMessage: mediaInfo } },
-                "buffer",
-                {},
-              );
-              imageUrl = await saveTempAndUpload(mediaBuffer);
-            } else if (isImage) {
-              const mediaBuffer = await downloadMediaMessage(
-                info,
-                "buffer",
-                {},
-              );
-              imageUrl = await saveTempAndUpload(mediaBuffer);
-            } else if (q?.startsWith("http")) {
-              imageUrl = q;
-            } else {
-              return reply(
-                `❌ Envie uma imagem, quote uma imagem, ou passe uma URL. Ex: ${prefix}removebg https://...`,
-              );
-            }
-
-            reply("⏳ Removendo o fundo da imagem, aguarde...");
-
-            const res = await fetch(
-              `${baseRaikken}/api/outros/remove-bg?imageUrl=${encodeURIComponent(imageUrl)}&apikey=${RaikkenKey}`,
-            );
-            if (!res.ok) throw new Error("Erro ao remover o fundo da imagem.");
-            const buffer = Buffer.from(await res.arrayBuffer());
-
-            const tempOut = `${tempDir}/removebg_out_${Date.now()}.png`;
-            fs.writeFileSync(tempOut, buffer);
-            const uploadedOut = await UploadFileUgu(tempOut);
-            fs.unlinkSync(tempOut);
-
-            await subaru.sendMessage(
-              from,
-              {
-                image: { url: uploadedOut.url },
-                caption: "✅ Fundo removido com sucesso!",
-              },
-              { quoted: info },
-            );
-          } catch (e) {
-            console.error(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "bratmeme": {
-          const partes = q?.split("|");
-          if (!q || partes.length < 2)
-            return reply(`❌ Use: ${prefix}bratmeme texto1 | texto2`);
-          try {
-            const text1 = partes[0].trim();
-            const text2 = partes[1].trim();
-            const res = await fetch(
-              `${baseRaikken}/api/canvas/bratmeme?text1=${encodeURIComponent(text1)}&text2=${encodeURIComponent(text2)}&apikey=${RaikkenKey}`,
-            );
-            if (!res.ok) throw new Error("Erro ao gerar sticker bratmeme.");
-            const buffer = Buffer.from(await res.arrayBuffer());
-            await sendImageAsSticker2(subaru, from, buffer, info, {
-              packname: botName,
-              author: donoName,
-            });
-          } catch (e) {
-            console.error(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "bratmeme2": {
-          if (!q)
-            return reply("❌ Digite um texto! Ex: .bratmeme2 seu texto aqui");
-          try {
-            const res = await fetch(
-              `${baseRaikken}/api/canvas/bratmeme2?text=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            if (!res.ok) throw new Error("Erro ao gerar sticker bratmeme2.");
-            const buffer = Buffer.from(await res.arrayBuffer());
-            await sendImageAsSticker2(subaru, from, buffer, info, {
-              packname: botName,
-              author: donoName,
-            });
-          } catch (e) {
-            console.error(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "bratvideo": {
-          if (!q)
-            return reply("❌ Digite um texto! Ex: .bratvideo seu texto aqui");
-          try {
-            const res = await fetch(
-              `${baseRaikken}/api/canvas/bratvideo?text=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            if (!res.ok) throw new Error("Erro ao gerar sticker brat.");
-            const buffer = Buffer.from(await res.arrayBuffer());
-            await sendVideoAsSticker2(subaru, from, buffer, info, {
-              packname: botName,
-              author: donoName,
-            });
-          } catch (e) {
-            console.error(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "brat": {
-          if (!q) return reply("❌ Digite um texto! Ex: .brat seu texto aqui");
-          try {
-            const res = await fetch(
-              `${baseRaikken}/api/canvas/brat?text=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            if (!res.ok) throw new Error("Erro ao gerar imagem brat.");
-            const buffer = Buffer.from(await res.arrayBuffer());
-            await sendImageAsSticker2(subaru, from, buffer, info, {
-              packname: botName,
-              author: donoName,
-            });
-          } catch (e) {
-            console.error(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "conversas-simi":
-          {
-            try {
-              const url = `${baseRaikken}/api/ia/conversas-simi?apikey=${RaikkenKey}`;
-              let response = await fetch(url);
-              if (!response.ok) {
-                return reply(`❌ Erro ao acessar API: ${response.status}`);
-              }
-
-              let data = await response.text();
-              reply(data);
-            } catch (err) {
-              console.error(err);
-              reply("❌ Erro ao buscar dados.");
-            }
-          }
-          break;
-
-        case "namorar": {
-          if (!alvo)
-            return reply("💔 Você precisa marcar alguém para pedir em namoro.");
-          if (alvo === sender2)
-            return reply("😂 Você não pode namorar com você mesmo!");
-          if (botNumber.includes(alvo))
-            return reply("😳 Eu sou apenas um bot, não posso namorar!");
-          const familia = await getFamiliaData(sender2);
-          if (familia && familia.parceiro) {
-            const parceiroAtual =
-              familia.parceiro.parceiroId || familia.parceiroId;
-            const nomeExibicao = parceiroAtual.replace("@lid", "");
-            const tipoRelacionamento = familia.parceiro.tipo.toLowerCase();
-            await mentions(
-              `💞 Você já está em um relacionamento (${tipoRelacionamento}) com @${nomeExibicao}. Não é possível pedir outra pessoa em namoro.`,
-              [parceiroAtual],
-            );
-            await subaru.sendMessage(parceiroAtual, {
-              text: `🐂 ALERTA! Seu parceiro @${sender2.split("@")[0]} está tentando pedir @${alvo.split("@")[0]} em namoro pelas suas costas!`,
-              mentions: [sender2, parceiroAtual],
-            });
-            return;
-          }
-          try {
-            const res = await fetch(
-              `${baseRaikken}api/familia/namorar?apikey=${RaikkenKey}`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo }),
-              },
-            );
-            const data = await res.json();
-            if (!data || !data.mensagem)
-              throw new Error("Resposta inválida da API.");
-            const mensagemOriginal = data.mensagem.replace(/@lid/g, "");
-            const [id1, id2] = mensagemOriginal.match(/\d+/g);
-            const msgFormatada = `💞 Novo casal formado!\n@${id1} 💍 @${id2}\n💘 Que o amor de vocês dure para sempre!`;
-            await mentions(msgFormatada, [sender2, alvo]);
-          } catch (e) {
-            console.error("Erro no namoro:", e);
-            await botSemKey(subaru, from);
-          }
-          break;
-        }
-
-        case "casar":
-          {
-            if (!alvo)
-              return reply("💍 Você precisa marcar com quem deseja casar.");
-            if (alvo === sender2)
-              return reply("😂 Você não pode casar com você mesmo!");
-            if (botNumber.includes(alvo))
-              return reply("😳 Casar com um bot? Que ideia maluca!");
-            const familia = await getFamiliaData(sender2);
-            if (!familia || !familia.parceiro) {
-              return reply(
-                "💔 Para casar, você primeiro precisa estar em um namoro.",
-              );
-            }
-            const parceiroAtual = familia.parceiro.parceiroId;
-            const nomeExibicao = parceiroAtual.replace("@lid", "");
-            const tipoRelacionamento = familia.parceiro.tipo;
-            if (tipoRelacionamento === "Casamento") {
-              return mention(
-                `💞 Você já está casado(a) com @${parceiroAtual}!`,
-              );
-            }
-            if (alvo !== parceiroAtual) {
-              await mentions(
-                `Sua dupla é o/a @${nomeExibicao}... Fica esperto em 🐂`,
-                [parceiroAtual],
-              );
-              await subaru.sendMessage(parceiroAtual, {
-                text: `🐂 ALERTA! Seu namorado(a) @${sender2.split("@")[0]} está tentando pedir @${alvo.split("@")[0]} em CASAMENTO!`,
-                mentions: [sender2, alvo],
-              });
-              return;
-            }
-            try {
-              const res = await fetch(
-                `${baseRaikken}/api/familia/casar?apikey=${RaikkenKey}`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    usuarioId: sender2,
-                    parceiroId: alvo,
-                  }),
-                },
-              );
-              const data = await res.json();
-              if (!data || !data.mensagem)
-                throw new Error("Resposta inválida da API.");
-              const mensagemOriginal = data.mensagem.replace(/@lid/g, "");
-              const [id1, id2] = mensagemOriginal.match(/\d+/g);
-              const msgFormatada = `💞 Mais um passo dado!\n@${id1} 💍 @${id2}\n💘 Que o amor de vocês dure para sempre!`;
-              await mentions(msgFormatada, [sender2, alvo]);
-            } catch (e) {
-              console.log(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "divorciar":
-        case "terminar":
-          {
-            if (args[0] !== "1") {
-              return reply(
-                `Tem certeza? Para confirmar o fim do relacionamento, use: *${prefix}${command} 1*`,
-              );
-            }
-            const familia = await getFamiliaData(sender2);
-            if (!familia || !familia.parceiro) {
-              return reply(
-                "💔 Você não está em um relacionamento para poder terminar.",
-              );
-            }
-            const parceiroId = familia.parceiro.parceiroId;
-            const endpoint =
-              familia.parceiro.tipo === "Casamento" ? "divorciar" : "terminar";
-            try {
-              const res = await fetch(
-                `${baseRaikken}/api/familia/divorciar?apikey=${RaikkenKey}`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    usuarioId: sender2,
-                    parceiroId: parceiroId,
-                  }),
-                },
-              );
-              const data = await res.json();
-              if (!data || !data.mensagem)
-                throw new Error("Resposta inválida da API.");
-              await mentions(data.mensagem, [sender2, alvo]);
-            } catch (e) {
-              console.log(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "addamante":
-          {
-            if (!alvo)
-              return reply("😏 Você precisa marcar quem será seu/sua amante.");
-            if (alvo === sender2)
-              return reply("😂 Ter um caso com você mesmo? Interessante...");
-            const familia = await getFamiliaData(sender2);
-            if (familia && familia.parceiro) {
-              const parceiroAtual = familia.parceiro.parceiroId;
-              await reply("🤫 Cuidado... Brincar com fogo pode te queimar...");
-              await subaru.sendMessage(parceiroAtual, {
-                text: `🐂 ALERTA DE CORNO! Seu parceiro @${sender2.split("@")[0]} acabou de adicionar @${alvo.split("@")[0]} como amante!`,
-                mentions: [sender2, alvo],
-              });
-            }
-            try {
-              const res = await fetch(
-                `${baseRaikken}/api/familia/amante?apikey=${RaikkenKey}`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    usuarioId: sender2,
-                    parceiroId: alvo,
-                  }),
-                },
-              );
-              const data = await res.json();
-              if (!data || !data.mensagem)
-                throw new Error("Resposta inválida da API.");
-              const mensagemOriginal = data.mensagem.replace(/@lid/g, "");
-              const [id1, id2] = mensagemOriginal.match(/\d+/g);
-              const msgFormatada = `🫦 Eita, uma amante na relação? !\n@${id1} 💍 @${id2}\n💋 Que o amor de vocês sobreviva o caos`;
-              await mentions(msgFormatada, [sender2, alvo]);
-            } catch (e) {
-              console.log(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "familia":
-          {
-            const usuarioConsultado = sender2 || alvo;
-
-            try {
-              const familia = await getFamiliaData(usuarioConsultado);
-              if (!familia)
-                return reply(
-                  "Este usuário não possui uma árvore genealógica registrada.",
-                );
-
-              const { parceiro, filhos, amantes, historico } = familia;
-              let msg = `🌳 Árvore Familiar de @${usuarioConsultado.split("@")[0]}\n\n`;
-
-              if (parceiro && parceiro.desde) {
-                const dataInicio = new Date(parceiro.desde);
-                const hoje = new Date();
-                const diffTempo = Math.abs(hoje - dataInicio);
-                const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
-                const anosJuntos = Math.floor(diffDias / 365);
-                const mesesJuntos = Math.floor((diffDias % 365) / 30);
-                const diasRestantes = (diffDias % 365) % 30;
-                let tempoJuntos = `⏳ Juntos há: `;
-                if (anosJuntos > 0) tempoJuntos += `${anosJuntos} ano(s) `;
-                if (mesesJuntos > 0) tempoJuntos += `${mesesJuntos} mês(es) `;
-                if (diasRestantes > 0) tempoJuntos += `${diasRestantes} dia(s)`;
-                msg += `${tempoJuntos.trim()}\n`;
-                const dia = dataInicio.getDate();
-                const mes = dataInicio.getMonth() + 1;
-                const ano = dataInicio.getFullYear();
-                if (hoje.getDate() === dia && hoje.getMonth() + 1 === mes) {
-                  if (anosJuntos > 0)
-                    msg += `\n🎂 FELIZ ANIVERSÁRIO DE ${anosJuntos} ANO(S)! 🎉\n`;
-                } else {
-                  const mesesTotais =
-                    (hoje.getFullYear() - ano) * 12 +
-                    (hoje.getMonth() + 1 - mes);
-                  if (mesesTotais > 0)
-                    msg += `\n💖 FELIZ ${mesesTotais} MESES JUNTOS! ✨\n`;
-                }
-                msg += "\n";
-              } else {
-                msg += "💞 Nenhum parceiro ativo.\n\n";
-              }
-
-              msg += filhos?.length
-                ? `👶 Filhos:\n${filhos.map((f) => `• ${f.nome.replace("@lid", "")} (${f.idade} anos)`).join("\n")}\n\n`
-                : "👶 Nenhum filho registrado.\n\n";
-              msg += amantes?.length
-                ? `😏 Amantes:\n${amantes.map((a) => `• @${a.amanteId.replace("@lid", "")}`).join("\n")}\n\n`
-                : "😏 Nenhum amante ativo.\n\n";
-              msg +=
-                "📜 Histórico:\n" +
-                (historico?.length
-                  ? historico
-                      .map(
-                        (h) =>
-                          `• ${h.tipo} com @${h.parceiroId.replace("@lid", "")} (${h.status})`,
-                      )
-                      .join("\n")
-                  : "Nenhum histórico.");
-              const membrosParaMencionar = [
-                usuarioConsultado,
-                ...(parceiro ? [parceiro.parceiroId] : []),
-                ...(filhos?.map((f) => f.id) || []),
-                ...(amantes?.map((a) => a.amanteId) || []),
-              ];
-
-              await mentions(msg, membrosParaMencionar);
-            } catch (e) {
-              console.log(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "terfilho":
-          {
-            if (!alvo || !q)
-              return reply("👶 Use: *.filho @pessoa NomeDoFilho*");
-            const nomeFilho = q.trim();
-            try {
-              const res = await fetch(
-                `${baseRaikken}/api/familia/filho?apikey=${RaikkenKey}`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    usuarioId: sender2,
-                    parceiroId: alvo,
-                    nomeFilho,
-                  }),
-                },
-              );
-              const data = await res.json();
-              await reply(`🍼 ${data.mensagem || "Erro desconhecido."}`);
-            } catch (e) {
-              console.log(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "listaramantes":
-          {
-            try {
-              const res = await fetch(
-                `${baseRaikken}/api/familia/amantes/${sender2}?apikey=${RaikkenKey}`,
-              );
-              const data = await res.json();
-              if (!data.sucesso || !data.dados.length)
-                return reply("😏 Nenhum amante encontrado.");
-              const lista = data.dados
-                .map((a, i) => `• ${i + 1}. ${a.amanteId} (desde ${a.desde})`)
-                .join("\n");
-              await reply(`💋 *Lista de Amantes de ${sender2}:*\n\n${lista}`);
-            } catch (e) {
-              console.log(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "filhos":
-          {
-            try {
-              const res = await fetch(
-                `${baseRaikken}/api/familia/filhos/${sender2}?apikey=${RaikkenKey}`,
-              );
-              const data = await res.json();
-              if (!data.sucesso || !data.dados.length)
-                return reply("👶 Nenhum filho encontrado.");
-              const lista = data.dados
-                .map((f, i) => `• ${i + 1}. ${f.nome} (${f.idade} anos)`)
-                .join("\n");
-              await reply(`🍼 *Filhos de ${sender2}:*\n\n${lista}`);
-            } catch (e) {
-              console.log(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "play": {
-          if (!q)
-            return reply("Digite o nome da música ou cole o link do YouTube!");
-          await react("✨");
-          try {
-            let data = moment().tz("America/Sao_Paulo").format("DD/MM/YYYY");
-            let hora = moment().tz("America/Sao_Paulo").format("HH:mm:ss");
-            const res = await fetch(
-              `${baseRaikken}/api/yt/audio?query=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            const json = await res.json();
-            if (!json.success || !json.resultado)
-              return reply("Não foi possível encontrar a música.");
-            const r = json.resultado;
-            const {
-              title: titulo,
-              author: canal,
-              duration: duracao,
-              thumb,
-              url: videoUrl,
-              audioStreamUrl,
-            } = r;
-
-            let c = `
-┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃࣪ ✿𖥔࣪ *ꔛ⃟𝐌𝐔𝐒𝐈𝐂𝐀 𝐄𝐍𝐂𝐎𝐍𝐓𝐑𝐀𝐃𝐀* ✿𖥔࣪
-┃࣪ ┃࣪ 🎵 *Título:* ${titulo}
-┃࣪ ┃࣪ ⏱️ *Duração:* ${duracao}
-┃࣪ ┃࣪ 👤 *Canal:* ${canal}
-┃࣪ ┃࣪ 🔗 *Link:* ${videoUrl}
-┃࣪ ┃࣪ 📅 *Data:* ${data}
-┃࣪ ┃࣪ ⏰ *Hora:* ${hora}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
-
-            await subaru.sendMessage(
-              from,
-              { image: { url: thumb }, caption: c },
-              { quoted: info },
-            );
-
-            const audioRes = await fetch(audioStreamUrl);
-            const audiok = Buffer.from(await audioRes.arrayBuffer());
-            await subaru.sendMessage(
-              from,
-              {
-                audio: audiok,
-                mimetype: "audio/mpeg",
-                filename: "audio.mp4",
-                ptt: false,
-              },
-              { quoted: info },
-            );
-          } catch (e) {
-            console.log(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "playdoc": {
-          if (!q || !q.startsWith("http")) {
-            return reply(
-              "❌ Link do YouTube inválido ou não fornecido. Use o comando .playb para buscar uma música.",
-            );
-          }
-          reply2("📥 Buscando informações do áudio, aguarde...");
-          try {
-            const res = await fetch(
-              `${baseRaikken}/api/mp3/url?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            const json = await res.json();
-            if (!json.success || !json.message) {
-              throw new Error(
-                "Não foi possível obter os dados da música. O vídeo pode ser privado ou ter restrição de idade.",
-              );
-            }
-            const titulo = json.message.title;
-            const audioUrl = json.message.url;
-            reply(
-              `✅ Música encontrada: "${titulo}"\nEnviando como documento...`,
-            );
-            await subaru.sendMessage(
-              from,
-              {
-                document: { url: audioUrl },
-                mimetype: "audio/mpeg",
-                fileName: `${titulo}.mp3`,
-              },
-              { quoted: info },
-            );
-          } catch (e) {
-            console.error("Erro no comando .playdoc:", e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "playvideo": {
-          if (!q) return reply(`❌ Use: ${prefix + command} <link do YouTube>`);
-          try {
-            const res = await fetch(
-              `${baseRaikken}/api/mp4/url?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            const json = await res.json();
-            if (!json.success || !json.message) {
-              return reply("❌ Não foi possível obter o vídeo.");
-            }
-            const m = json.message;
-            const dataAtual = moment
-              .tz("America/Sao_Paulo")
-              .format("DD/MM/YYYY");
-            const horaAtual = moment.tz("America/Sao_Paulo").format("HH:mm:ss");
-            const msgg = `
-┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *🎬 Vídeo Encontrado!*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Título:* ${m.title}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Canal:* ${m.channel?.name || "Desconhecido"}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Duração:* ${m.duration}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Data:* ${dataAtual}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Hora:* ${horaAtual}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
-            await subaru.sendMessage(
-              from,
-              { video: { url: m.url }, caption: msgg },
-              { quoted: seloSz },
-            );
-          } catch (e) {
-            console.error(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "facebook":
-          {
-            if (!q)
-              return reply(
-                "📌 Envie o link de um vídeo do Facebook.\n\nExemplo:\n.facebook https://www.facebook.com/...",
-              );
-
-            try {
-              const url = `${baseRaikken}/api/facebook?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`;
-              const res = await axios.get(url);
-              const data = res.data;
-
-              if (!data.status || !data.resultado || !data.resultado.status) {
-                return reply(
-                  "❌ Não consegui processar esse vídeo. Link inválido ou protegido.",
-                );
-              }
-
-              const { title, duration, thumbnail, links } = data.resultado;
-              const linkHD = links.find((v) => v.quality.includes("720"))?.link;
-              const linkSD = links.find((v) => v.quality.includes("360"))?.link;
-
-              const finalLink = linkHD || linkSD;
-              if (!finalLink)
-                return reply("❌ Nenhum link de vídeo encontrado.");
-              reply("📥 Baixando o vídeo, aguarde...");
-
-              const buffer = await getBuffer(finalLink);
-              await subaru.sendMessage(
-                from,
-                {
-                  video: buffer,
-                  mimetype: "video/mp4",
-                  caption: `🎬 *${title}*\n⏱ Duração: ${duration}`,
-                },
-                { quoted: info },
-              );
-            } catch (err) {
-              console.error(err);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "twitter":
-          {
-            if (!q)
-              return reply(
-                "❗ Envie o link do post do Twitter/X.\n\nExemplo:\n.twitter https://x.com/usuario/status/123456",
-              );
-
-            try {
-              const api = `${baseRaikken}/twitter?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`;
-              const res = await axios.get(api);
-              const data = res.data;
-
-              if (!data.status)
-                return reply(
-                  "❌ Não consegui processar o vídeo. Verifique o link.",
-                );
-
-              const { desc, HD } = data.resultado;
-              await subaru.sendMessage(
-                from,
-                {
-                  video: { url: HD },
-                  caption: `🎬 *Twitter/X Downloader*\n\n📝 *Descrição:* ${desc}`,
-                  mimetype: "video/mp4",
-                },
-                { quoted: info },
-              );
-            } catch (err) {
-              console.error(err);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "gemini": {
-          if (!sz)
-            return reply(
-              `💬 Envie uma pergunta para o Gemini responder.\n\nExemplo:\n${prefixo}gemini Quem descobriu o Brasil?`,
-            );
-          waitReact();
-          try {
-            const res = await axios.get(
-              `${baseRaikken}/api/ia/gemini?prompt=${encodeURIComponent(sz)}&apikey=${RaikkenKey}`,
-            );
-
-            if (!res.data || !res.data.resultado) {
-              return reply("❌ Não consegui obter resposta do Gemini.");
-            }
-
-            return reply(`🤖 *Resposta do Gemini:*\n\n${res.data.resultado}`);
-          } catch (err) {
-            console.error("Erro ao chamar Gemini:", err);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "gpt": {
-          if (!sz)
-            return reply(
-              `💬 Envie uma pergunta para a IA responder.\n\nExemplo:\n${prefixo}ia O que é buraco negro?`,
-            );
-          waitReact();
-          try {
-            const url = `${baseRaikken}/api/ia/gpt3?prompt=${encodeURIComponent(sz)}&apikey=${RaikkenKey}`;
-            const res = await axios.get(url);
-
-            if (!res.data?.status || !res.data?.resultado)
-              return reply("❌ Erro ao processar a resposta.");
-
-            await reply(`💡 *Resposta da IA:*\n\n${res.data.resultado}`);
-          } catch (err) {
-            console.error("Erro na IA =>", err);
-            botSemKey(subaru, groupName, comando);
-          }
-
-          break;
-        }
-
-        case "insta": {
-          if (!sz)
-            return reply(
-              `📷 Envie o link do vídeo do Instagram.\nExemplo:\n${prefixo}insta https://www.instagram.com/reel/xxxxx`,
-            );
-          await waitReact();
-
-          try {
-            const urlApi = `${baseRaikken}/instagram?url=${encodeURIComponent(sz)}&apikey=${RaikkenKey}`;
-            const res = await axios.get(urlApi);
-            const json = res.data;
-            if (!json.status || !json.resultado?.video) {
-              return reply(
-                "❌ Não consegui baixar o vídeo. Verifique o link e tente novamente.",
-              );
-            }
-            const { video, legenda, perfil } = json.resultado;
-            const buffer = await getBuffer(video);
-
-            await subaru.sendMessage(
-              from,
-              {
-                video: buffer,
-                caption: `🎬 *Reel de:* @${perfil}\n\n📝 ${legenda || "Sem legenda"}\n> ©Subaru-V1`,
-              },
-              { quoted: info },
-            );
-          } catch (err) {
-            console.error("Erro Insta =>", err);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "pinterest": {
-          try {
-            if (!sz)
-              return reply(
-                `📌 Envie o termo da pesquisa.\nExemplo:\n${prefixo}pinterest naruto,5`,
-              );
-            await reply("⏳ Buscando imagens no Pinterest...");
-            const [queryRaw, qtdStr] = sz.split(",");
-            const query = queryRaw?.trim();
-            const total = Math.min(Number(qtdStr) || 5, 10);
-            let cards = [],
-              i = 1;
-            for (let count = 0; count < total; count++) {
-              try {
-                const url = `${baseRaikken}/api/pinterest?query=${encodeURIComponent(query)}&apikey=${RaikkenKey}`;
-                const buffer = await getBuffer(url);
-                const { imageMessage } = await generateWAMessageContent(
-                  { image: buffer },
-                  { upload: subaru.waUploadToServer },
-                );
-
-                cards.push({
-                  body: proto.Message.InteractiveMessage.Body.fromObject({
-                    text: `🔍 Resultado ${i++} de *${query}*`,
-                  }),
-                  footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                    text: "> ⚡ via Raikken-API",
-                  }),
-                  header: proto.Message.InteractiveMessage.Header.fromObject({
-                    title: "*Pinterest*",
-                    hasMediaAttachment: true,
-                    imageMessage,
-                  }),
-                  nativeFlowMessage:
-                    proto.Message.InteractiveMessage.NativeFlowMessage.fromObject(
-                      {
-                        buttons: [
-                          {
-                            name: "cta_url",
-                            buttonParamsJson: JSON.stringify({
-                              display_text: "Abrir no Pinterest",
-                              url: `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`,
-                              merchant_url: `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`,
-                            }),
-                          },
-                        ],
-                      },
-                    ),
-                });
-              } catch (err) {
-                console.error(
-                  `[❌] Erro ao buscar imagem ${count + 1}:`,
-                  err.message || err,
-                );
-                botSemKey(subaru, groupName, comando);
-              }
-            }
-
-            if (cards.length === 0)
-              return reply("❌ Não consegui obter imagens. Tente outro termo.");
-
-            const msg = generateWAMessageFromContent(
-              from,
-              {
-                viewOnceMessage: {
-                  message: {
-                    messageContextInfo: {
-                      deviceListMetadata: {},
-                      deviceListMetadataVersion: 2,
-                    },
-                    interactiveMessage:
-                      proto.Message.InteractiveMessage.fromObject({
-                        body: proto.Message.InteractiveMessage.Body.create({
-                          text: `🔎 Pesquisa por: *${query}*`,
-                        }),
-                        footer: proto.Message.InteractiveMessage.Footer.create({
-                          text: botName,
-                        }),
-                        header: proto.Message.InteractiveMessage.Header.create({
-                          hasMediaAttachment: false,
-                        }),
-                        carouselMessage:
-                          proto.Message.InteractiveMessage.CarouselMessage.fromObject(
-                            {
-                              cards,
-                            },
-                          ),
-                      }),
-                  },
-                },
-              },
-              {},
-            );
-
-            await subaru.relayMessage(from, msg.message, {
-              messageId: msg.key.id,
-            });
-          } catch (e) {
-            console.error("[❌ Erro Pinterest Carrossel]", e);
-            reply("❌ Erro ao gerar o carrossel do Pinterest.");
-          }
-          break;
-        }
-
-        case "ttk": {
-          if (!q) return enviar("🚫 Envie o link de um vídeo do TikTok.");
-          await waitReact();
-          try {
-            const res = await fetch(
-              `${baseRaikken}/tiktok-link?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            const json = await res.json();
-            if (!json.status || !json.data || !json.data.length) {
-              return enviar("⚠️ Vídeo não encontrado ou inválido.");
-            }
-            const videoHD =
-              json.data.find((v) => v.type === "nowatermark_hd")?.url ||
-              json.data.find((v) => v.type === "nowatermark")?.url ||
-              json.data[0]?.url;
-            const legenda = `
-┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃࣪ ✿𖥔࣪ *☽˚｡✧❖ 𝑻𝑰𝑲𝑻𝑶𝑲 ❖✧☽˚｡* ✿𖥔࣪
-┃࣪ ┃࣪ 👤 *Autor:* ${json.author.nickname} (@${json.author.fullname})
-┃࣪ ┃࣪ 🕒 *Duração:* ${json.duration}
-┃࣪ ┃࣪ 📆 *Postado em:* ${json.taken_at}
-┃࣪ ┃࣪ 📊 *Visualizações:* ${json.stats.views}
-┃࣪ ┃࣪ ❤️ *Curtidas:* ${json.stats.likes}
-┃࣪ ┃࣪ 💬 *Comentários:* ${json.stats.comment}
-┃࣪ ┃࣪ 🔄 *Compartilhamentos:* ${json.stats.share}
-┃࣪ ┃࣪ 🎬 *${json.title}*
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛
-> _𝑹𝒂𝒊𝒌𝒌𝒆𝒏-𝑨𝒑𝒊⚡_`.trim();
-
-            await subaru.sendMessage(from, {
-              video: { url: videoHD },
-              caption: legenda,
-              mimetype: "video/mp4",
-            });
-          } catch (e) {
-            console.error(e);
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "tksrc": {
-          if (!q)
-            return enviar(
-              "🚫 Insira o nome ou termo para pesquisar vídeos no TikTok.",
-            );
-          await waitReact();
-          try {
-            const res = await fetch(
-              `${baseRaikken}/tiktok-src?q=${encodeURIComponent(q)}&apikey=${RaikkenKey}`,
-            );
-            const json = await res.json();
-            if (!json.resultado || !Array.isArray(json.resultado)) {
-              return enviar("⚠️ Nenhum resultado encontrado.");
-            }
-            const lista = json.resultado;
-            const linkAleatorio =
-              lista[Math.floor(Math.random() * lista.length)];
-            await subaru.sendMessage(
-              from,
-              {
-                video: { url: linkAleatorio },
-                caption: `🎵 *TikTok Source*\n🔎 Termo: ${q}\n🌐`,
-              },
-              { quoted: info },
-            );
-          } catch (e) {
-            botSemKey(subaru, groupName, comando);
-          }
-          break;
-        }
-
-        case "rgtinder":
-          {
-            const rgValue = q;
-            try {
-              let endpoint = `${baseRaikken}/api/tinder/login?usu=${sender}`;
-
-              if (rgValue && !isImage) {
-                endpoint += `&rg=${encodeURIComponent(rgValue)}`;
-              } else if (isImage && linkft) {
-                endpoint += `&rg=${encodeURIComponent(linkft)}`;
-              }
-
-              const response = await axios.get(endpoint);
-              const { message } = response.data;
-              if (!message)
-                return reply(
-                  "A API retornou uma resposta vazia. Tente novamente.",
-                );
-
-              reply(detectTinder(message));
-            } catch (error) {
-              console.error("Erro no comando rgtinder:", error);
-              const errorMessage =
-                error.response?.data?.message ||
-                "Ocorreu um pequeno erro, tente novamente mais tarde!";
-              reply(errorMessage);
-            }
-          }
-          break;
-
-        case "tinder":
-        case "rolar": {
-          await react("🔥");
-          if (!isGroup)
-            return reply("Este comando só pode ser usado em grupos.");
-          try {
-            const userProfileResponse = await axios.get(
-              `${baseRaikken}/api/tinder/perfil?usu=${sender}`,
-            );
-            if (
-              !userProfileResponse.data.dados ||
-              userProfileResponse.data.dados.length === 0
-            ) {
-              return reply2(
-                "Você não está registrado! Use o comando de registro para começar.",
-              );
-            }
-
-            const findResponse = await axios.get(
-              `${baseRaikken}/api/tinder/find?usu=${sender}`,
-            );
-            if (
-              !findResponse.data.dados ||
-              findResponse.data.dados.length === 0
-            ) {
-              return reply(
-                findResponse.data.message ||
-                  "Nenhum usuário encontrado no momento. Tente mais tarde!",
-              );
-            }
-            const dupla = findResponse.data.dados[0];
-            let texto = `*${botName} Tinder 👫🌟*\n—\n`;
-            texto += `• [💖] Usuário: ${dupla.name}\n`;
-            texto += `• WhatsApp: wa.me/${dupla.userId.split("@")[0]}\n`;
-            texto += `• [⏳] Idade: ${dupla.age} anos.\n`;
-            texto += `• [🏳‍🌈] Sexualidade: ${dupla.sexuality}\n`;
-            texto += `• [🚻] Gênero: ${dupla.gender}\n`;
-            texto += `• [💌] *Bio:* ${dupla.bio}\n—`;
-
-            const thumbResponse = await fetch(dupla.photo);
-            const thumbBuffer = Buffer.from(await thumbResponse.arrayBuffer());
-            const imageMedia = await prepareWAMessageMedia(
-              { image: thumbBuffer },
-              { upload: subaru.waUploadToServer },
-            );
-            const interactiveMessage = {
-              header: {
-                ...imageMedia,
-                hasMediaAttachment: true,
-                title: "",
-              },
-              body: { text: texto },
-              footer: { text: "Escolha uma opção para reagir ao perfil!" },
-              nativeFlowMessage: {
-                buttons: [
-                  {
-                    name: "quick_reply",
-                    buttonParamsJson: JSON.stringify({
-                      display_text: "💖 Like",
-                      id: `${prefix}like ${dupla.userId}`,
-                    }),
-                  },
-                  {
-                    name: "quick_reply",
-                    buttonParamsJson: JSON.stringify({
-                      display_text: "💔 Dislike",
-                      id: `${prefix}dislike ${dupla.userId}`,
-                    }),
-                  },
-                ],
-                messageParamsJson: "",
-              },
-            };
-            await sendInteractiveMessage(
-              subaru,
-              from,
-              { interactiveMessage },
-              { additionalAttributes: {}, useCachedGroupMetadata: true },
-            );
-          } catch (error) {
-            console.error("Erro no comando rolar:", error);
-            const errorMessage =
-              error.response?.data?.message ||
-              "Ocorreu um pequeno erro ao buscar um par para você!";
-            reply(detectTinder(errorMessage));
-          }
-          break;
-        }
-
-        case "tindernome":
-        case "tinderidade":
-        case "tinderbio":
-        case "setgene":
-        case "setsex":
-        case "setfiltro":
-        case "tinderfoto":
-          {
-            if (!isGroup) return reply("Só pode ser usado em grupos!");
-            if (!q && !isImage)
-              return reply(
-                `Por favor, forneça um valor. Ex: #${command} novo valor`,
-              );
-
-            try {
-              let finalQueryValue = q;
-              if (command === "tinderfoto") {
-                if (!isImage)
-                  return reply(
-                    "Você precisa marcar uma imagem para definir como foto de perfil.",
-                  );
-                try {
-                  var Fl =
-                    info?.message?.extendedTextMessage?.contextInfo
-                      ?.quotedMessage;
-                  var muk =
-                    Fl?.viewOnceMessageV2?.message?.imageMessage ||
-                    Fl?.viewOnceMessage?.message?.imageMessage ||
-                    Fl?.imageMessage;
-                  let base64String = await getFileBuffer(muk, "image");
-                  var abcd = await CatBox(base64String);
-                  finalQueryValue = abcd;
-                } catch (error) {
-                  console.error("Erro ao processar imagem:", error);
-                  return reply(
-                    "Não foi possível processar a imagem. Tente novamente!",
-                  );
-                }
-              }
-              const endpoint = `${baseRaikken}/api/tinder/config?usu=${sender}&mod=${command}&q=${encodeURIComponent(finalQueryValue)}`;
-              const response = await axios.get(endpoint);
-              if (!response.data || !response.data.message)
-                throw new Error("Resposta inválida da API");
-              reply(detectTinder(response.data.message));
-            } catch (error) {
-              console.error(`Erro no comando ${command}:`, error);
-              const errorMessage =
-                error.response?.data?.message ||
-                `Ocorreu um pequeno erro, tente novamente mais tarde.\n${error.message}`;
-              reply(errorMessage);
-            }
-          }
-          break;
-
-        case "meutinder":
-          {
-            if (!isGroup) return reply("Só pode ser usado em grupos");
-            try {
-              const response = await axios.get(
-                `${baseRaikkenTinder}/perfil?usu=${sender}`,
-              );
-              if (!response.data.dados || response.data.dados.length === 0) {
-                return reply(
-                  response.data.message ||
-                    "Usuário não encontrado. Use o comando de registro para começar.",
-                );
-              }
-              const perfil = response.data.dados[0];
-
-              let envMyTinder = `• [💖] Usuári${perfil.gene === "masculino" ? "o" : "a"}: ${perfil.nome}\n`;
-              envMyTinder += `• [⏳] Idade: ${perfil.idade} anos.\n`;
-              envMyTinder += `• [📞] WhatsApp: wa.me/${perfil.nmr[0]}\n`;
-              envMyTinder += `• [🏳️‍🌈] Sexualidade: ${perfil.sexualidade}\n`;
-              envMyTinder += `• [🚻] Gênero: ${perfil.gene}\n`;
-              envMyTinder += `• [📍] Filtro: ${perfil.filtro == 3 ? `Não há preferência.` : `Busca por ${perfil.filtro == 1 ? `homens` : `mulheres`}`}\n`;
-              envMyTinder += `—\n• [😺] Bio: ${perfil.bio}\n`;
-
-              await subaru.sendMessage(
-                from,
-                {
-                  text: envMyTinder,
-                  contextInfo: {
-                    externalAdReply: {
-                      title: `Raikken-API's Tinder! 💘`,
-                      body: `😌🌟 Este é o seu perfil atual!`,
-                      thumbnail: await getBuffer(perfil.foto),
-                      mediaType: 1,
-                      showAdAttribution: true,
-                      sourceUrl: baseRaikkenTinder,
-                    },
-                  },
-                },
-                { quoted: info },
-              );
-            } catch (error) {
-              console.error("Erro em meutinder:", error);
-              const errorMessage =
-                error.response?.data?.message ||
-                "Ocorreu um pequeno problema, tente novamente mais tarde.";
-              reply(detectTinder(errorMessage));
-            }
-          }
-          break;
-
-        case "teste":
-          try {
-            await subaru.sendMessage(from, { text: "Hello World", ai: true });
-          } catch (e) {
-            console.log(e);
-          }
-          break;
-
-        case "sairtinder":
-        case "rmtinder":
-          {
-            if (!isGroup) return reply("Só pode ser usado em grupos");
-
-            let userToDelete = sender;
-            if (command === "rmtinder") {
-              if (!isDono)
-                return reply("Somente o dono pode usar este comando.");
-              if (!q && !alvo)
-                return reply(
-                  "Marque ou informe o número do usuário a ser removido.",
-                );
-              userToDelete = alvo ? alvo[0] : identifyAtSign(q);
-            }
-
-            try {
-              const response = await axios.get(
-                `${baseRaikkenTinder}/delete?usu=${userToDelete}`,
-              );
-              reply(detectTinder(response.data.message));
-            } catch (error) {
-              console.error("Erro ao deletar usuário:", error);
-              const errorMessage =
-                error.response?.data?.message ||
-                "Ocorreu um pequeno erro, tente novamente mais tarde.";
-              reply(errorMessage);
-            }
-          }
-          break;
-
-        case "like":
-          {
-            if (!q)
-              return reply(
-                "Responda à mensagem do perfil ou use o comando com o @ do usuário que deseja curtir.",
-              );
-            const alvo = q.includes("@s.whatsapp.net")
-              ? q
-              : identifyAtSign(q.replace("@", ""));
-
-            try {
-              const response = await axios.get(
-                `${baseRaikkenTinder}/like?usu=${sender}&alvo=${alvo}`,
-              );
-              const data = response.data;
-
-              if (data.success) {
-                if (data.message.includes("Match")) {
-                  await subaru.sendMessage(
-                    sender,
-                    {
-                      text: `💘 *É UM MATCH!* 💘\n${data.message}`,
-                      contextInfo: {
-                        mentionedJid: [sender, alvo],
-                        externalAdReply: {
-                          title: "Raikken-API's Tinder",
-                          body: "😌🌟 Vocês se curtiram mutuamente!",
-                          thumbnail: await getBuffer(
-                            "https://i.imgur.com/3G5K5rG.png",
-                          ),
-                          mediaType: 1,
-                          sourceUrl: baseRaikkenTinder,
-                        },
-                      },
-                    },
-                    { quoted: info },
-                  );
-
-                  try {
-                    const perfilMatchResponse = await axios.get(
-                      `${baseRaikkenTinder}/perfil?usu=${alvo}`,
-                    );
-                    if (
-                      perfilMatchResponse.data &&
-                      perfilMatchResponse.data.dados
-                    ) {
-                      const matchUser = perfilMatchResponse.data.dados[0];
-                      const matchInfo =
-                        `*🔥 PERFIL DO SEU MATCH: ${matchUser.nome} 🔥*\n\n` +
-                        `• Idade: ${matchUser.idade}\n` +
-                        `• Gênero: ${matchUser.gene}\n` +
-                        `• Bio: ${matchUser.bio}\n\n` +
-                        `Iniciem uma conversa! wa.me/${matchUser.nmr[0]}`;
-                      await subaru.sendMessage(from, {
-                        image: { url: matchUser.foto },
-                        caption: matchInfo,
-                      });
-                    }
-                  } catch (matchError) {
-                    console.error(
-                      "Erro ao buscar perfil do match:",
-                      matchError,
-                    );
-                    reply(
-                      "Deu match, mas não consegui buscar o perfil do outro usuário.",
-                    );
-                  }
-                } else {
-                  reply(data.message);
-                }
-              } else {
-                reply(data.message || "Ocorreu um erro ao curtir o usuário.");
-              }
-            } catch (err) {
-              console.error("Erro no comando like:", err);
-              const errorMessage =
-                err.response?.data?.message ||
-                "Ocorreu um erro ao tentar curtir o usuário.";
-              reply(errorMessage);
-            }
-          }
-          break;
-
-        case "dislike":
-          {
-            if (!q)
-              return reply(
-                "Use este comando respondendo a um perfil ou com o @ do usuário.",
-              );
-
-            const alvo = q.includes("@s.whatsapp.net")
-              ? q
-              : identifyAtSign(q.replace("@", ""));
-
-            try {
-              const response = await axios.get(
-                `${baseRaikkenTinder}/dislike?usu=${sender}&alvo=${alvo}`,
-              );
-              reply(response.data.message || "Ação registrada.");
-            } catch (err) {
-              console.error("Erro no comando dislike:", err);
-              const errorMessage =
-                err.response?.data?.message ||
-                "Ocorreu um erro ao registrar sua ação.";
-              reply(errorMessage);
-            }
-          }
-          break;
-
-        case "stalkinsta":
-          {
-            if (!q) {
-              return reply(
-                `Cadê o usuário?\n\nExemplo de uso:\n${prefix}stalkinsta @raikkenapi`,
-              );
-            }
-            react("🫟");
-            try {
-              let usuario = q.replace("@", "").trim();
-              let url = `${baseRaikken}/api/stalk/insta?user=${usuario}&apikey=${RaikkenKey}`;
-              let res = await fetch(url);
-              let json = await res.json();
-              if (!json.status) {
-                return reply(`Perfil nao encontrado!`);
-              }
-
-              let perfil = json.resultado;
-              let txt = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💖࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Usuário: *${perfil.username}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Nome: *${perfil.name}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Seguidores: *${perfil.followers}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Posts: *${perfil.uploads}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Engajamento: *${perfil.engagement}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Link: ${perfil.profileUrl}
-┃──────────────
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ Bio:
-┃ ${perfil.bio || "—"}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💖࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
-
-              await subaru.sendMessage(
-                from,
-                { image: { url: perfil.avatar }, caption: txt },
-                { quoted: info },
-              );
-            } catch (e) {
-              console.error(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "stalkttk":
-          {
-            if (!q) {
-              return reply(
-                `Qual o usuário?\n\nExemplo de uso:\n${prefix}stalkttk _doofy.sz`,
-              );
-            }
-            react("🫟");
-            try {
-              let usuario = q.replace("@", "").trim();
-              let url = `${baseRaikken}/api/stalktiktok?username=${usuario}&apikey=${RaikkenKey}`;
-              let res = await fetch(url);
-              let json = await res.json();
-              if (!json.sucesso && !json.resultado?.status) {
-                returnreply(`> ┃ ❌ *Perfil não encontrado.*`);
-              }
-
-              let perfil = json.resultado;
-              let txt = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫📱࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Usuário: *${perfil.username}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Seguidores: *${perfil.followers}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Seguindo: *${perfil.following}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Curtidas: *${perfil.likes}*
-┃──────────────
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Link: https://tiktok.com/@${perfil.username}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫📱࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
-              await subaru.sendMessage(
-                from,
-                {
-                  image: { url: perfil.avatar || defaultAvatar },
-                  caption: txt,
-                },
-                { quoted: info },
-              );
-            } catch (e) {
-              console.error(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "stalkyt":
-          {
-            if (!q) {
-              return reply(
-                `Qual o usuário?\n\nExemplo de uso:\n${prefix}stalkyt lilgiela33`,
-              );
-            }
-            react("🫟");
-            try {
-              let usuario = q.replace("@", "").trim();
-              let url = `${baseRaikken}/api/stalk/yt?username=${usuario}&apikey=${RaikkenKey}`;
-              let res = await fetch(url);
-              let json = await res.json();
-
-              if (!json.sucesso || !json.resultado) {
-                return reply(`> ┃ ❌ *Canal não encontrado.*`);
-              }
-
-              let canal = json.resultado;
-              let txt = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫▶️࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Canal: *${canal.name}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Username: *${canal.username}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Inscritos: *${canal.subscribers || "Oculto"}*
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Link: ${canal.url}
-┃──────────────
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Descrição:
-┃ ${canal.description || "—"}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫▶️࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
-
-              await subaru.sendMessage(
-                from,
-                { image: { url: canal.image || defaultAvatar }, caption: txt },
-                { quoted: info },
-              );
-              if (canal.banner) {
-                await subaru.sendMessage(
-                  from,
-                  {
-                    image: { url: canal.banner },
-                    caption: `🎨 Banner do canal *${canal.name}*`,
-                  },
-                  { quoted: info },
-                );
-              }
-              if (canal.videos && canal.videos.length > 0) {
-                let ultimos = canal.videos.slice(0, 3).join("\n");
-                await subaru.sendMessage(
-                  from,
-                  { text: `📺 Últimos vídeos:\n${ultimos}` },
-                  { quoted: info },
-                );
-              }
-            } catch (e) {
-              console.error(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
-        case "stalkff":
-          {
-            react("🫟");
-            if (!q) return reply("❌ Informe o *ID do jogador*!");
-            try {
-              let res = await fetch(
-                `${baseRaikken}/api/stalk/perfil-ff?id=${q}&apikey=${RaikkenKey}`,
-              );
-              let json = await res.json();
-
-              if (!json.status)
-                return reply("❌ Não encontrei nada com esse ID!");
-
-              let r = json.resultado;
-              let texto = `
-┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🎮⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓
-│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Nome: ${r.name}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ID: ${r.id}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Level: ${r.level}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Guilda: ${r.guilda || "Nenhuma"}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Nível da Guilda: ${r.nivel_guilda || "-"}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Região: ${r.regiao}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Criado em: ${r.criado_em}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Último login: ${r.ultimo_login}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Passe Booyah: ${r.passe_booyah}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Bio: ${r.bio || "Nenhuma"}
-┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Atualizado em: ${r.atualizado_em}
-┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🔥⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
-
-              await subaru.sendMessage(
-                from,
-                { image: { url: defaultAvatar }, caption: texto.trim() },
-                { quoted: info },
-              );
-            } catch (e) {
-              console.error(e);
-              botSemKey(subaru, groupName, comando);
-            }
-          }
-          break;
-
         default:
           if (isCmd) {
             try {
@@ -5104,7 +3692,7 @@ você jogar, se não tiver nenhum dos 2 online, fale com algum adm para digitar 
       }
     } catch (error) {
       console.error(`Erro ao processar o comando '${command}':`, error);
-      if (!botSemKey(subaru, groupName, comando)) return;
+      if (!botSemKey(subaru, groupName, comando, from)) return;
     }
   } // aqui fecha o else
 }; //CUIDADO, AQUI FECHA A FUNÇÃO !!

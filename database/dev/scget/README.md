@@ -4,7 +4,7 @@
 
 > Projeto destinado a oferecer rapidez, simplicidade e baixo consumo de recursos. Excelente para requests rápidos.
 
-## Instalação 
+## Instalação
 
 ```bash
 npm install @dylan771/scget
@@ -23,12 +23,12 @@ async function main() {
         },
         //data: params //Somente para POST
     });
-    
+
     if (!body.success) {
         console.log('Falha!');
         process.exit();
     }
-    
+
     console.log(body.data); //Para json => body.json();
 }
 
@@ -37,13 +37,12 @@ main();
 
 ## Features
 
- - **Options** method, headers e data
- - **Returns** text, json e buffer ( concat )
+- **Options** method, headers e data
+- **Returns** text, json e buffer ( concat )
 
 ## Aviso
- 
- - Módulo não recomendado para projetos que requerem mais informações. ( statuscode, headers e etc... )
 
+- Módulo não recomendado para projetos que requerem mais informações. ( statuscode, headers e etc... )
 
 ### LICENSE
 

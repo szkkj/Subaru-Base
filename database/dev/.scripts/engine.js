@@ -1,79 +1,293 @@
-import { EventEmitter } from 'events';
-import path from 'path';
-import { fileURLToPath } from 'url';
+/*
+ * Camada de abstração entre Baileys e Zapo que expõe uma interface
+ * compatível com os plugins existentes do Subaru-Base. No modo Zapo,
+ * traduz eventos e métodos (sendMessage, groupMetadata, ev.on, etc.)
+ * para o formato esperado pelo bot, permitindo alternar entre engines
+ * sem alterar nenhuma linha dos plugins.
+ *
+ * O SQLite persistente do Zapo é construído sobre o fork
+ * @irithell-js/better-sqlite3-termux, com cache local em
+ * database/dev/.scripts/.sqlite3_engines/ para evitar recompilações
+ * desnecessárias no Termux (Android).
+ *
+ * @author: Sz — https://raikken.com.br
+ */
 
+import { EventEmitter } from "events";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import os from "os";
+import { createRequire } from "module";
+import LRU from "pixl-cache";
+import {
+  getGroupMetadataSafe,
+  groupMetadataCache,
+  messageCache,
+} from "../../../src/functions.js";
+
+const __require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const AUTH_DIR = path.resolve(__dirname, '../../../dono/config/session');
+const session = path.resolve(__dirname, "../../../dono/configs/session");
+const mUC = new LRU({ maxItems: 100, maxAge: 1800 }); // 30 min
+
+let Database;
+const cachePath = path.join(
+  __dirname,
+  "./.sqlite3_engines/544beecb/node_modules/better-sqlite3",
+);
+try {
+  Database = __require(cachePath);
+} catch {
+  Database = __require("@irithell-js/better-sqlite3-termux");
+}
 
 export async function createEngine(settings = {}) {
-  const engine = String(settings.engine || 'baileys').toLowerCase();
-  if (engine === 'zapo') return createZapoEngine(settings);
+  const engine = String(settings.engine || "baileys").toLowerCase();
+  if (engine === "zapo") return createZapoEngine(settings);
   return createBaileysEngine(settings);
 }
 
 async function createBaileysEngine(settings) {
+  const AUTH_DIR = path.join(session, "baileys");
   const {
     makeWASocket,
     useMultiFileAuthState,
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
     Browsers,
-  } = await import('@whiskeysockets/baileys');
+    DisconnectReason,
+    isJidBroadcast,
+    isJidStatusBroadcast,
+    getContentType,
+  } = await import("@whiskeysockets/baileys");
 
-  const pino = (await import('pino')).default;
-  const logger = pino({ level: 'silent' });
+  const pino = (await import("pino")).default;
+  const logger = pino({ level: "silent" });
 
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
-  const { version } = await fetchLatestBaileysVersion();
+  //  const { version } = await fetchLatestBaileysVersion();
+  const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 
   const sock = makeWASocket({
-    version,
+    version: [2, 3000, 1044006379],
     logger,
-    printQRInTerminal: false,
-    browser: Browsers.ubuntu('Chrome'),
-    auth: {
-      creds: state.creds,
-      keys: makeCacheableSignalKeyStore(state.keys, logger),
-    },
+    auth: state,
+    markOnlineOnConnect: true,
     syncFullHistory: false,
-    generateHighQualityLinkPreview: true,
+    keepAliveIntervalMs: 15_000,
+    connectTimeoutMs: 20_000,
+    keys: makeCacheableSignalKeyStore(state.keys, logger),
+    groupMetadataCache,
+    shouldIgnoreJid: (jid) =>
+      isJidBroadcast(jid) || isJidStatusBroadcast(jid) || isJidNewsletter(jid),
+    getMessage: async (key) => {
+      const msg = messageCache.get(key.id);
+      if (msg?.message) return msg?.message;
+      return { conversation: "" };
+    },
   });
 
-  sock.ev.on('creds.update', saveCreds);
-  sock.type = 'baileys';
+  sock.ev.on("creds.update", saveCreds);
+  sock.type = "baileys";
+  sock.authState = { ...state, saveCreds };
   return sock;
 }
 
 async function createZapoEngine(settings) {
-  const { WaClient } = await import('zapo-js');
-  const client = new WaClient({ session: AUTH_DIR });
-  await client.connect();
-  return createZapoSocketAdapter(client);
+  const { createStore, WaClient } = await import("zapo-js");
+  const { createSqliteStore } = await import("@zapo-js/store-sqlite");
+  const AUTH_DIR = path.join(session, "zapo");
+
+  const pino = (await import("pino")).default;
+  const logger = pino({ level: "silent" });
+
+  fs.mkdirSync(AUTH_DIR, { recursive: true });
+
+  const dbPath = path.join(AUTH_DIR, "state.sqlite");
+  const connection = createBetterSqliteConnection(dbPath);
+
+  const store = createStore({
+    backends: {
+      sqlite: createSqliteStore({ connection }),
+    },
+    providers: {
+      auth: "sqlite",
+      signal: "sqlite",
+      preKey: "sqlite",
+      session: "sqlite",
+      identity: "sqlite",
+      senderKey: "sqlite",
+      appState: "sqlite",
+      privacyToken: "sqlite",
+      messages: "none",
+      threads: "none",
+      contacts: "none",
+    },
+  });
+
+  const client = new WaClient(
+    {
+      store,
+      sessionId: "default",
+      connectTimeoutMs: 15_000,
+      nodeQueryTimeoutMs: 30_000,
+    },
+    logger,
+  );
+
+  const sock = createZapoSocketAdapter(client);
+  sock.start = () => client.connect();
+
+  return sock;
+}
+
+function createBetterSqliteConnection(databasePath) {
+  fs.mkdirSync(path.dirname(databasePath), { recursive: true });
+
+  const db = new Database(databasePath);
+  db.pragma("journal_mode = WAL");
+  db.pragma("synchronous = NORMAL");
+
+  const connection = {
+    driver: "better-sqlite3",
+
+    exec(sql) {
+      return db.exec(sql);
+    },
+
+    run(sql, params) {
+      return db.prepare(sql).run(...(params || []));
+    },
+
+    get(sql, params) {
+      return db.prepare(sql).get(...(params || []));
+    },
+
+    all(sql, params) {
+      return db.prepare(sql).all(...(params || []));
+    },
+
+    async runInTransaction(callback) {
+      const tx = db.transaction(() => callback(connection));
+      return tx();
+    },
+
+    flush() {
+      try {
+        db.pragma("wal_checkpoint(PASSIVE)");
+      } catch {}
+      return undefined;
+    },
+
+    close() {
+      if (db.open) {
+        try {
+          db.pragma("wal_checkpoint(TRUNCATE)");
+        } catch {}
+        db.close();
+      }
+    },
+  };
+
+  return connection;
 }
 
 function createZapoSocketAdapter(client) {
   const ev = new EventEmitter();
 
-  client.on('message', (msg) => {
-    ev.emit('messages.upsert', {
-      messages: [toBaileysMessage(msg)],
-      type: 'notify',
+  client.on("message", (msg) => {
+    const jid = msg.key?.remoteJid || msg.chatId || msg.from;
+    if (!jid) return;
+    if (jid.endsWith("@newsletter")) return;
+    if (jid === "status@broadcast") return;
+
+    const baileysMsg =
+      msg.key && msg.message
+        ? {
+            key: msg.key,
+            message: msg.message,
+            pushName: msg.pushName,
+            messageTimestamp:
+              msg.timestampSeconds || Math.floor(Date.now() / 1000),
+          }
+        : toBaileysMessage(msg);
+
+    ev.emit("messages.upsert", {
+      messages: [baileysMsg],
+      type: "notify",
     });
   });
 
-  client.on('connection', (state) => {
-    ev.emit('connection.update', {
+  client.on("auth_qr", async () => {
+    if (process.argv.includes("--code")) {
+      if (global.__pairingRequested) return;
+      global.__pairingRequested = true;
+
+      const readline = await import("readline");
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+
+      const raw = await new Promise((resolve) => {
+        rl.question("Insira o número de telefone para conectar: ", resolve);
+      });
+      rl.close();
+
+      const number = raw.replace(/\D/g, "");
+      try {
+        await client.auth.requestPairingCode(number, true);
+      } catch (err) {
+        console.error("❌ Erro ao pedir pairing code:", err?.message || err);
+      }
+      return;
+    }
+
+    ev.emit("connection.update", { qr: null });
+  });
+
+  client.on("auth_qr", ({ qr }) => {
+    if (process.argv.includes("--code")) return;
+    ev.emit("connection.update", { qr });
+  });
+
+  client.on("auth_pairing_code", ({ code }) => {
+    const formatted = code?.match(/.{1,4}/g)?.join("-") || code;
+    console.log(`\n✅ Código de pareamento: ${formatted}\n`);
+  });
+
+  client.on("auth_paired", ({ credentials }) => {
+    console.log("✅ Pareado como", credentials?.meJid || credentials?.me?.id);
+  });
+
+  client.on("connection", (event) => {
+    ev.emit("connection.update", {
       connection:
-        state === 'open' ? 'open' : state === 'connecting' ? 'connecting' : 'close',
+        event.status === "open"
+          ? "open"
+          : event.status === "close"
+            ? "close"
+            : "connecting",
+      lastDisconnect: event.error
+        ? { error: { output: { statusCode: event.isLogout ? 401 : 500 } } }
+        : undefined,
     });
   });
 
   const sock = {
     ev,
     client,
-    type: 'zapo',
-    get user() { return client.user ?? null; },
+    type: "zapo",
+    get user() {
+      const creds = client.auth.getCurrentCredentials();
+      if (!creds?.meJid) return null;
+      return {
+        id: creds.meJid,
+        lid: creds.meLid,
+      };
+    },
 
     async sendMessage(jid, content = {}, options = {}) {
       return sendViaZapo(client, jid, content, options);
@@ -84,25 +298,31 @@ function createZapoSocketAdapter(client) {
     },
 
     async groupMetadata(jid) {
-      return toBaileysGroupMetadata(await client.group.getMetadata(jid));
+      return toBaileysGroupMetadata(await client.group.queryGroupMetadata(jid));
     },
 
     async groupParticipantsUpdate(jid, participants, action) {
-      const fn = { add: 'add', remove: 'remove', promote: 'promote', demote: 'demote' }[action];
+      const fnMap = {
+        add: "addParticipants",
+        remove: "removeParticipants",
+        promote: "promoteParticipants",
+        demote: "demoteParticipants",
+      };
+      const fn = fnMap[action];
       if (!fn) throw new Error(`Ação de grupo inválida: ${action}`);
       return client.group[fn](jid, participants);
     },
 
     async groupSettingUpdate(jid, setting) {
       const map = {
-        announcement: ['announcement', true],
-        not_announcement: ['announcement', false],
-        locked: ['locked', true],
-        unlocked: ['locked', false],
+        announcement: ["announcement", true],
+        not_announcement: ["announcement", false],
+        locked: ["locked", true],
+        unlocked: ["locked", false],
       };
-      const [key, value] = map[setting] ?? [];
-      if (!key) throw new Error(`Setting inválido: ${setting}`);
-      return client.group.updateSetting(jid, key, value);
+      const entry = map[setting];
+      if (!entry) throw new Error(`Setting inválido: ${setting}`);
+      return client.group.updateSetting(jid, entry[0], entry[1]);
     },
 
     async groupUpdateSubject(jid, subject) {
@@ -114,7 +334,7 @@ function createZapoSocketAdapter(client) {
     },
 
     async updateBlockStatus(jid, action) {
-      return action === 'block'
+      return action === "block"
         ? client.contact.block(jid)
         : client.contact.unblock(jid);
     },
@@ -123,7 +343,7 @@ function createZapoSocketAdapter(client) {
       return client.presence.send(type, jid);
     },
 
-    async profilePictureUrl(jid, type = 'preview') {
+    async profilePictureUrl(jid, type = "preview") {
       return client.contact.getProfilePicture(jid, type);
     },
 
@@ -135,63 +355,199 @@ function createZapoSocketAdapter(client) {
   return sock;
 }
 
+async function fetchUrlMedia(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Falha ao baixar mídia (${res.status}): ${url}`);
+  const contentType = res.headers.get("content-type")?.split(";")[0]?.trim();
+  const buffer = Buffer.from(await res.arrayBuffer());
+  return { buffer, contentType };
+}
+
+function extMimeFallback(url) {
+  try {
+    const ext = path.extname(new URL(url).pathname).toLowerCase();
+    return EXT_MIME[ext];
+  } catch {
+    return undefined;
+  }
+}
+
 async function sendViaZapo(client, jid, content, options) {
   const opts = resolveSendOptions(options);
 
-  if (typeof content === 'string' || content?.text) {
-    const text = typeof content === 'string' ? content : content.text;
-    const r = await client.message.send(jid, { text }, opts);
+  if (content.delete) {
+    const r = await client.message.send(
+      jid,
+      { type: "revoke", target: content.delete },
+      opts,
+    );
     return attachBaileysKey(jid, r);
   }
 
-  if (content?.react) {
-    const r = await client.message.react(jid, content.react.key.id, content.react.text);
+  if (content.react) {
+    const r = await client.message.send(
+      jid,
+      {
+        type: "reaction",
+        emoji: content.react.text,
+        target: content.react.key,
+      },
+      opts,
+    );
+    return attachBaileysKey(jid, r);
+  }
+
+  if (typeof content === "string" || content.text) {
+    const text = typeof content === "string" ? content : content.text;
+    const r = await client.message.send(jid, { type: "text", text }, opts);
     return attachBaileysKey(jid, r);
   }
 
   const media = pickMedia(content);
   if (media) {
-    const r = await client.message.send(jid, media, opts);
+    const uploaded = await getOrUploadZapoMedia(client, media);
+    const field = {
+      image: "imageMessage",
+      video: "videoMessage",
+      audio: "audioMessage",
+      document: "documentMessage",
+      sticker: "stickerMessage",
+    }[media.type];
+
+    const r = await client.message.send(
+      jid,
+      {
+        [field]: {
+          url: uploaded.url,
+          directPath: uploaded.directPath,
+          mediaKey: uploaded.mediaKey,
+          fileSha256: uploaded.fileSha256,
+          fileEncSha256: uploaded.fileEncSha256,
+          fileLength: uploaded.fileLength,
+          mediaKeyTimestamp: uploaded.mediaKeyTimestamp,
+          mimetype: uploaded.mimetype,
+          caption: media.caption,
+          fileName: media.fileName,
+          ptt: content.ptt,
+          gifPlayback: content.gifPlayback,
+        },
+      },
+      opts,
+    );
     return attachBaileysKey(jid, r);
   }
 
-  const r = await client.message.send(jid, { text: JSON.stringify(content) }, opts);
+  const r = await client.message.send(jid, content, opts);
   return attachBaileysKey(jid, r);
 }
 
+async function getOrUploadZapoMedia(client, media) {
+  const {
+    type,
+    media: source,
+    mimetype: explicitMimetype,
+    gifPlayback,
+    ptt,
+  } = media;
+  const cacheKey =
+    typeof source === "object" && source?.url ? source.url : null;
+
+  if (cacheKey && mUC.has(cacheKey)) {
+    return mUC.get(cacheKey);
+  }
+
+  let buffer = source;
+  let mimetype = explicitMimetype;
+  if (typeof source === "object" && source?.url) {
+    const { buffer: fetched, contentType } = await fetchUrlMedia(source.url);
+    buffer = fetched;
+    mimetype = mimetype || contentType || extMimeFallback(source.url);
+  }
+
+  const uploadType =
+    type === "video" && gifPlayback
+      ? "gif"
+      : type === "audio" && ptt
+        ? "ptt"
+        : type;
+  const uploaded = await client.message.upload(buffer, {
+    type: uploadType,
+    mimetype,
+  });
+
+  if (cacheKey) mUC.set(cacheKey, uploaded);
+  return uploaded;
+}
+
 function pickMedia(c = {}) {
-  if (c.image)    return { image: c.image, caption: c.caption, mimetype: c.mimetype };
-  if (c.video)    return { video: c.video, caption: c.caption, mimetype: c.mimetype };
-  if (c.audio)    return { audio: c.audio, mimetype: c.mimetype, ptt: c.ptt };
-  if (c.document) return { document: c.document, fileName: c.fileName, mimetype: c.mimetype };
-  if (c.sticker)  return { sticker: c.sticker };
+  if (c.image)
+    return {
+      type: "image",
+      media: c.image,
+      caption: c.caption,
+      mimetype: c.mimetype,
+    };
+  if (c.video)
+    return {
+      type: "video",
+      media: c.video,
+      caption: c.caption,
+      mimetype: c.mimetype,
+    };
+  if (c.audio)
+    return { type: "audio", media: c.audio, mimetype: c.mimetype, ptt: c.ptt };
+  if (c.document)
+    return {
+      type: "document",
+      media: c.document,
+      fileName: c.fileName,
+      mimetype: c.mimetype,
+    };
+  if (c.sticker) return { type: "sticker", media: c.sticker };
   return null;
+}
+
+function sanitizeQuoted(quoted) {
+  if (!quoted) return quoted;
+  const sanitized = { ...quoted };
+  if (sanitized.remoteJid === null) sanitized.remoteJid = undefined;
+  if (sanitized.key) {
+    sanitized.key = { ...sanitized.key };
+    if (sanitized.key.remoteJid === null) sanitized.key.remoteJid = undefined;
+  }
+  return sanitized;
 }
 
 function resolveSendOptions(o = {}) {
   const out = {};
-  if (o.quoted)   out.quote    = o.quoted;
+  if (o.quoted) out.quote = sanitizeQuoted(o.quoted);
   if (o.mentions) out.mentions = o.mentions;
   return out;
 }
 
 function attachBaileysKey(jid, result) {
-  if (!result || typeof result !== 'object') return result;
+  if (!result || typeof result !== "object") return result;
   return { ...result, key: { remoteJid: jid, fromMe: true, id: result.id } };
 }
 
 function toBaileysMessage(m) {
+  const jid = m.chatId || m.from || m.remoteJid || "";
   const message = {};
-  if (m.type === 'text' || m.text)          message.conversation    = m.text ?? '';
-  else if (m.type === 'image')              message.imageMessage    = { caption: m.caption, mimetype: m.mimetype };
-  else if (m.type === 'video')              message.videoMessage    = { caption: m.caption, mimetype: m.mimetype };
-  else if (m.type === 'audio')              message.audioMessage    = { mimetype: m.mimetype, ptt: m.ptt };
-  else if (m.type === 'document')           message.documentMessage = { fileName: m.fileName, mimetype: m.mimetype };
-  else if (m.type === 'sticker')            message.stickerMessage  = { mimetype: m.mimetype };
+  if (m.type === "text" || m.text) message.conversation = m.text || "";
+  else if (m.type === "image")
+    message.imageMessage = { caption: m.caption, mimetype: m.mimetype };
+  else if (m.type === "video")
+    message.videoMessage = { caption: m.caption, mimetype: m.mimetype };
+  else if (m.type === "audio")
+    message.audioMessage = { mimetype: m.mimetype, ptt: m.ptt };
+  else if (m.type === "document")
+    message.documentMessage = { fileName: m.fileName, mimetype: m.mimetype };
+  else if (m.type === "sticker")
+    message.stickerMessage = { mimetype: m.mimetype };
 
   return {
     key: {
-      remoteJid: m.chatId ?? m.from,
+      remoteJid: jid,
       fromMe: !!m.fromMe,
       id: m.id,
       participant: m.senderId,
@@ -204,15 +560,52 @@ function toBaileysMessage(m) {
 }
 
 function toBaileysGroupMetadata(meta) {
-  const adminOf = (p) => (p.isSuperAdmin ? 'superadmin' : p.isAdmin ? 'admin' : null);
+  const adminOf = (p) =>
+    p.isSuperAdmin ? "superadmin" : p.isAdmin ? "admin" : null;
   return {
     id: meta.jid,
     subject: meta.subject,
     owner: meta.owner,
     creation: meta.creation,
-    participants: (meta.participants ?? []).map((p) => ({
+    participants: (meta.participants || []).map((p) => ({
       id: p.jid,
+      jid: p.jid,
+      lid: p.lid,
+      phoneNumber: p.phoneNumber,
       admin: adminOf(p),
     })),
   };
+}
+
+export async function prepareMediaHeader(
+  sock,
+  buffer,
+  { type = "video", mimetype, gifPlayback = false } = {},
+) {
+  if (sock.type === "baileys") {
+    const { prepareWAMessageMedia } = await import("@whiskeysockets/baileys");
+    return prepareWAMessageMedia(
+      { [type]: buffer, ...(type === "video" ? { gifPlayback } : {}) },
+      { upload: sock.waUploadToServer },
+    );
+  }
+
+  if (sock.type === "zapo") {
+    const media = await sock.client.message.upload(buffer, { type, mimetype });
+    return {
+      [`${type}Message`]: {
+        url: media.url,
+        directPath: media.directPath,
+        mediaKey: media.mediaKey,
+        fileSha256: media.fileSha256,
+        fileEncSha256: media.fileEncSha256,
+        fileLength: media.fileLength,
+        mediaKeyTimestamp: media.mediaKeyTimestamp,
+        mimetype: media.mimetype,
+        ...(type === "video" ? { gifPlayback } : {}),
+      },
+    };
+  }
+
+  throw new Error(`Engine "${sock.type}" não suporta header de mídia ainda`);
 }

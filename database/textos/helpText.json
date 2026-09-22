@@ -13,10 +13,10 @@
   },
   {
     "nomeAjuda": "code-pareamento",
-    "texto": "O código pareamento é modificavel pelo arquivo settings.json, ou seja, só ir na pasta *dono*, depois clique na pasta *configs*, clique no arquivo *settings.json* e edite a opção 'pairKey'.\nMas atenção! O código de pareamento precisa ter exatamente 8 dígitos e apenas números e letras, se não será usado o fallback *SUBARUV2*.
+    "texto": "O código pareamento é modificavel pelo arquivo settings.json, ou seja, só ir na pasta *dono*, depois clique na pasta *configs*, clique no arquivo *settings.json* e edite a opção 'pairKey'.\nMas atenção! O código de pareamento precisa ter exatamente 8 dígitos e apenas números e letras, se não será usado o fallback *SUBARUV2*."
   },
   {
     "nomeAjuda": "bot-nao-responde",
     "texto": "Por padrão, o bot está com o banchat ativo, o que você precisa fazer é ativar o bot — use o comando 'banchat 0' pra isso."
-  },
+  }
 ]
