@@ -174,6 +174,9 @@ Edite o arquivo `./dono/configs/settings.json:`
 }
 ```
 
+> [!NOTE]
+> Por padrão, o `Subaru-Base` está com o número do desenvolvedor nas configurações, substitua antes de ligar! O próprio sempre irá enviar uma mensagem no privado avisando que foi reiniciado. 
+
 5️⃣ Estrutura do Subaru-Base
 
 ```
